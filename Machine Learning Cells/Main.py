@@ -1,4 +1,4 @@
-# Fisierul asta serveste drept fisierul sursa pentru program; de aici incepe executia programului.
+# This is the main program source file.
 
 # here we import standard libraries\modules
 import sys
