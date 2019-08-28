@@ -4,8 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>9f400719-8ff3-448c-9632-fa2951c7d9f1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>
-    </StartupFile>
+    <StartupFile>Main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -23,6 +22,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="GUI\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="GUI\main_window.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GUI\MainWindow.py" />
+    <Compile Include="Main.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
