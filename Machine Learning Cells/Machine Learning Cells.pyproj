@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>9f400719-8ff3-448c-9632-fa2951c7d9f1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>GUI\test.py</StartupFile>
+    <StartupFile>Main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -24,7 +24,11 @@
     <Folder Include="GUI\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GUI\test.py">
+    <Content Include="GUI\main_window.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GUI\MainWindow.py" />
+    <Compile Include="Main.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
