@@ -24,15 +24,15 @@ class MLCellApp(mw.Ui_MainWindow, QtWidgets.QMainWindow):
 
     # this function adds a new graph plot and navbar to the tab widget
     def addNewPlot(self, fig):
-        _newTab = QtWidgets.QWidget(self.status, objectName = "Canvas " + str(self.status.count())) # creating a new tab
-        self.status.addTab(_newTab, "Canvas " + str(self.status.count())) # adding it to the status tab widget
-        self.status.setCurrentWidget(self.status.findChild(QtWidgets.QWidget, "Canvas " + str(self.status.count() - 1))) # setting the current widget(tab) to this tab
+        newTab = QtWidgets.QWidget(self.status, objectName = "Canvas " + str(self.status.count())) # creating a new tab
+        self.status.addTab(newTab, newTab.objectName()) # adding it to the status tab widget
+        self.status.setCurrentWidget(newTab) # setting the current widget(tab) to this tab
 
-        self.tabLayouts.append(QtWidgets.QVBoxLayout(self.status.currentWidget())) # here I add a new vertical layout to the current tab widget
+        self.tabLayouts.append(QtWidgets.QVBoxLayout(newTab)) # here I add a new vertical layout to the current tab widget
         self.plots.append(FigureCanvas(fig)) # adds a new widget to the plots list, constructed with the fig parameter
         currentIndex = self.status.count() - 1 # I substract 1 because the index for the lists start at 0
         self.tabLayouts[currentIndex].addWidget(self.plots[currentIndex])
-        self.navtbs.append(NavToolbar(self.plots[currentIndex], self.status.currentWidget(), coordinates = True)) # adds a nav toolbar under the graph
+        self.navtbs.append(NavToolbar(self.plots[currentIndex], newTab, coordinates = True)) # adds a nav toolbar under the graph
         self.tabLayouts[currentIndex].addWidget(self.navtbs[currentIndex])
 
 if __name__ == '__main__': # yeah i guess we have to use this
