@@ -33,9 +33,9 @@ class Ui_MainWindow(object):
         self.statsLayout.addWidget(self.cellNfo)
         spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.statsLayout.addItem(spacerItem1)
-        self.status = QtWidgets.QTabWidget(self.centralwidget)
-        self.status.setObjectName("status")
-        self.statsLayout.addWidget(self.status)
+        self.graphs = QtWidgets.QTabWidget(self.centralwidget)
+        self.graphs.setObjectName("graphs")
+        self.statsLayout.addWidget(self.graphs)
         self.mainLayout.addLayout(self.statsLayout)
         self.gridLayout.addLayout(self.mainLayout, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -95,7 +95,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.status.setCurrentIndex(-1)
+        self.graphs.setCurrentIndex(-1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
