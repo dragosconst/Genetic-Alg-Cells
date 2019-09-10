@@ -22,11 +22,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="GUI\" />
+    <Folder Include="Cell\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="GUI\main_window.ui" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cell\Cell.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="GUI\MainWindow.py" />
     <Compile Include="Main.py">
       <SubType>Code</SubType>

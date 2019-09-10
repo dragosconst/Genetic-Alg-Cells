@@ -5,7 +5,7 @@ import sys
 import functools
 
 # here we import third party libraries\modules
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtGui
 from matplotlib.figure import Figure # at this point, these are imported only for testing stuff, although they might prove to be useful later on
 from matplotlib.backends.backend_qt5agg import(
     FigureCanvasQTAgg as FigureCanvas,
@@ -14,15 +14,23 @@ import numpy as np
 
 # here we import local modules
 from GUI import MainWindow as mw
+from Cell import Cell
 
 class MLCellApp(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def __init__(self): 
         super().__init__()
         self.setupUi(self)
-        self.tabLayouts = [] # this list will contain every layout from every tab
-        self.plots = [] # this list will contain every math plot from every tab
-        self.navtbs = [] # this list will contain every nav toolbar from every tab
-        self.timers = []
+
+        self.mapScene = QtWidgets.QGraphicsScene() # create a graphics scene for drawing etc
+        self.mapScene.setSceneRect(0, 0, 1000, 1000) # the painting area will be fixed to 1000 x 1000, the size of the map
+        self.mapGView.setScene(self.mapScene)
+
+        self._tabLayouts = [] # this list will contain every layout from every tab
+        self._plots = [] # this list will contain every math plot from every tab
+        self._navtbs = [] # this list will contain every nav toolbar from every tab
+        self._timers = [] # all the timers for every tab
+        self._cells = [] # all the cells
+        self._cells.append(Cell.Cell(self)) # add a new cell
 
     # this function adds a new graph plot and navbar to the tab widget
     def addNewPlot(self, fig, axis, yVals):
@@ -31,17 +39,18 @@ class MLCellApp(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self.graphs.addTab(newTab, newTab.objectName()) # adding it to the graphs tab widget
         self.graphs.setCurrentWidget(newTab) # setting the current widget(tab) to this tab
 
-        self.tabLayouts.append(QtWidgets.QVBoxLayout(newTab)) # here I add a new vertical layout to the current tab widget
-        self.plots.append(FigureCanvas(fig)) # adds a new widget to the plots list, constructed with the fig parameter
+        self._tabLayouts.append(QtWidgets.QVBoxLayout(newTab)) # here I add a new vertical layout to the current tab widget
+        self._plots.append(FigureCanvas(fig)) # adds a new widget to the plots list, constructed with the fig parameter
         currentIndex = self.graphs.count() - 1 # I substract 1 because the index for the lists start at 0
-        self.tabLayouts[currentIndex].addWidget(self.plots[currentIndex])
-        self.navtbs.append(NavToolbar(self.plots[currentIndex], newTab, coordinates = True)) # adds a nav toolbar under the graph
-        self.tabLayouts[currentIndex].addWidget(self.navtbs[currentIndex])
+        self._tabLayouts[currentIndex].addWidget(self._plots[currentIndex])
+        self._navtbs.append(NavToolbar(self._plots[currentIndex], newTab, coordinates = True)) # adds a nav toolbar under the graph
+        self._tabLayouts[currentIndex].addWidget(self._navtbs[currentIndex])
         
         # add a QTimer
-        self.timers.append(QtCore.QTimer())
+        self._timers.append(QtCore.QTimer())
 
         self.updateTab(currentIndex, fig, axis, yVals)
+
 
     # this function should change a tab's content with the newly given plot
     def updateTab(self, index, newPlot, axis, yVals):
@@ -54,7 +63,7 @@ class MLCellApp(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         axis.plot(newYVals) # plots the new functions
         newPlot.canvas.draw() # this redraws the plot
         
-        time = self.timers[index]
+        time = self._timers[index]
         time.singleShot(1000, lambda: self.updateTab(index, newPlot, axis, newYVals)) # not using singleShot makes some weird problems, where there are multiple timers working at the same time, instead of just one(or how many tabs are open)
      
          
@@ -73,9 +82,9 @@ class MLCellApp(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def removeTab(self, index):
         toDelete = self.graphs.findChild(QtWidgets.QWidget, "Canvas" + str(index))
         self.graphs.removeTab(index) # this only removes the tab from the tab widget, it doesn't actually delete the widget used for the tab
-        del self.plots[index] # removes the objects associated with this tab
-        del self.navtbs[index]
-        del self.timers[index]
+        del self._plots[index] # removes the objects associated with this tab
+        del self._navtbs[index]
+        del self._timers[index]
         del toDelete # not sure if manual deletion is necessary, doing it anyway
         self._updateTabNames() # update the tab names
 
@@ -97,3 +106,4 @@ if __name__ == '__main__': # yeah i guess we have to use this
 
     
     sys.exit(app.exec_())
+
