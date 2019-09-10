@@ -4,7 +4,6 @@ from enum import Enum
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
-import turtle as tl
 
 # I'm not done converting yet!!
 
@@ -80,7 +79,7 @@ class Cell():
     # this function does everything needed for the pre-creation of the circles, such as choosing the coordinates, the radius and so on
     # sideLen refers to the length of the sidesWithCircles list
     # soFar represents the ammount of circles added so far
-    # window is MLCellApp object
+    # window is a MLCellApp object
     def _prepCircles(self, sideLen, soFar, app):
         if soFar >= self._circNum: # if there have been added enough circles, stop the function
             return 
@@ -88,7 +87,7 @@ class Cell():
         self._chooseSide() # pretty obvious, chooses a side
 
         coords = self._chooseCoords(self._sidesWithCircles[sideLen])
-        radius = self._chooseRadiusSquare(self._sidesWithCircles[sideLen], coords[0], coords[1], coords[2], coords[3])
+        radius = self._chooseRadius(self._sidesWithCircles[sideLen], coords[0], coords[1], coords[2], coords[3])
         self._resetCoords(None, None, None, None, self._sidesWithCircles[sideLen], radius, coords)
         
         circle, opCircle = self._makeCircle(self._sidesWithCircles[sideLen], coords[0], coords[1], coords[2], coords[3], radius)
@@ -98,6 +97,16 @@ class Cell():
         app.mapScene.addItem(opCircle)
 
         self._prepCircles(len(self._sidesWithCircles), soFar + 1, app) # the recursive call makes sure all circles are added
+
+    # this function works as a nice wrapper for the actual chooseRadius functions
+    def _chooseRadius(self, side, sidex, sidey, opsidex, opsidey):
+        if self.baseShapeKey == BaseShape.Square.value:
+            return self._chooseRadiusSquare(side, sidex, sidey, opsidex, opsidey)
+
+    # this is a wrapper for resetCoords functions
+    def _resetCoords(self, sidex, sidey, opsidex, opsidey, side, radius, coords = None):
+        if self.baseShapeKey == BaseShape.Square.value:
+            self._resetCoordsSquare(sidex, sidey, opsidex, opsidey, side, radius, coords)
 
 
     # FUNCTIONS FOR CHOOSING THE COORDS AND THE RADIUS FOR THE SEMI-CIRCLES
@@ -110,10 +119,9 @@ class Cell():
         else:   
             return self._chooseRhombCoords(side)
 
-
     # this functions resets the "fixed" coords of the circle based on the radius parameter
     # what I mean by "fixed" coords are the coords that are constant on a given side, ie the y coords on side 1(or side 3)
-    def _resetCoords(self, sidex, sidey, opsidex, opsidey, side, radius, coords = None):
+    def _resetCoordsSquare(self, sidex, sidey, opsidex, opsidey, side, radius, coords = None):
         if coords is not None:
             if side == 1 or side == 3:
                 coords[1] = self.baseShape.rect().y() - radius # keep in mind that the coords of an ellipse(a circle) are the top left coords
@@ -129,6 +137,7 @@ class Cell():
                 sidex = self.baseShape.rect().x() - radius
                 opsidex = sidex + self.baseShape.rect().width()
             return sidex, sidey, opsidex, opsidey
+
 
     def _chooseSquareCoords(self, side): # this function will return a list of the top-left coords of the rects of the both circles
         radius = 60 # we are checking for a minimum radius of 60
@@ -177,7 +186,7 @@ class Cell():
         # adjusted accordingly
         actualRadius = maxPosRadNoCircs
         for circle in self.circles:
-            sidex, sidey, opsidex, opsidey = self._resetCoords(sidex, sidey, opsidex, opsidey, side, actualRadius) # the top left corner of the ellipse has to be updated every time the radius is changed
+            sidex, sidey, opsidex, opsidey = self._resetCoordsSquare(sidex, sidey, opsidex, opsidey, side, actualRadius) # the top left corner of the ellipse has to be updated every time the radius is changed
             currCircle, opCircle = self._makeCircle(side, sidex, sidey, opsidex, opsidey, actualRadius)
 
             otherCircCenter = [circle.rect().center().x(), circle.rect().center().y()] # center of the circle variable from the loop
