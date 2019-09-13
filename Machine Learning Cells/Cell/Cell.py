@@ -5,7 +5,6 @@ from enum import Enum
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
 
-# I'm not done converting yet!!
 
 class BaseShape(Enum): # not sure if we will ever use this enum, but this is the standard I use in the class
     Square = 1
