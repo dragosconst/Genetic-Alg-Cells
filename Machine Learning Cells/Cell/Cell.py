@@ -24,9 +24,6 @@ class Cell():
         self._circNum = self._chooseNumberOfCircles() # chooses whether to draw one or two circles(and their symmetric counterparts)
         self._sidesWithCircles = [] # similar to the older turtle algorithm, it won't draw two circles on the same side
         
-        self._baseShapeKey = 2
-        self.app = app
-        self._circNum = 2
         self._drawShape(app.mapScene, app.mapGView) # draws the base shape
 
         self._prepCircles(0, 0, app) # this function prepares the circles for being drawn and adds them to the scene, after they are prepared
