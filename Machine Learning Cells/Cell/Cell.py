@@ -24,6 +24,9 @@ class Cell():
         self._circNum = self._chooseNumberOfCircles() # chooses whether to draw one or two circles(and their symmetric counterparts)
         self._sidesWithCircles = [] # similar to the older turtle algorithm, it won't draw two circles on the same side
         
+        self._baseShapeKey = 2
+        self.app = app
+        self._circNum = 2
         self._drawShape(app.mapScene, app.mapGView) # draws the base shape
 
         self._prepCircles(0, 0, app) # this function prepares the circles for being drawn and adds them to the scene, after they are prepared
@@ -89,8 +92,8 @@ class Cell():
         coords = self._chooseCoords(self._sidesWithCircles[sideLen]) # chooses the coords; the rhomb will return some coords ON the rhomb, not the coords of the top-left point
         if checkForBreak != self._circNum: # if circNum is changed, that means there was no space for a circle of minimum radius of 60
             return 
+        radius = self._chooseRadius(self._sidesWithCircles[sideLen], coords[0], coords[1], coords[2], coords[3], coords)
         newCoords = [coords[0], coords[1], coords[2], coords[3]] # given that lists are mutable, writing newCoords = coords would make any change to coords or newCoords apply to both lists, which is the opposite of what should happen here
-        radius = self._chooseRadius(self._sidesWithCircles[sideLen], coords[0], coords[1], coords[2], coords[3])
         self._resetCoords(None, None, None, None, self._sidesWithCircles[sideLen], radius, coords, newCoords)
 
         circle, opCircle = self._makeCircle(self._sidesWithCircles[sideLen], newCoords[0], newCoords[1], newCoords[2], newCoords[3], radius)
@@ -101,9 +104,9 @@ class Cell():
         self._prepCircles(len(self._sidesWithCircles), soFar + 1, app) # the recursive call makes sure all circles are added
 
     # this function works as a nice wrapper  for the actual chooseRadius functions
-    def _chooseRadius(self, side, sidex, sidey, opsidex, opsidey):
+    def _chooseRadius(self, side, sidex, sidey, opsidex, opsidey, coords):
         if self._baseShapeKey == BaseShape.Square.value or self._baseShapeKey == BaseShape.Rect.value: # in this case, the function is literally identical
-            return self._chooseRadiusSquareOrRect(side, sidex, sidey, opsidex, opsidey)
+            return self._chooseRadiusSquareOrRect(side, sidex, sidey, opsidex, opsidey, coords)
         else:
             return self._chooseRadiusRhomb(side, sidex, sidey, opsidex, opsidey)
 
@@ -191,7 +194,7 @@ class Cell():
     
     # this function finds the biggest possible radius starting from the given coords
     # just as before, this function would look literally the same for a rectangle
-    def _chooseRadiusSquareOrRect(self, side, sidex, sidey, opsidex, opsidey):
+    def _chooseRadiusSquareOrRect(self, side, sidex, sidey, opsidex, opsidey, coords):
 
         xPos = self._baseShape.rect().x() # x position of the square
         height = self._baseShape.rect().height() 
@@ -217,10 +220,23 @@ class Cell():
             currCircle, opCircle = self._makeCircle(side, sidex, sidey, opsidex, opsidey, actualRadius)
             
             if index > 0: # there is no point in checking with the first circle, because it will always be drawn "outside"
+                oldRadius = actualRadius
                 actualRadius = self._checkCircleColl(actualRadius, circle, opCircle)
+                if side == 1 or side == 3:
+                    sidex += oldRadius - actualRadius
+                    opsidex += oldRadius - actualRadius
+                else:
+                    sidey += oldRadius - actualRadius
+                    opsidey += oldRadius - actualRadius
+                # updating the coordinates if anything changed
+                if oldRadius != actualRadius:
+                    coords[0] = sidex
+                    coords[1] = sidey
+                    coords[2] = opsidex
+                    coords[3] = opsidey
             index += 1
         # here ends this for loop
-        return actualRadius
+        return actualRadius 
 
     # this functions resets the "fixed" coords of the circle based on the radius parameter
     # what I mean by "fixed" coords are the coords that are constant on a given side, ie the y coords on side 1(or side 3)
