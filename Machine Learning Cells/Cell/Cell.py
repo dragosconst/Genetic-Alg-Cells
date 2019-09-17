@@ -23,12 +23,15 @@ class Cell():
         self._circles = [] # here will be saved the circles drawn on the cell
         self._circNum = self._chooseNumberOfCircles() # chooses whether to draw one or two circles(and their symmetric counterparts)
         self._sidesWithCircles = [] # similar to the older turtle algorithm, it won't draw two circles on the same side
-        
+            
         self._drawShape(app.mapScene, app.mapGView) # draws the base shape
 
         self._prepCircles(0, 0, app) # this function prepares the circles for being drawn and adds them to the scene, after they are prepared
+        self.finalItem = self._createPolyItem() # this is the final shape of the cell, stored in QGraphicsPolyItem
+        app.mapScene.addItem(self.finalItem)
 
 
+    # INTERNAL LOGIC OF THE CELL STARTS HERE
         
     # FUNCTIONS FOR CHOOSING SOME RANDOM VALUES
     def _chooseShape(self):
@@ -51,6 +54,8 @@ class Cell():
 
         self._sidesWithCircles.append(side)
         self._sidesWithCircles.append(side + 2 if side <= 2 else side - 2) # for 1 and 2 appends 3 or 4 and for 3 or 4 appends 1 or 2(the opposing sides)
+    
+    # HERE END THE FUNCTIONS FOR CHOOSING SOME RANDOM VALUES
 
 
     # MISCELLANEOUS FUNCTIONS  
@@ -96,8 +101,6 @@ class Cell():
         circle, opCircle = self._makeCircle(self._sidesWithCircles[sideLen], newCoords[0], newCoords[1], newCoords[2], newCoords[3], radius)
         self._circles.append(circle) # the code should've been pretty straightforward so far
         self._circles.append(opCircle)
-        app.mapScene.addItem(circle)
-        app.mapScene.addItem(opCircle)
         self._prepCircles(len(self._sidesWithCircles), soFar + 1, app) # the recursive call makes sure all circles are added
 
     # this function works as a nice wrapper  for the actual chooseRadius functions
@@ -114,6 +117,22 @@ class Cell():
         else:
             self._resetCoordsRhomb(side, radius, coords, newCoords)
             
+
+    # returns all four points of the Base Shape, starting from the top-left clockwise
+    def _getPoints(self):
+        if self._baseShapeKey == BaseShape.Rect.value or self._baseShapeKey == BaseShape.Square.value:
+            return self._getSquareOrRectPoints()
+        else:
+            return self._getRhombPoints()
+    
+    # returns the index of a circle in the self._circles list on the side given by the "side" parameter
+    def _findCircle(self, side):
+        index = 0
+        for circle in self._circles:
+            if self._sidesWithCircles[index] == side:
+                return index
+            index += 1
+        return -1 # if no circle was found, the program returns -1
 
     # this function will return the nearest point on a line from a specified point
     def _nearestPoint(self, point, line):
@@ -139,6 +158,7 @@ class Cell():
             if radius + otherCircRadius > opCircleDist:
                 radius = opCircleDist - otherCircRadius # this isn't exactly correct, but a proper function would bloat the code even more; this is more detailed in the wiki
         return radius if radius > 0 else 0
+    # HERE END THE MISCELLANEOUS FUNCTIONS
 
     # FUNCTIONS FOR CHOOSING THE COORDS AND THE RADIUS FOR THE SEMI-CIRCLES
     def _chooseCoords(self, side): # randomly chooses some coords that can draw a circle of minimum radius of 60 on the given side
@@ -266,6 +286,11 @@ class Cell():
                 sidex = self._baseShape.rect().x() - radius
                 opsidex = sidex + self._baseShape.rect().width()
             return sidex, sidey, opsidex, opsidey
+
+    # returns all four points of a Square or a Rectangle, starting from the top-left in a clockwise direction
+    def _getSquareOrRectPoints(self):
+        shape = self._baseShape.rect()
+        return shape.topLeft(), shape.topRight(), shape.bottomRight(), shape.bottomLeft()
 
 
     # this algorithm is a bit weirder, given the nature of rhombuses, from the points chosen by this function it might still not be possible
@@ -399,6 +424,7 @@ class Cell():
         smolDist = min(dist1, dist2, dist3, dist4) # finds the absolute smalles distance to any line on the rhombus
         return smolDist
 
+    # HERE END THE FUNCTIONS FOR CHOOSING THE COORDS AND THE RADIUS FOR THE SEMI-CIRCLES
                 
 
     # DRAWING FUNCTIONS
@@ -424,7 +450,6 @@ class Cell():
         rhombPoly.append(QtCore.QPointF(300, 300 + np.cos(np.deg2rad(self._angle / 2)) * side))
         rhombus.setPolygon(rhombPoly)
         self._baseShape = rhombus
-        scene.addItem(self._baseShape)
 
 
     def _drawRect(self, scene, view):
@@ -432,11 +457,80 @@ class Cell():
         self._sides[0] = self._area / self._sides[1]
 
         self._baseShape = QtWidgets.QGraphicsRectItem(300, 300, self._sides[0], self._sides[1])
-        scene.addItem(self._baseShape)
 
     def _drawSquare(self, scene, view):
         self._sides[0] = self._sides[1] = math.sqrt(self._area)
 
         self._baseShape = QtWidgets.QGraphicsRectItem(300, 300, self._sides[0], self._sides[1])
-        scene.addItem(self._baseShape)
+           
+    # HERE END THE DRAWING FUNCTIONS
+
+
+    # THE FUNCTIONS FROM HERE ON DEAL WITH CREATING THE FINAL SHAPE POLYGON
+
+    # returns a Qt graphics item that contains the shape of the Cell as a QPolygonF
+    def _createPolyItem(self):
+        polyItem = QtWidgets.QGraphicsPolygonItem()
+        polyItem.setPolygon(self._createPoly())
+        return polyItem
+
+    # this function returns a list of all the points needed to draw the corresponding semi-circle
+    def _getCirclePoints(self, circIndex):
+        points = [] # this list will contain all the poins of the given semi-circle
+        circle = self._circles[circIndex] # the corresponding circle
+        angle = circle.startAngle() + (180 * 16 if circIndex % 2 == 0 else 0) # this will be explained in the wiki, it would take too many words to be explained here
+        circleCenter = circle.rect().center()
+        radius = circle.rect().height() / 2
+
+        # because I'm adding the points in a clockwise manner, while the angles on the circle work in a counter clockwise manner
+        # I will start from what is technically the last point of the semi-circle and end on its first point
+        radiusLine = QtCore.QLineF()
+        radiusLine.setP1(circleCenter)
+        radiusLine.setLength(radius)
+        radiusLine.setAngle(angle / 16)
+
+        for addAngle in range(1, 180 * 16 + 1):
+            lastPoint = radiusLine.p2()
+            points.append(lastPoint)
+            angle = angle - (1 if circIndex % 2 == 0 else -1) # same as the previous conditional expression
+            radiusLine.setAngle(angle / 16)
+
+        return points
+
+    # adds a semi-circle to the polygon of the final shape
+    def _addCircle(self, side, poly):
+        nextCircleIndex = self._findCircle(side) # searches for the first side
+        if nextCircleIndex >= 0: # if the index is greater than equal to 0, it means that the program could find a circle on this side
+            circPoints = self._getCirclePoints(nextCircleIndex)
+            for point in circPoints:
+                poly.append(point)
+
+
+    # this function returns a QPolygonF object that is essentially the final shape that the Cell should have
+    def _createPoly(self):
+        poly = QtGui.QPolygonF()
+        
+        # the points start from the top-left one and go up to the bottom-left one, clockwise
+        p1, p2, p3, p4 = self._getPoints()
+
+        # add the first point
+        poly.append(p1)
+        self._addCircle(1, poly)
+        
+        # adds the second point
+        poly.append(p2)
+        self._addCircle(2, poly)
+
+        # third point
+        poly.append(p3)
+        self._addCircle(3, poly)
+
+        # last point
+        poly.append(p4)
+        self._addCircle(4, poly)
+
+        return poly
     
+    # HERE END THE FUNCTIONS THAT DEAL WITH CREATING THE FINAL SHAPE POLYGON
+
+    # INTERNAL LOGIC OF THE CELL ENDS HERE
