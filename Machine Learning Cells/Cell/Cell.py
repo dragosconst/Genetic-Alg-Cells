@@ -24,10 +24,10 @@ class Cell():
         self._circNum = self._chooseNumberOfCircles() # chooses whether to draw one or two circles(and their symmetric counterparts)
         self._sidesWithCircles = [] # similar to the older turtle algorithm, it won't draw two circles on the same side
             
-        self._drawShape(app.mapScene, app.mapGView) # draws the base shape
+        self._createShape(app.mapScene, app.mapGView) # draws the base shape
 
         self._prepCircles(0, 0, app) # this function prepares the circles for being drawn and adds them to the scene, after they are prepared
-        self.finalItem = self._createPolyItem() # this is the final shape of the cell, stored in QGraphicsPolyItem
+        self.finalItem = self._createPolyItem() # this is the final shape of the cell, stored in a QGraphicsPolyItem
         app.mapScene.addItem(self.finalItem)
 
 
@@ -427,17 +427,17 @@ class Cell():
     # HERE END THE FUNCTIONS FOR CHOOSING THE COORDS AND THE RADIUS FOR THE SEMI-CIRCLES
                 
 
-    # DRAWING FUNCTIONS
+    # FUNCTIONS THAT MANAGE CREATING THE BASE SHAPE
     # this function draws the base shape
-    def _drawShape(self, scene, view):
+    def _createShape(self, scene, view):
         if self._baseShapeKey == BaseShape.Square.value:
-            self._drawSquare(scene, view)
+            self._createSquare(scene, view)
         elif self._baseShapeKey == BaseShape.Rect.value:
-            self._drawRect(scene, view)
+            self._createRect(scene, view)
         else:
-            self._drawRhomb(scene, view)
+            self._createRhomb(scene, view)
 
-    def _drawRhomb(self, scene, view):
+    def _createRhomb(self, scene, view):
 
         self._sides[0] = self._sides[1] = math.sqrt(self._area / np.sin(np.deg2rad(self._angle))) # same way we used to build rhombs\rhombuses in the old program
         side = self._sides[0]
@@ -452,18 +452,18 @@ class Cell():
         self._baseShape = rhombus
 
 
-    def _drawRect(self, scene, view):
+    def _createRect(self, scene, view):
         self._sides[1] = math.sqrt(self._area) * self._multiplier[0] 
         self._sides[0] = self._area / self._sides[1]
 
         self._baseShape = QtWidgets.QGraphicsRectItem(300, 300, self._sides[0], self._sides[1])
 
-    def _drawSquare(self, scene, view):
+    def _createSquare(self, scene, view):
         self._sides[0] = self._sides[1] = math.sqrt(self._area)
 
         self._baseShape = QtWidgets.QGraphicsRectItem(300, 300, self._sides[0], self._sides[1])
            
-    # HERE END THE DRAWING FUNCTIONS
+    # HERE END THE CREATION MANAGEMENT FUNCTIONS
 
 
     # THE FUNCTIONS FROM HERE ON DEAL WITH CREATING THE FINAL SHAPE POLYGON
