@@ -29,7 +29,37 @@ class Cell():
         self._prepCircles(0, 0, app) # this function prepares the circles for being drawn and adds them to the scene, after they are prepared
         self.finalItem = self._createPolyItem() # this is the final shape of the cell, stored in a QGraphicsPolyItem
         app.mapScene.addItem(self.finalItem)
+        # for rotation
+        self.finalItem.setTransformOriginPoint(self.finalItem.boundingRect().x(), self.finalItem.boundingRect().y())
+        self.rotateBy(360 * 3)
+        self.moveTo(500, 500)
 
+
+    # rotation thingy
+    def rotateBy(self, degrees):
+        timer = QtCore.QTimer()
+        if degrees < 5:
+            self.finalItem.setRotation(self.finalItem.rotation() + degrees)
+        else:
+            self.finalItem.setRotation(self.finalItem.rotation() + 5)
+            timer.singleShot(20, lambda: self.rotateBy(degrees - 5))
+
+
+    # functions for moving
+    def moveTo(self, xf, yf):
+        self._moveToCoords(xf, yf, self.finalItem.boundingRect().x(), self.finalItem.boundingRect().y())
+    def _moveToCoords(self, xf, yf, xc, yc):
+        timer = QtCore.QTimer()
+        line = QtCore.QLineF(QtCore.QPointF(xc, yc), QtCore.QPointF(xf, yf))
+        if line.length() > 1:
+            line.setLength(1)
+            dx = line.p2().x() - xc
+            dy = line.p2().y() - yc
+        else:
+            dx = line.p2().x() - xc
+            dy = line.p2().y() - yc
+        self.finalItem.moveBy(dx, dy)
+        timer.singleShot(10, lambda: self._moveToCoords(xf, yf, xc + dx, yc + dy))
 
     # INTERNAL LOGIC OF THE CELL STARTS HERE
         
