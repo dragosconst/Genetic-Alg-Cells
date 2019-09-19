@@ -14,11 +14,11 @@ class BaseShape(Enum): # not sure if we will ever use this enum, but this is the
 class Cell():
     def __init__(self, app):
         super().__init__()
-        self._area = rand.randrange(50000, 100001) # selects a random _area for the cell
+        self._area = rand.randrange(500, 1001) # selects a random _area for the cell
         self._sides = [0, 0] # the value for the width and height(they are equivalent for squares and rhombuses(? hope this is the plural))
         self._angle = rand.randrange(30, 161) # this is only relevant for the rhombus
         self._baseShapeKey = self._chooseShape() # this is the shape from whitch the cell is drawn
-        self._multiplier = np.random.uniform(low = 0.37, high = 0.8, size = (1,)) # this multiplies is used for determing the height(second side) of the rectangle; given the way the paint event works, if the random multiplier were to be calculated in the draw function, it would keep getting change at every call and make a very chaotic drawing
+        self._multiplier = np.random.uniform(low = 0.37, high = 0.8, size = (1,)) # this multiplies is used for determing the height(second side) of the rectangle; given the way the paint event works, if the random multiplier were to be calculated in the draw methods, it would keep getting change at every call and make a very chaotic drawing
         self._baseShape = None # the base shape of the cell
         self._circles = [] # here will be saved the circles drawn on the cell
         self._circNum = self._chooseNumberOfCircles() # chooses whether to draw one or two circles(and their symmetric counterparts)
@@ -26,51 +26,26 @@ class Cell():
             
         self._createShape(app.mapScene, app.mapGView) # draws the base shape
 
-        self._prepCircles(0, 0, app) # this function prepares the circles for being drawn and adds them to the scene, after they are prepared
+        self._prepCircles(0, 0, app) # this methods prepares the circles for being drawn and adds them to the scene, after they are prepared
         self.finalItem = self._createPolyItem() # this is the final shape of the cell, stored in a QGraphicsPolyItem
-        app.mapScene.addItem(self.finalItem)
+        app.mapScene.addItem(self.finalItem) # place the Final Item in the scene
         # for rotation
-        self.finalItem.setTransformOriginPoint(self.finalItem.boundingRect().x(), self.finalItem.boundingRect().y())
         self.rotateBy(360 * 3)
-        self.moveTo(500, 500)
 
+        self.timeDir = QtCore.QTimer()
+        self.move()
 
-    # rotation thingy
-    def rotateBy(self, degrees):
-        timer = QtCore.QTimer()
-        if degrees < 5:
-            self.finalItem.setRotation(self.finalItem.rotation() + degrees)
-        else:
-            self.finalItem.setRotation(self.finalItem.rotation() + 5)
-            timer.singleShot(20, lambda: self.rotateBy(degrees - 5))
-
-
-    # functions for moving
-    def moveTo(self, xf, yf):
-        self._moveToCoords(xf, yf, self.finalItem.boundingRect().x(), self.finalItem.boundingRect().y())
-    def _moveToCoords(self, xf, yf, xc, yc):
-        timer = QtCore.QTimer()
-        line = QtCore.QLineF(QtCore.QPointF(xc, yc), QtCore.QPointF(xf, yf))
-        if line.length() > 1:
-            line.setLength(1)
-            dx = line.p2().x() - xc
-            dy = line.p2().y() - yc
-        else:
-            dx = line.p2().x() - xc
-            dy = line.p2().y() - yc
-        self.finalItem.moveBy(dx, dy)
-        timer.singleShot(10, lambda: self._moveToCoords(xf, yf, xc + dx, yc + dy))
 
     # INTERNAL LOGIC OF THE CELL STARTS HERE
         
-    # FUNCTIONS FOR CHOOSING SOME RANDOM VALUES
+    # METHODS FOR CHOOSING SOME RANDOM VALUES
     def _chooseShape(self):
         return rand.randrange(1, 4)
 
     def _chooseNumberOfCircles(self):
         return rand.randrange(1, 3)
 
-    # FUNCTIONS FOR CHOOSING THE SIDE ON WHICH TO DRAW
+    # METHODS FOR CHOOSING THE SIDE ON WHICH TO DRAW
     def _checkSideCircle(self, side): # some simple stuff, checks if this side was already used
         for usedSide in self._sidesWithCircles:
             if usedSide == side:
@@ -85,11 +60,11 @@ class Cell():
         self._sidesWithCircles.append(side)
         self._sidesWithCircles.append(side + 2 if side <= 2 else side - 2) # for 1 and 2 appends 3 or 4 and for 3 or 4 appends 1 or 2(the opposing sides)
     
-    # HERE END THE FUNCTIONS FOR CHOOSING SOME RANDOM VALUES
+    # HERE END THE METHODS FOR CHOOSING SOME RANDOM VALUES
 
 
-    # MISCELLANEOUS FUNCTIONS  
-    # this function returns two circles made with QGraphicsEllipseItem
+    # MISCELLANEOUS METHODS  
+    # this method returns two circles made with QGraphicsEllipseItem
     # it is made specifically for this class, which is why it makes two circles(the circles come in pairs, that's how the algorithm works)
     def _makeCircle(self, side, sidex, sidey, opsidex, opsidey, radius):
         if self._baseShapeKey == BaseShape.Square.value or self._baseShapeKey == BaseShape.Rect.value:
@@ -112,12 +87,12 @@ class Cell():
         opCircle.setStartAngle(add * 16) ; opCircle.setSpanAngle(180 * 16)
         return circle, opCircle
     
-    # this function does everything needed for the pre-creation of the circles, such as choosing the coordinates, the radius and so on
+    # this method does everything needed for the pre-creation of the circles, such as choosing the coordinates, the radius and so on
     # sideLen refers to the length of the sidesWithCircles list
     # soFar represents the ammount of circles added so far
     # app is a MLCellApp object
     def _prepCircles(self, sideLen, soFar, app):
-        if soFar >= self._circNum: # if there have been added enough circles, stop the function
+        if soFar >= self._circNum: # if there have been added enough circles, stop the method
             return 
         self._chooseSide() # pretty obvious, chooses a side
         checkForBreak = self._circNum
@@ -133,14 +108,14 @@ class Cell():
         self._circles.append(opCircle)
         self._prepCircles(len(self._sidesWithCircles), soFar + 1, app) # the recursive call makes sure all circles are added
 
-    # this function works as a nice wrapper  for the actual chooseRadius functions
+    # this method works as a nice wrapper  for the actual chooseRadius methods
     def _chooseRadius(self, side, sidex, sidey, opsidex, opsidey, coords):
-        if self._baseShapeKey == BaseShape.Square.value or self._baseShapeKey == BaseShape.Rect.value: # in this case, the function is literally identical
+        if self._baseShapeKey == BaseShape.Square.value or self._baseShapeKey == BaseShape.Rect.value: # in this case, the method is literally identical
             return self._chooseRadiusSquareOrRect(side, sidex, sidey, opsidex, opsidey, coords)
         else:
             return self._chooseRadiusRhomb(side, sidex, sidey, opsidex, opsidey)
 
-    # this is a wrapper for resetCoords functions
+    # this is a wrapper for resetCoords methods
     def _resetCoords(self, sidex, sidey, opsidex, opsidey, side, radius, coords = None, newCoords = None):
         if self._baseShapeKey == BaseShape.Square.value or self._baseShapeKey == BaseShape.Rect.value:
             self._resetCoordsSquareOrRect(sidex, sidey, opsidex, opsidey, side, radius, coords, newCoords)
@@ -164,20 +139,20 @@ class Cell():
             index += 1
         return -1 # if no circle was found, the program returns -1
 
-    # this function will return the nearest point on a line from a specified point
+    # this method will return the nearest point on a line from a specified point
     def _nearestPoint(self, point, line):
         perpLine = QtCore.QLineF(point.x(), point.y(), point.x(), 0.0)
         perpLine.setAngle(90 + line.angle()) # rotates the new line in such a way that it becomes perpendicular on the old line
         interPoint = QtCore.QPointF(0, 0)
         line.intersect(perpLine, interPoint)
         return interPoint
-    # this function will calculate the distance between a line and a point in a clever way
+    # this method will calculate the distance between a line and a point in a clever way
     def _disToLine(self, point, line):
         interPoint = self._nearestPoint(point, line) # looks for the nearest point on the line
         return QtCore.QLineF(point, interPoint).length() # returns the length of the line from this point to the nearest point
 
 
-    # this function checks the collision between circles drawn "inside" the shape
+    # this method checks the collision between circles drawn "inside" the shape
     def _checkCircleColl(self, radius, circle, opCircle):
         otherCircCenter = circle.rect().center() # center of the circle variable from the loop
         otherCircRadius = circle.rect().height() / 2 # the circle rect is a square (otherwise it would be an ellipse, not a circle)
@@ -186,26 +161,26 @@ class Cell():
         opCircleDist = QtCore.QLineF(otherCircCenter, opCircleCenter).length()
         if circle.collidesWithItem(opCircle):
             if radius + otherCircRadius > opCircleDist:
-                radius = opCircleDist - otherCircRadius # this isn't exactly correct, but a proper function would bloat the code even more; this is more detailed in the wiki
+                radius = opCircleDist - otherCircRadius # this isn't exactly correct, but a proper method would bloat the code even more; this is more detailed in the wiki
         return radius if radius > 0 else 0
-    # HERE END THE MISCELLANEOUS FUNCTIONS
+    # HERE END THE MISCELLANEOUS METHODS
 
-    # FUNCTIONS FOR CHOOSING THE COORDS AND THE RADIUS FOR THE SEMI-CIRCLES
+    # METHODS FOR CHOOSING THE COORDS AND THE RADIUS FOR THE SEMI-CIRCLES
     def _chooseCoords(self, side): # randomly chooses some coords that can draw a circle of minimum radius of 60 on the given side
         if self._baseShapeKey == BaseShape.Square.value:
-            return self._chooseCoordsSquareOrRect(side, 60) # minimum 20 radius for squares
+            return self._chooseCoordsSquareOrRect(side, 6) # minimum 20 radius for squares
         elif self._baseShapeKey == BaseShape.Rect.value:
             return self._chooseCoordsSquareOrRect(side, min(60, self._sides[0] / 2 - 1, self._sides[1] / 2 - 1))
         else:   # for the rhombus
-            return self._chooseCoordsRhomb(side, 60)
+            return self._chooseCoordsRhomb(side, 6)
 
-    # under this are the 3 functions for squares and rects, they are essentially identical
+    # under this are the 3 methods for squares and rects, they are essentially identical
 
     # !!READ THIS!!
-    # this function is the same for both the square and the rect, because the only difference whatsoever between them is the way the radius
+    # this method is the same for both the square and the rect, because the only difference whatsoever between them is the way the radius
     # is calculated(for the square the minimum radius is 60, while for the rect it can be smaller, depending on the width and height)
     # this can be easily solved by passing the radius as a parameter
-    def _chooseCoordsSquareOrRect(self, side, radius): # this function will return a list of the top-left coords of the rects of the both circles
+    def _chooseCoordsSquareOrRect(self, side, radius): # this method will return a list of the top-left coords of the rects of the both circles
         
         sideX = sideY = opSideX = opSideY = 0 # these are the top left coords of the circle on this side and on the opposite side
         foundGoodCoords = False
@@ -239,15 +214,15 @@ class Cell():
         # here ends this big while
         return [sideX, sideY, opSideX, opSideY]
     
-    # this function finds the biggest possible radius starting from the given coords
-    # just as before, this function would look literally the same for a rectangle
+    # this method finds the biggest possible radius starting from the given coords
+    # just as before, this method would look literally the same for a rectangle
     def _chooseRadiusSquareOrRect(self, side, sidex, sidey, opsidex, opsidey, coords):
 
         xPos = self._baseShape.rect().x() # x position of the square
         height = self._baseShape.rect().height() 
         width = self._baseShape.rect().width()
         yPos = self._baseShape.rect().y() # y position of the square
-        minDim = min(height, width) # this variable is only useful when this function is called for a rectangle, the radius should not exceed the smaller value of the two
+        minDim = min(height, width) # this variable is only useful when this method is called for a rectangle, the radius should not exceed the smaller value of the two
         
         maxPosRadNoCircs = 0 # this will hold the maximum possible radius if there were no other circles drawn on the figure
         if side == 1 or side == 3:
@@ -285,9 +260,9 @@ class Cell():
         # here ends this for loop
         return actualRadius 
 
-    # this functions resets the "fixed" coords of the circle based on the radius parameter
+    # this methods resets the "fixed" coords of the circle based on the radius parameter
     # what I mean by "fixed" coords are the coords that are constant on a given side, ie the y coords on side 1(or side 3)
-    # again, the function for the square and rect is one and the same
+    # again, the method for the square and rect is one and the same
     def _resetCoordsSquareOrRect(self, sidex, sidey, opsidex, opsidey, side, radius, coords = None, newCoords = None):
         if coords is not None:
             if side == 1:
@@ -323,13 +298,13 @@ class Cell():
         return shape.topLeft(), shape.topRight(), shape.bottomRight(), shape.bottomLeft()
 
 
-    # this algorithm is a bit weirder, given the nature of rhombuses, from the points chosen by this function it might still not be possible
+    # this algorithm is a bit weirder, given the nature of rhombuses, from the points chosen by this method it might still not be possible
     # for a circle of specified radius to be drawn, due to the way rhombuses' "inwards" are. oof this doesn't really makes sense, does it
     # it should be noted that it returns the coordinates projected on the rhombus, not of the rectangle in which the ellipse is included
     def _chooseCoordsRhomb(self, side, radius):
         
         sideX = sideY = opSideX = opSideY = 0
-        noSmallCircs = 40 # this constant is used for the bounds of the coordinates, to make sure that no small circles appear
+        noSmallCircs = 5 # this constant is used for the bounds of the coordinates, to make sure that no small circles appear
         line1, line2, line3, line4 = self._getRhombLines()
     
         leftX = self._baseShape.polygon()[3].x() # this is the way the points are added in the polygon; the most upward point is the last one
@@ -394,7 +369,7 @@ class Cell():
         opSidePoint = QtCore.QPointF(opsidex, opsidey) # the center of the opposite circle
 
         dist = min(self._smallestDistRhomb(sidePoint, side), self._smallestDistRhomb(opSidePoint, oppositeSide)) # this is the smallest distance to any line from either this sides' circle or the opposite sides'
-        maxPosRadNoCircs = dist # as in the other function, this is the biggest possible radius if there were no other circles drawn
+        maxPosRadNoCircs = dist # as in the other method, this is the biggest possible radius if there were no other circles drawn
        
 
         actualRadius = maxPosRadNoCircs
@@ -413,7 +388,7 @@ class Cell():
 
 
         
-    # this does what the other function for the square does, except that in a slightly more compelx manner
+    # this does what the other method for the square does, except that in a slightly more compelx manner
     def _resetCoordsRhomb(self, side, radius, coords, newCoords):
         if coords is None:
             assert False # this will return an error
@@ -424,15 +399,15 @@ class Cell():
             newCoords[2] = coords[2] - radius
             newCoords[3] = coords[3] - radius
         else:
-            assert False # this will return an error, this function would be too tirseome to implement without the use of lists
+            assert False # this will return an error, this method would be too tirseome to implement without the use of lists
 
-    # UNDER HERE ARE FUNCTIONS MADE SPECIFICALLY FOR THE RHOMBUS
+    # UNDER HERE ARE METHODS MADE SPECIFICALLY FOR THE RHOMBUS
     # SO FAR, THERE ARE ONLY 3 OF THEM
-    # this function will return all the points of the rhombus polygon
+    # this method will return all the points of the rhombus polygon
     def _getRhombPoints(self):
         poly = self._baseShape.polygon()
         return poly[0], poly[1], poly[2], poly[3]
-    # this function will return all the lines of the rhombus polygon
+    # this method will return all the lines of the rhombus polygon
     def _getRhombLines(self):
         poly = self._baseShape.polygon()
         p1, p2, p3, p4 = self._getRhombPoints()
@@ -443,7 +418,7 @@ class Cell():
         l4 = QtCore.QLineF(p4, p1)
         return l1, l2, l3, l4
 
-    # this function finds the smallest distances from this point to any of the rhombus' lines and then returns the smallest of these
+    # this method finds the smallest distances from this point to any of the rhombus' lines and then returns the smallest of these
     def _smallestDistRhomb(self, point, side):
         line1, line2, line3, line4 = self._getRhombLines()
         dist1 = self._disToLine(point, line1) if side != 1 else line1.length() * 1000 # calculates the minimum distance to every line, keeping both circles in mind
@@ -454,11 +429,11 @@ class Cell():
         smolDist = min(dist1, dist2, dist3, dist4) # finds the absolute smalles distance to any line on the rhombus
         return smolDist
 
-    # HERE END THE FUNCTIONS FOR CHOOSING THE COORDS AND THE RADIUS FOR THE SEMI-CIRCLES
+    # HERE END THE METHODS FOR CHOOSING THE COORDS AND THE RADIUS FOR THE SEMI-CIRCLES
                 
 
-    # FUNCTIONS THAT MANAGE CREATING THE BASE SHAPE
-    # this function draws the base shape
+    # METHODS THAT MANAGE CREATING THE BASE SHAPE
+    # this method draws the base shape
     def _createShape(self, scene, view):
         if self._baseShapeKey == BaseShape.Square.value:
             self._createSquare(scene, view)
@@ -493,10 +468,10 @@ class Cell():
 
         self._baseShape = QtWidgets.QGraphicsRectItem(300, 300, self._sides[0], self._sides[1])
            
-    # HERE END THE CREATION MANAGEMENT FUNCTIONS
+    # HERE END THE CREATION MANAGEMENT METHODS
 
 
-    # THE FUNCTIONS FROM HERE ON DEAL WITH CREATING THE FINAL SHAPE POLYGON
+    # THE METHODS FROM HERE ON DEAL WITH CREATING THE FINAL SHAPE POLYGON
 
     # returns a Qt graphics item that contains the shape of the Cell as a QPolygonF
     def _createPolyItem(self):
@@ -504,7 +479,7 @@ class Cell():
         polyItem.setPolygon(self._createPoly())
         return polyItem
 
-    # this function returns a list of all the points needed to draw the corresponding semi-circle
+    # this method returns a list of all the points needed to draw the corresponding semi-circle
     def _getCirclePoints(self, circIndex):
         points = [] # this list will contain all the poins of the given semi-circle
         circle = self._circles[circIndex] # the corresponding circle
@@ -536,7 +511,7 @@ class Cell():
                 poly.append(point)
 
 
-    # this function returns a QPolygonF object that is essentially the final shape that the Cell should have
+    # this method returns a QPolygonF object that is essentially the final shape that the Cell should have
     def _createPoly(self):
         poly = QtGui.QPolygonF()
         
@@ -561,6 +536,22 @@ class Cell():
 
         return poly
     
-    # HERE END THE FUNCTIONS THAT DEAL WITH CREATING THE FINAL SHAPE POLYGON
+    # HERE END THE METHODS THAT DEAL WITH CREATING THE FINAL SHAPE POLYGON
 
     # INTERNAL LOGIC OF THE CELL ENDS HERE
+
+    
+    # EXTERNAL LOGIC STARTS HERE
+    
+    # rotation thingy
+    def rotateBy(self, degrees):
+        self.finalItem.setTransformOriginPoint(self.finalItem.boundingRect().center().x(), self.finalItem.boundingRect().center().y())
+        timer = QtCore.QTimer()
+        if degrees < 5:
+            self.finalItem.setRotation(self.finalItem.rotation() + degrees)
+        else:
+            self.finalItem.setRotation(self.finalItem.rotation() + 5)
+            timer.singleShot(16, lambda: self.rotateBy(degrees - 5))
+    
+    def move(self):
+        pass
