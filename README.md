@@ -24,5 +24,5 @@ the formula for speed is as follows:
 ![SV formula](https://user-images.githubusercontent.com/38582034/65237806-099a0c00-dae4-11e9-8ccd-bb40c4e05ef4.png)
 
 - the food preference is a variable that takes a value between 0 and 1 and represents exactly what its name says: whether a cell prefers algae or other cells. there are two types of food preferences: the _initial_ and the _actual_ food preference of a cell. The _initial_ food preference is set at 0.5 and is affected by previous generations and random mutations, while the _actual_ food preference is calculated based on what the cell ate while it was alive. The _actual_ food preference of a cell is used for future generations for determining their _initial_ food preference. The _actual_ food preference is calculated in the following manner:  
-![fp equation](https://user-images.githubusercontent.com/38582034/65239787-63043a00-dae8-11e9-9b8f-212a081dad7b.png)  
+![fp equation](https://user-images.githubusercontent.com/38582034/65249092-0448bb80-dafc-11e9-94d0-5799cf7e9ad6.gif)  
 If the Cell hasn't eaten anything at all, its _actual_ food preference will be automatically set to -1 and this cell won't be used at all for any future generations. After all, if it hasn't eaten anything, then it didn't contribute in any meaningful way to the gene pool.
