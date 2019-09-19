@@ -30,10 +30,16 @@ class Cell():
         self.finalItem = self._createPolyItem() # this is the final shape of the cell, stored in a QGraphicsPolyItem
         app.mapScene.addItem(self.finalItem) # place the Final Item in the scene
         # for rotation
-        self.rotateBy(360 * 3)
+        #self.rotateBy(360 * 3)
 
-        self.timeDir = QtCore.QTimer()
+        self._timeDir = QtCore.QTimer() # this timer is used for storing the time during which the cell moves in a certain direction
+        self._timeDir.setSingleShot(True) # sets the timer to work only as a single shot
+
+        self._movementFrameTime = QtCore.QTime() # this clock will be used for determining the elapsed time between calls of the move method
+        self._movementFrameTime.start()
+
         self.move()
+
 
 
     # INTERNAL LOGIC OF THE CELL STARTS HERE
@@ -553,5 +559,31 @@ class Cell():
             self.finalItem.setRotation(self.finalItem.rotation() + 5)
             timer.singleShot(16, lambda: self.rotateBy(degrees - 5))
     
-    def move(self):
-        pass
+
+    # HERE START METHODS RELATED TO MOVING THE CELL
+
+    def _chooseDir(self):
+        return rand.randrange(0, 360)
+
+    # this method will be sort of a movement loop
+    def move(self, dirAngle = 0):
+        if self._timeDir.isActive() == False: # if the timer has not started yet or if it has stopped
+            dirAngle = self._chooseDir()
+            self._timeDir.start(rand.randrange(3, 5) * 1000)
+            
+        timeElapsed = self._movementFrameTime.restart() / 20 # the timeElapsed is used for keeping the speed constant
+        self._moveInDir(timeElapsed, dirAngle)
+        tempTimer = QtCore.QTimer() # this timer only serves to call the movement loop back
+        tempTimer.singleShot(20, lambda: self.move(dirAngle))
+    # the directions for this method should be normalized, otherwise the movmement will be a mess
+    def _moveInDir(self, timeElapsed, angle):
+        startPoint = QtCore.QPointF(self.finalItem.boundingRect().x(), self.finalItem.boundingRect().y())
+        lineDir = QtCore.QLineF() # im using the line trick again, it's just so much better than doing the maths
+
+        lineDir.setP1(startPoint)
+        lineDir.setAngle(angle)
+        lineDir.setLength(1 * timeElapsed)
+
+        self.finalItem.moveBy(lineDir.p2().x() - startPoint.x(), lineDir.p2().y() - startPoint.y())
+
+        
