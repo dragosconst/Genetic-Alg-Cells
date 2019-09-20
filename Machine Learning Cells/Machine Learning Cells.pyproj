@@ -5,8 +5,7 @@
     <ProjectGuid>9f400719-8ff3-448c-9632-fa2951c7d9f1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>Main.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>..\Machine Learning Cells;Cells;Utilities;Walls;GUI</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Machine Learning Cells</Name>
@@ -22,17 +21,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="GUI\" />
-    <Folder Include="Cell\" />
+    <Folder Include="Cells\" />
+    <Folder Include="Walls\" />
+    <Folder Include="Utilities\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="GUI\main_window.ui" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cell\Cell.py">
+    <Compile Include="Cells\Cells.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\MainWindow.py" />
     <Compile Include="Main.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Utilities\util.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Walls\Walls.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

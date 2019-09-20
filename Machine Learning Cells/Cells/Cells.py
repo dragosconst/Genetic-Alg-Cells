@@ -5,6 +5,8 @@ from enum import Enum
 from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
 
+import util
+
 
 class BaseShape(Enum): # not sure if we will ever use this enum, but this is the standard I use in the class
     Square = 1
@@ -12,7 +14,7 @@ class BaseShape(Enum): # not sure if we will ever use this enum, but this is the
     Rhomb = 3
 
 class Cell():
-    def __init__(self, app):
+    def __init__(self):
         super().__init__()
         self._area = rand.randrange(500, 1001) # selects a random _area for the cell
         self._sides = [0, 0] # the value for the width and height(they are equivalent for squares and rhombuses(? hope this is the plural))
@@ -24,11 +26,10 @@ class Cell():
         self._circNum = self._chooseNumberOfCircles() # chooses whether to draw one or two circles(and their symmetric counterparts)
         self._sidesWithCircles = [] # similar to the older turtle algorithm, it won't draw two circles on the same side
             
-        self._createShape(app.mapScene, app.mapGView) # draws the base shape
+        self._createShape() # creates the base shape
 
-        self._prepCircles(0, 0, app) # this methods prepares the circles for being drawn and adds them to the scene, after they are prepared
+        self._prepCircles(0, 0) # this methods prepares the circles for being drawn and adds them to the scene, after they are prepared
         self.finalItem = self._createPolyItem() # this is the final shape of the cell, stored in a QGraphicsPolyItem
-        app.mapScene.addItem(self.finalItem) # place the Final Item in the scene
         # for rotation
         #self.rotateBy(360 * 3)
 
@@ -97,7 +98,7 @@ class Cell():
     # sideLen refers to the length of the sidesWithCircles list
     # soFar represents the ammount of circles added so far
     # app is a MLCellApp object
-    def _prepCircles(self, sideLen, soFar, app):
+    def _prepCircles(self, sideLen, soFar):
         if soFar >= self._circNum: # if there have been added enough circles, stop the method
             return 
         self._chooseSide() # pretty obvious, chooses a side
@@ -112,7 +113,7 @@ class Cell():
         circle, opCircle = self._makeCircle(self._sidesWithCircles[sideLen], newCoords[0], newCoords[1], newCoords[2], newCoords[3], radius)
         self._circles.append(circle) # the code should've been pretty straightforward so far
         self._circles.append(opCircle)
-        self._prepCircles(len(self._sidesWithCircles), soFar + 1, app) # the recursive call makes sure all circles are added
+        self._prepCircles(len(self._sidesWithCircles), soFar + 1) # the recursive call makes sure all circles are added
 
     # this method works as a nice wrapper  for the actual chooseRadius methods
     def _chooseRadius(self, side, sidex, sidey, opsidex, opsidey, coords):
@@ -310,7 +311,7 @@ class Cell():
     def _chooseCoordsRhomb(self, side, radius):
         
         sideX = sideY = opSideX = opSideY = 0
-        noSmallCircs = 5 # this constant is used for the bounds of the coordinates, to make sure that no small circles appear
+        noSmallCircs = 3 # this constant is used for the bounds of the coordinates, to make sure that no small circles appear
         line1, line2, line3, line4 = self._getRhombLines()
     
         leftX = self._baseShape.polygon()[3].x() # this is the way the points are added in the polygon; the most upward point is the last one
@@ -440,39 +441,42 @@ class Cell():
 
     # METHODS THAT MANAGE CREATING THE BASE SHAPE
     # this method draws the base shape
-    def _createShape(self, scene, view):
+    def _createShape(self):
         if self._baseShapeKey == BaseShape.Square.value:
-            self._createSquare(scene, view)
+            self._createSquare()
         elif self._baseShapeKey == BaseShape.Rect.value:
-            self._createRect(scene, view)
+            self._createRect()
         else:
-            self._createRhomb(scene, view)
+            self._createRhomb()
 
-    def _createRhomb(self, scene, view):
+    def _createRhomb(self):
 
         self._sides[0] = self._sides[1] = math.sqrt(self._area / np.sin(np.deg2rad(self._angle))) # same way we used to build rhombs\rhombuses in the old program
         side = self._sides[0]
+        initPos = QtCore.QPointF(rand.randrange(200, 601), rand.randrange(200, 601))
 
         rhombus = QtWidgets.QGraphicsPolygonItem()
         rhombPoly = QtGui.QPolygonF()
-        rhombPoly.append(QtCore.QPointF(300 + np.sin(np.deg2rad(self._angle / 2)) * side, 300))
-        rhombPoly.append(QtCore.QPointF(300 + 2 * np.sin(np.deg2rad(self._angle / 2)) * side, 300 + np.cos(np.deg2rad(self._angle / 2)) * side))
-        rhombPoly.append(QtCore.QPointF(300 + np.sin(np.deg2rad(self._angle / 2)) * side, 300 + 2 * np.cos(np.deg2rad(self._angle / 2)) * side))
-        rhombPoly.append(QtCore.QPointF(300, 300 + np.cos(np.deg2rad(self._angle / 2)) * side))
+        rhombPoly.append(QtCore.QPointF(initPos.x() + np.sin(np.deg2rad(self._angle / 2)) * side, initPos.y()))
+        rhombPoly.append(QtCore.QPointF(initPos.x() + 2 * np.sin(np.deg2rad(self._angle / 2)) * side, initPos.y() + np.cos(np.deg2rad(self._angle / 2)) * side))
+        rhombPoly.append(QtCore.QPointF(initPos.x() + np.sin(np.deg2rad(self._angle / 2)) * side, initPos.y() + 2 * np.cos(np.deg2rad(self._angle / 2)) * side))
+        rhombPoly.append(QtCore.QPointF(initPos.x(), initPos.y() + np.cos(np.deg2rad(self._angle / 2)) * side))
         rhombus.setPolygon(rhombPoly)
         self._baseShape = rhombus
 
 
-    def _createRect(self, scene, view):
+    def _createRect(self):
         self._sides[1] = math.sqrt(self._area) * self._multiplier[0] 
         self._sides[0] = self._area / self._sides[1]
+        initPos = QtCore.QPointF(rand.randrange(200, 601), rand.randrange(200, 601))
 
-        self._baseShape = QtWidgets.QGraphicsRectItem(300, 300, self._sides[0], self._sides[1])
+        self._baseShape = QtWidgets.QGraphicsRectItem(initPos.x(), initPos.y(), self._sides[0], self._sides[1])
 
-    def _createSquare(self, scene, view):
+    def _createSquare(self):
         self._sides[0] = self._sides[1] = math.sqrt(self._area)
+        initPos = QtCore.QPointF(rand.randrange(200, 601), rand.randrange(200, 601))
 
-        self._baseShape = QtWidgets.QGraphicsRectItem(300, 300, self._sides[0], self._sides[1])
+        self._baseShape = QtWidgets.QGraphicsRectItem(initPos.x(), initPos.y(), self._sides[0], self._sides[1])
            
     # HERE END THE CREATION MANAGEMENT METHODS
 
@@ -571,11 +575,14 @@ class Cell():
             dirAngle = self._chooseDir()
             self._timeDir.start(rand.randrange(3, 5) * 1000)
             
+        # check for collisions
+
         timeElapsed = self._movementFrameTime.restart() / 20 # the timeElapsed is used for keeping the speed constant
         self._moveInDir(timeElapsed, dirAngle)
         tempTimer = QtCore.QTimer() # this timer only serves to call the movement loop back
         tempTimer.singleShot(20, lambda: self.move(dirAngle))
-    # the directions for this method should be normalized, otherwise the movmement will be a mess
+
+    # moves the Final Item in the direction given by the angle
     def _moveInDir(self, timeElapsed, angle):
         startPoint = QtCore.QPointF(self.finalItem.boundingRect().x(), self.finalItem.boundingRect().y())
         lineDir = QtCore.QLineF() # im using the line trick again, it's just so much better than doing the maths
@@ -586,4 +593,9 @@ class Cell():
 
         self.finalItem.moveBy(lineDir.p2().x() - startPoint.x(), lineDir.p2().y() - startPoint.y())
 
-        
+    # METHODS FOR DETECTING AND HANDLING COLLISIONS
+
+    def _checkCol(self):
+        if self.finalItem.collidingItems() != []:
+            pass
+     
