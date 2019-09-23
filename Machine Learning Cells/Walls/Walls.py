@@ -1,14 +1,33 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 # this will be the class of the walls that border the available area for 
-class Wall():
+class Wall(QtWidgets.QGraphicsRectItem):
     def __init__(self, side):
+        super().__init__()
         self._colorText = "darkblue" # this will be the default color for all walls
-        self._rectItem = self._buildRect(side) # the graphics item
+        self.setRect(0, 0, self._buildRect(side).width(), self._buildRect(side).height()) # the graphics item
+        self.setPos(self._buildRect(side).x(), self._buildRect(side).y()) # this is the coordinate trick explained in the wiki
+        self.setPen(QtGui.QPen(QtGui.QColor(self._colorText)))
+        self.setBrush(QtGui.QBrush(QtGui.QColor(self._colorText)))
+
+        self._side = side
 
 
-    def rectItem(self):
-        return self._rectItem
+    # returns the side of the scene which this wall occupies
+    def side(self):
+        return self._side
+
+    # methods for getting the wall dimensions
+    def wallHeight(self):
+        return self.rect().height()
+    def wallWidth(self):
+        return self.rect().width()
+
+    # the scene\absolute coords of the wall
+    def wallX(self):
+        return self.x()
+    def wallY(self):
+        return self.y()
 
     # returns the QGraphicsRectItem for the wall of the corresponding side
     def _buildRect(self, side):
@@ -23,31 +42,23 @@ class Wall():
 
     # this method builds a rectangle for the first side of the graphics view(using the same encoding we used for a rect's sides)
     def _buildRect1(self):
-        topRect = QtWidgets.QGraphicsRectItem(0, 0, 1000, 25)
-        topRect.setPen(QtGui.QPen(QtGui.QColor(self._colorText)))
-        topRect.setBrush(QtGui.QBrush(QtGui.QColor(self._colorText)))
+        topRect = QtCore.QRectF(0, 0, 1000, 25)
 
         return topRect
 
     # second side and so on
     def _buildRect2(self):
-        rightRect = QtWidgets.QGraphicsRectItem(975, 0, 25, 1000)
-        rightRect.setPen(QtGui.QPen(QtGui.QColor(self._colorText)))
-        rightRect.setBrush(QtGui.QBrush(QtGui.QColor(self._colorText)))
+        rightRect = QtCore.QRectF(975, 0, 25, 1000)
 
         return rightRect
 
     def _buildRect3(self):
-        bottomRect = QtWidgets.QGraphicsRectItem(0, 975, 1000, 25)
-        bottomRect.setPen(QtGui.QPen(QtGui.QColor(self._colorText)))
-        bottomRect.setBrush(QtGui.QBrush(QtGui.QColor(self._colorText)))
+        bottomRect = QtCore.QRectF(0, 975, 1000, 25)
 
         return bottomRect
 
     def _buildRect4(self):
-        leftRect = QtWidgets.QGraphicsRectItem(0, 0, 25, 1000)
-        leftRect.setPen(QtGui.QPen(QtGui.QColor(self._colorText)))
-        leftRect.setBrush(QtGui.QBrush(QtGui.QColor(self._colorText)))
+        leftRect = QtCore.QRectF(0, 0, 25, 1000)
 
         return leftRect
         

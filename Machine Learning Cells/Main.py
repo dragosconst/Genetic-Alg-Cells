@@ -30,19 +30,18 @@ class MLCellApp(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._plots = [] # this list will contain every math plot from every tab
         self._navtbs = [] # this list will contain every nav toolbar from every tab
         self._timers = [] # all the timers for every tab
-
+            
         self._walls = [] # the walls that mark the boundaries of the graphics scene(and view)
         self._addWalls()
 
         self._cells = [] # all the cells
-        self._addCells(2)
-
+        self._addCells(10)
 
     # creates a number of cells and adds the to the scene
     def _addCells(self, number):
         for i in range(0, number):
             self._cells.append(Cell())
-            self.mapScene.addItem(self._cells[i].finalItem)
+            self.mapScene.addItem(self._cells[i])
 
     # creates the walls and adds them to the scene
     def _addWalls(self):
@@ -52,7 +51,7 @@ class MLCellApp(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._walls.append(Wall(4))
 
         for wall in self._walls: # add the walls to the scene
-            self.mapScene.addItem(wall.rectItem())
+            self.mapScene.addItem(wall)
 
     # this function adds a new graph plot and navbar to the tab widget
     def addNewPlot(self, fig, axis, yVals):
@@ -84,6 +83,7 @@ class MLCellApp(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         newYVals = np.append(newYVals, np.random.rand(1)) # adds five elements to the end of the array
         #axis.plot(newYVals) # plots the new functions
         #newPlot.canvas.draw() # this redraws the plot
+        self.mapScene.items()
         
         time = self._timers[index]
         time.singleShot(1000, lambda: self.updateTab(index, newPlot, axis, newYVals)) # not using singleShot makes some weird problems, where there are multiple timers working at the same time, instead of just one(or how many tabs are open)

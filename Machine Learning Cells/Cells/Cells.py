@@ -13,7 +13,7 @@ class BaseShape(Enum): # not sure if we will ever use this enum, but this is the
     Rect = 2
     Rhomb = 3
 
-class Cell():
+class Cell(QtWidgets.QGraphicsPolygonItem):
     def __init__(self):
         super().__init__()
         self._area = rand.randrange(500, 1001) # selects a random _area for the cell
@@ -21,15 +21,22 @@ class Cell():
         self._angle = rand.randrange(30, 161) # this is only relevant for the rhombus
         self._baseShapeKey = self._chooseShape() # this is the shape from whitch the cell is drawn
         self._multiplier = np.random.uniform(low = 0.37, high = 0.8, size = (1,)) # this multiplies is used for determing the height(second side) of the rectangle; given the way the paint event works, if the random multiplier were to be calculated in the draw methods, it would keep getting change at every call and make a very chaotic drawing
-        self._baseShape = None # the base shape of the cell
+        self._baseShape = None # the base shape of the cell 
         self._circles = [] # here will be saved the circles drawn on the cell
         self._circNum = self._chooseNumberOfCircles() # chooses whether to draw one or two circles(and their symmetric counterparts)
-        self._sidesWithCircles = [] # similar to the older turtle algorithm, it won't draw two circles on the same side
-            
+        self._sidesWithCircles = [] # similar to the older turtle algorithm, it won't draw two circles on the same side    
+
         self._createShape() # creates the base shape
 
         self._prepCircles(0, 0) # this methods prepares the circles for being drawn and adds them to the scene, after they are prepared
-        self.finalItem = self._createPolyItem() # this is the final shape of the cell, stored in a QGraphicsPolyItem
+        self.setPolygon(self._createPoly()) # the Final Item of the Cell becomes
+        initPos = QtCore.QPointF(rand.randrange(200, 601), rand.randrange(200, 601))
+        self._originPoint = initPos
+        self.setPos(initPos.x(), initPos.y())
+        self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue")))
+        self._height = None # the height of the Final Shape(and Final Item)
+        self._width = None
+        self._topLeftPoint = None # the top-left point of the Final Shape
         # for rotation
         #self.rotateBy(360 * 3)
 
@@ -41,9 +48,7 @@ class Cell():
 
         self.move()
 
-
-
-    # INTERNAL LOGIC OF THE CELL STARTS HERE
+    # INTERNAL LOGIC OF THE CELL STARTS  HERE
         
     # METHODS FOR CHOOSING SOME RANDOM VALUES
     def _chooseShape(self):
@@ -71,6 +76,71 @@ class Cell():
 
 
     # MISCELLANEOUS METHODS  
+
+    # this method should only be called after the Final Shape is done
+    # it returns the height of the Final Shape(which will, most likely, be distinct from the height of the Base Shape)
+    def height(self):
+        if self._height == None: # if this is the first time the height is calculated
+            heightVal = 0
+            if self._baseShapeKey == BaseShape.Square.value or self._baseShapeKey == BaseShape.Rect.value:
+                heightVal += self._baseShape.rect().height()
+            else: # in the case the Base Shape is a rhombus
+                heightVal += self._baseShape.polygon()[2].y() - self._baseShape.polygon()[0].y()
+         
+            index = 0
+            for circle in self._circles:
+                side = self._sidesWithCircles[index]
+                if side == 1 or side == 3:
+                    if self._baseShapeKey == BaseShape.Square.value or self._baseShapeKey == BaseShape.Rect.value:
+                        heightVal += self._circles[index].rect().height() / 2 # adds the radius of the circle
+                        break
+                # in the case of a rhombus, the circles might not affect the width or the height at all
+                if self._baseShapeKey == BaseShape.Rhomb.value:
+                    if circle.rect().y() < self._baseShape.polygon()[0].y():
+                        if index % 2 == 0: # if it is an outer circle
+                            heightVal += abs(self._baseShape.polygon()[0].y() - circle.rect().y()) 
+                    elif circle.rect().y() + circle.rect().height() > self._baseShape.polygon()[2].y():
+                        if index % 2 == 0: # if it is an outer circle
+                            heightVal += abs(circle.rect().y() + circle.rect().height()  - self._baseShape.polygon()[2].y())
+                index += 1
+            
+            self._height = heightVal # set the Cell height to the heightVal that was just calculated
+            return heightVal
+        else: # dont do the calculations more than once
+            return self._height
+
+    # same as before, but for width
+    def width(self):
+        if self._width == None: # same as for the height
+            widthVal = 0
+            if self._baseShapeKey == BaseShape.Square.value or self._baseShapeKey == BaseShape.Rect.value:
+                widthVal += self._baseShape.rect().width()
+            else: # in the case the Base Shape is a rhombus
+                widthVal += self._baseShape.polygon()[1].x() - self._baseShape.polygon()[3].x()
+         
+            index = 0
+            for circle in self._circles:
+                side = self._sidesWithCircles[index]
+                if side == 2 or side == 4:
+                    if self._baseShapeKey == BaseShape.Square.value or self._baseShapeKey == BaseShape.Rect.value:
+                        widthVal += self._circles[index].rect().height() / 2 # adds the radius of the circle
+                        break
+                # in the case of a rhombus, the circles might not affect the width or the height at all
+                if self._baseShapeKey == BaseShape.Rhomb.value:
+                    if circle.rect().x() < self._baseShape.polygon()[3].x():
+                        if index % 2 == 0: # if it is an outer circle
+                            widthVal += abs(self._baseShape.polygon()[3].x() - circle.rect().x())
+                    elif circle.rect().x() + circle.rect().width() > self._baseShape.polygon()[1].x():
+                        if index % 2 == 0: # if it is an outer circle
+                            widthVal += abs(circle.rect().x() + circle.rect().width()  - self._baseShape.polygon()[1].x())
+                index += 1
+
+            self._width = widthVal
+            return widthVal
+        else:
+            return self._width
+
+
     # this method returns two circles made with QGraphicsEllipseItem
     # it is made specifically for this class, which is why it makes two circles(the circles come in pairs, that's how the algorithm works)
     def _makeCircle(self, side, sidex, sidey, opsidex, opsidey, radius):
@@ -93,7 +163,8 @@ class Cell():
         circle.setStartAngle(add * 16) ; circle.setSpanAngle(180 * 16)
         opCircle.setStartAngle(add * 16) ; opCircle.setSpanAngle(180 * 16)
         return circle, opCircle
-    
+
+
     # this method does everything needed for the pre-creation of the circles, such as choosing the coordinates, the radius and so on
     # sideLen refers to the length of the sidesWithCircles list
     # soFar represents the ammount of circles added so far
@@ -453,14 +524,13 @@ class Cell():
 
         self._sides[0] = self._sides[1] = math.sqrt(self._area / np.sin(np.deg2rad(self._angle))) # same way we used to build rhombs\rhombuses in the old program
         side = self._sides[0]
-        initPos = QtCore.QPointF(rand.randrange(200, 601), rand.randrange(200, 601))
 
         rhombus = QtWidgets.QGraphicsPolygonItem()
         rhombPoly = QtGui.QPolygonF()
-        rhombPoly.append(QtCore.QPointF(initPos.x() + np.sin(np.deg2rad(self._angle / 2)) * side, initPos.y()))
-        rhombPoly.append(QtCore.QPointF(initPos.x() + 2 * np.sin(np.deg2rad(self._angle / 2)) * side, initPos.y() + np.cos(np.deg2rad(self._angle / 2)) * side))
-        rhombPoly.append(QtCore.QPointF(initPos.x() + np.sin(np.deg2rad(self._angle / 2)) * side, initPos.y() + 2 * np.cos(np.deg2rad(self._angle / 2)) * side))
-        rhombPoly.append(QtCore.QPointF(initPos.x(), initPos.y() + np.cos(np.deg2rad(self._angle / 2)) * side))
+        rhombPoly.append(QtCore.QPointF(np.sin(np.deg2rad(self._angle / 2)) * side, 0))
+        rhombPoly.append(QtCore.QPointF(2 * np.sin(np.deg2rad(self._angle / 2)) * side, np.cos(np.deg2rad(self._angle / 2)) * side))
+        rhombPoly.append(QtCore.QPointF(np.sin(np.deg2rad(self._angle / 2)) * side, 2 * np.cos(np.deg2rad(self._angle / 2)) * side))
+        rhombPoly.append(QtCore.QPointF(0, np.cos(np.deg2rad(self._angle / 2)) * side))
         rhombus.setPolygon(rhombPoly)
         self._baseShape = rhombus
 
@@ -470,24 +540,18 @@ class Cell():
         self._sides[0] = self._area / self._sides[1]
         initPos = QtCore.QPointF(rand.randrange(200, 601), rand.randrange(200, 601))
 
-        self._baseShape = QtWidgets.QGraphicsRectItem(initPos.x(), initPos.y(), self._sides[0], self._sides[1])
+        self._baseShape = QtWidgets.QGraphicsRectItem(0, 0, self._sides[0], self._sides[1])
 
     def _createSquare(self):
         self._sides[0] = self._sides[1] = math.sqrt(self._area)
         initPos = QtCore.QPointF(rand.randrange(200, 601), rand.randrange(200, 601))
 
-        self._baseShape = QtWidgets.QGraphicsRectItem(initPos.x(), initPos.y(), self._sides[0], self._sides[1])
+        self._baseShape = QtWidgets.QGraphicsRectItem(0, 0, self._sides[0], self._sides[1])
            
     # HERE END THE CREATION MANAGEMENT METHODS
 
 
     # THE METHODS FROM HERE ON DEAL WITH CREATING THE FINAL SHAPE POLYGON
-
-    # returns a Qt graphics item that contains the shape of the Cell as a QPolygonF
-    def _createPolyItem(self):
-        polyItem = QtWidgets.QGraphicsPolygonItem()
-        polyItem.setPolygon(self._createPoly())
-        return polyItem
 
     # this method returns a list of all the points needed to draw the corresponding semi-circle
     def _getCirclePoints(self, circIndex):
@@ -513,7 +577,7 @@ class Cell():
         return points
 
     # adds a semi-circle to the polygon of the final shape
-    def _addCircle(self, side, poly):
+    def _addCirclePoints(self, side, poly):
         nextCircleIndex = self._findCircle(side) # searches for the first side
         if nextCircleIndex >= 0: # if the index is greater than equal to 0, it means that the program could find a circle on this side
             circPoints = self._getCirclePoints(nextCircleIndex)
@@ -530,39 +594,96 @@ class Cell():
 
         # add the first point
         poly.append(p1)
-        self._addCircle(1, poly)
+        self._addCirclePoints(1, poly)
         
         # adds the second point
         poly.append(p2)
-        self._addCircle(2, poly)
+        self._addCirclePoints(2, poly)
 
         # third point
         poly.append(p3)
-        self._addCircle(3, poly)
+        self._addCirclePoints(3, poly)
 
         # last point
         poly.append(p4)
-        self._addCircle(4, poly)
+        self._addCirclePoints(4, poly)
 
         return poly
     
     # HERE END THE METHODS THAT DEAL WITH CREATING THE FINAL SHAPE POLYGON
+
 
     # INTERNAL LOGIC OF THE CELL ENDS HERE
 
     
     # EXTERNAL LOGIC STARTS HERE
     
+    # MISCELLANEOUS METHODS
+
+    # checks if another cell is very close to this cell
+    def cellIsInVicinity(self, otherCell):
+        extendedX = self.actualPos().x() - 10 # the extended things represent the dimensions and coordinates
+        extendedY = self.actualPos().y() - 10 # of the vicinity
+        extendedWidth = 10 + self.width() + 10 # the vicinity will extend by 20 pixels in all directions
+        extendedHeight = 10 + self.height() + 10
+
+        otherX = otherCell.actualPos().x() # the coordinates and dimensions of the other cell
+        otherY = otherCell.actualPos().y()
+        otherWidth = otherCell.width()
+        otherWidth = otherCell.height()
+
+        # EXPERIMENTAL - MIGHT PROVE TO BE VERY SLOW
+        vicinity = QtCore.QRectF(extendedX, extendedY, extendedWidth, extendedHeight)
+        if vicinity.contains(QtCore.QPointF(otherX, otherY)):
+            return True
+        return False
+
     # rotation thingy
     def rotateBy(self, degrees):
-        self.finalItem.setTransformOriginPoint(self.finalItem.boundingRect().center().x(), self.finalItem.boundingRect().center().y())
+        self.setTransformOriginPoint(self.boundingRect().center().x(), selfboundingRect().center().y())
         timer = QtCore.QTimer()
         if degrees < 5:
-            self.finalItem.setRotation(self.finalItem.rotation() + degrees)
+            self.setRotation(self.rotation() + degrees)
         else:
-            self.finalItem.setRotation(self.finalItem.rotation() + 5)
+            self.setRotation(self.rotation() + 5)
             timer.singleShot(16, lambda: self.rotateBy(degrees - 5))
+
+    # METHODS FOR POSITIONS AND STUFF RELATED TO POSITIONS
+
+    # i have no idea what the pos() of a polygon graphics item is, either way this looks in the polygon's points
+    # and finds its extremities. im adding self.pos() to every point because the points' coordonate system is in relation
+    # to the original graphics item, not the scene itself
+    def actualPos(self):
+        if self._topLeftPoint == None: # if the top-left point has not been yet determined
+            topY = 1000
+            yPos = self.pos().y() # the position of the cell might slightly change during the for loop, which makes the function return all kinds of weird results
+            for point in self.polygon():
+                if point.y() + yPos < topY:
+                    topY = point.y() + yPos
+
+            leftX = 1000
+            xPos = self.pos().x()
+            for point in self.polygon():
+                if point.x() + xPos < leftX:
+                    leftX = point.x() + xPos
+
+            self._topLeftPoint = QtCore.QPointF(leftX - xPos, topY - yPos)
+            return QtCore.QPointF(leftX, topY)
+        else:
+            return QtCore.QPointF(self._topLeftPoint.x() + self.pos().x(), self._topLeftPoint.y() + self.pos().y())
+
+    # this method takes coordinates for the actualPosition and translates them to regular position of the item
+    # note that I genuinely have no idea what the regular position of the item actually is, Qt can get really
+    # weird
+    def setActualPos(self, x, y):
+        itemPos = self.pos()
+        actualPos = self.actualPos()
+
+        x -= actualPos.x() - itemPos.x()
+        y -= actualPos.y() - itemPos.y()
+        self.setPos(x, y)
     
+    # HERE END METHODS FOR POSITIONING 
 
     # HERE START METHODS RELATED TO MOVING THE CELL
 
@@ -574,28 +695,58 @@ class Cell():
         if self._timeDir.isActive() == False: # if the timer has not started yet or if it has stopped
             dirAngle = self._chooseDir()
             self._timeDir.start(rand.randrange(3, 5) * 1000)
-            
-        # check for collisions
-
+        
         timeElapsed = self._movementFrameTime.restart() / 20 # the timeElapsed is used for keeping the speed constant
         self._moveInDir(timeElapsed, dirAngle)
+        
+        # check for collisions
+        self._checkCol(dirAngle)
+
         tempTimer = QtCore.QTimer() # this timer only serves to call the movement loop back
         tempTimer.singleShot(20, lambda: self.move(dirAngle))
 
+
     # moves the Final Item in the direction given by the angle
     def _moveInDir(self, timeElapsed, angle):
-        startPoint = QtCore.QPointF(self.finalItem.boundingRect().x(), self.finalItem.boundingRect().y())
+        startPoint = QtCore.QPointF(0.001, 0.001)
         lineDir = QtCore.QLineF() # im using the line trick again, it's just so much better than doing the maths
 
         lineDir.setP1(startPoint)
-        lineDir.setAngle(angle)
         lineDir.setLength(1 * timeElapsed)
+        lineDir.setAngle(angle)
 
-        self.finalItem.moveBy(lineDir.p2().x() - startPoint.x(), lineDir.p2().y() - startPoint.y())
+        self.moveBy(lineDir.p2().x(), lineDir.p2().y())
 
     # METHODS FOR DETECTING AND HANDLING COLLISIONS
 
-    def _checkCol(self):
-        if self.finalItem.collidingItems() != []:
-            pass
-     
+
+    def _checkCol(self, angle):
+        scene = self.scene() # the qgraphicsscene in which this cell is contained
+        if scene is None: # the cell is added to the scene only AFTER it is created, so for some brief time it might not be added to any scene yet
+            return 
+        for item in scene.items():
+            if util.getClassName(item) == "Wall":
+                if self.collidesWithItem(item):
+                    self._handleWall(item) # this method pushes the cell out of the walls
+            elif util.getClassName(item) == "Cell":
+                if self.cellIsInVicinity(item):
+                    if self.collidesWithItem(item):
+                        self._handleCellCol(item) 
+
+        
+
+    # handles cell collision
+    def _handleCellCol(self, otherCell):
+        pass
+
+    # move the cell outside the wall   
+    def _handleWall(self, wall):
+        if wall.side() == 1:
+            self.setActualPos(self.actualPos().x(), wall.wallX() + wall.wallHeight() + 4) # adds one so they don't end up tangent
+        elif wall.side() == 2:
+            self.setActualPos(wall.wallX() - self.width() - 4, self.actualPos().y())
+        elif wall.side() == 3:
+            self.setActualPos(self.actualPos().x(), wall.wallY() - self.height() - 4)
+        elif wall.side() == 4:
+            self.setActualPos(wall.wallX() + wall.wallWidth() + 4, self.actualPos().y())
+
