@@ -730,14 +730,19 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
                     self._handleWall(item) # this method pushes the cell out of the walls
             elif util.getClassName(item) == "Cell":
                 if self.cellIsInVicinity(item):
-                    if self.collidesWithItem(item):
-                        self._handleCellCol(item) 
+                    pass#if self.collidesWithItem(item):
+                        #self._handleCellCol(item) 
 
         
 
     # handles cell collision
     def _handleCellCol(self, otherCell):
         pass
+
+    # the following methods are used for making Cell collision easier to manage
+    def isHitUpLeft(self, otherCell):
+        pass
+        
 
     # move the cell outside the wall   
     def _handleWall(self, wall):

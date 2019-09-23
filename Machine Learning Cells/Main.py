@@ -17,7 +17,7 @@ from Cells import Cell
 from Walls import Wall
 import MainWindow as mw
 
-class MLCellApp(mw.Ui_MainWindow, QtWidgets.QMainWindow):
+class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def __init__(self): 
         super().__init__()
         self.setupUi(self)
@@ -121,7 +121,7 @@ if __name__ == '__main__': # yeah i guess we have to use this
     axes2.plot(yValues2)
 
     app = QtWidgets.QApplication(sys.argv)
-    qtApp = MLCellApp()
+    qtApp = MLCellWindow()
     qtApp.addNewPlot(fig1, axes1, yValues1)
     qtApp.addNewPlot(fig2, axes2, yValues2)
     qtApp.show()
