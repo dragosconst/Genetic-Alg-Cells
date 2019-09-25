@@ -27,7 +27,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     def resetCells(cls, scene):
         if scene is None: # if the scene object was not constructed, wait a bit for it(by recalling the function 10 ms later)
             reset = QtCore.QTimer()
-            reset.singleShot(10, lambda: resetCells(scene))
+            reset.singleShot(10, lambda: cls.resetCells(scene))
 
         for item in scene.items(): # check all cells
             if util.getClassName(item) == "Cell": # if it is a cell
@@ -78,6 +78,17 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             cell.setActualPos(newX, newY)
             cell.resetOrigin(QtCore.QPointF(newX, newY)) # resets the origin point to this
 
+    # start moving all cells once all the positions have been set
+    @classmethod
+    def startMoving(cls, scene):
+        if cls.cellDisjoint == cls.CELL_GEN_POP:
+            for item in scene.items():
+                if util.getClassName(item) == "Cell":
+                    item.startFrameClock()
+                    item.move()
+        else:
+            tryAgain = QtCore.QTimer()
+            tryAgain.singleShot(10, lambda: cls.startMoving(scene))
     # CLASS METHODS END
 
     # OBJECT\INSTANCE METHODS START
@@ -112,12 +123,10 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._timeDir.setSingleShot(True) # sets the timer to work only as a single shot
 
         self._movementFrameTime = QtCore.QTime() # this clock will be used for determining the elapsed time between calls of the move method
-        self._movementFrameTime.start()
 
         self._turnTime = QtCore.QTime() # this clock will be used to count the second during which a cell turns
         self._turnTime.start()
 
-        self.move()
 
     #boundinfRect override
     def boundingRects(self):
@@ -704,6 +713,10 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # MISCELLANEOUS METHODS
 
+    # start the frame clock; this function comes in handy for the class method that makes all the cells move
+    def startFrameClock(self):
+        self._movementFrameTime.start()
+
     # checks if another cell is very close to this cell
     def cellIsInVicinity(self, otherCell):
         if otherCell is self: # if they are the same cell
@@ -781,9 +794,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # this method will be sort of a movement loop
     def move(self, dirAngle = 0):
-        if Cell.cellDisjoint < Cell.CELL_GEN_POP: # if not all cells have the appropriate position
-            waitForAll = QtCore.QTimer() # wait untill all cells have their positions reset
-            waitForAll.singleShot(10, lambda: self.move())
         if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 1000: # if the timer has not started yet or if it has stopped
             dirAngle = self._chooseDir()
             self._timeDir.start(rand.randrange(3, 5) * 1000)
