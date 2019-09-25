@@ -8,15 +8,83 @@ import numpy as np
 import util
 
 
+
 class BaseShape(Enum): # not sure if we will ever use this enum, but this is the standard I use in the class
     Square = 1
     Rect = 2
     Rhomb = 3
 
 class Cell(QtWidgets.QGraphicsPolygonItem):
+    # Class variables
+    cellDisjoint = 0 # this represents how many cells do not intersect with other cells; will be used for making
+                     # all cells start movement only when all cells have been correctly positioned
+    CELL_GEN_POP = 40 # how many cells will be in a generation
+
+    # CLASS METHODS START
+
+    # this function resets the position of every cell, one by one
+    @classmethod
+    def resetCells(cls, scene):
+        if scene is None: # if the scene object was not constructed, wait a bit for it(by recalling the function 10 ms later)
+            reset = QtCore.QTimer()
+            reset.singleShot(10, lambda: resetCells(scene))
+
+        for item in scene.items(): # check all cells
+            if util.getClassName(item) == "Cell": # if it is a cell
+                if item.collidingItems() != []: # if the item collides with anything
+                    cls.resetCellPos(scene, item)
+                    cls.cellDisjoint += 1
+                else:
+                    cls.cellDisjoint += 1
+
+
+    # this function resets the position of an individual cell
+    @classmethod
+    def resetCellPos(cls, scene, cell):
+    
+            allCoords = list(range(100, 801))
+            allCoords = [allCoords] * 701 # create a 701 x 701 matrix with all possible positions
+
+            for item in scene.items():
+                if util.getClassName(item) == "Cell" and item is not cell:
+                    yStart = item.actualPos().y() - cell.height() # the bounds in which this cell cannot spawn 
+                    yStop = item.actualPos().y() + item.height() # in refernence to the cell it is currently checking
+                    if yStart <= 100:
+                        yStart = 100
+                    if yStop >= 800:
+                        yStop = 800
+                    xStart = item.actualPos().x() - cell.width()
+                    xStop = item.actualPos().x() + item.width()
+                    if xStart <= 100:
+                        xStart = 100
+                    if xStop >= 800:
+                        xStop = 800
+
+                    yStart = int(yStart) # given that they might probably end up with floating coordinates 
+                    yStop = int(yStop) # they should be casted to whole numbers
+                    xStart = int(xStart)
+                    xStop = int(xStop)
+                    for i in range(yStart - 100, yStop - 100): 
+                        for j in range(xStart - 100, xStop - 100):
+                            allCoords[i][j] = -1 # -1 means that it cannot spawn on this point
+
+            possibleCoords = [] # these will be all the coords in which a cell could be spawn alright
+            for i  in range(0, 701):
+                for j in range(0, 701):
+                    if allCoords[i][j] != -1:
+                        possibleCoords.append((i + 100, j + 100))
+
+            newY, newX = rand.choice(possibleCoords) # chooses a random suitable position
+            cell.setActualPos(newX, newY)
+            cell.resetOrigin(QtCore.QPointF(newX, newY)) # resets the origin point to this
+
+    # CLASS METHODS END
+
+    # OBJECT\INSTANCE METHODS START
+
     def __init__(self):
         super().__init__()
-        self._area = rand.randrange(500, 1001) # selects a random _area for the cell
+        self._area = rand.randrange(50, 101) # selects a random _area for the cell
         self._sides = [0, 0] # the value for the width and height(they are equivalent for squares and rhombuses(? hope this is the plural))
         self._angle = rand.randrange(30, 161) # this is only relevant for the rhombus
         self._baseShapeKey = self._chooseShape() # this is the shape from whitch the cell is drawn
@@ -46,7 +114,17 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._movementFrameTime = QtCore.QTime() # this clock will be used for determining the elapsed time between calls of the move method
         self._movementFrameTime.start()
 
+        self._turnTime = QtCore.QTime() # this clock will be used to count the second during which a cell turns
+        self._turnTime.start()
+
         self.move()
+
+    #boundinfRect override
+    def boundingRects(self):
+        bounds = QtCore.QRectF(self.actualPos().x() - self.pos().x(), self.actualPos().y() - self.pos().y(),
+                               self.width(), self.height())
+        return bounds
+
 
     # INTERNAL LOGIC OF THE CELL STARTS  HERE
         
@@ -246,11 +324,11 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     # METHODS FOR CHOOSING THE COORDS AND THE RADIUS FOR THE SEMI-CIRCLES
     def _chooseCoords(self, side): # randomly chooses some coords that can draw a circle of minimum radius of 60 on the given side
         if self._baseShapeKey == BaseShape.Square.value:
-            return self._chooseCoordsSquareOrRect(side, 6) # minimum 20 radius for squares
+            return self._chooseCoordsSquareOrRect(side, 1) # minimum 20 radius for squares
         elif self._baseShapeKey == BaseShape.Rect.value:
             return self._chooseCoordsSquareOrRect(side, min(60, self._sides[0] / 2 - 1, self._sides[1] / 2 - 1))
         else:   # for the rhombus
-            return self._chooseCoordsRhomb(side, 6)
+            return self._chooseCoordsRhomb(side, 1)
 
     # under this are the 3 methods for squares and rects, they are essentially identical
 
@@ -382,7 +460,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     def _chooseCoordsRhomb(self, side, radius):
         
         sideX = sideY = opSideX = opSideY = 0
-        noSmallCircs = 3 # this constant is used for the bounds of the coordinates, to make sure that no small circles appear
+        noSmallCircs = 1 # this constant is used for the bounds of the coordinates, to make sure that no small circles appear
         line1, line2, line3, line4 = self._getRhombLines()
     
         leftX = self._baseShape.polygon()[3].x() # this is the way the points are added in the polygon; the most upward point is the last one
@@ -618,23 +696,33 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     
     # EXTERNAL LOGIC STARTS HERE
     
+    # METHOD FOR RESETING THE ORIGIN POINT
+    def resetOrigin(self, origin):
+        self._originPoint = origin
+
+
+
     # MISCELLANEOUS METHODS
 
     # checks if another cell is very close to this cell
     def cellIsInVicinity(self, otherCell):
-        extendedX = self.actualPos().x() - 10 # the extended things represent the dimensions and coordinates
-        extendedY = self.actualPos().y() - 10 # of the vicinity
-        extendedWidth = 10 + self.width() + 10 # the vicinity will extend by 20 pixels in all directions
-        extendedHeight = 10 + self.height() + 10
+        if otherCell is self: # if they are the same cell
+            return False
+        extendedX = self.actualPos().x() # the extended things represent the dimensions and coordinates
+        extendedY = self.actualPos().y() # of the vicinity
+        extendedWidth = self.width() # the vicinity will extend by the cell's dimensions
+        extendedHeight = self.height()
 
         otherX = otherCell.actualPos().x() # the coordinates and dimensions of the other cell
         otherY = otherCell.actualPos().y()
         otherWidth = otherCell.width()
-        otherWidth = otherCell.height()
+        otherHeight = otherCell.height()
 
         # EXPERIMENTAL - MIGHT PROVE TO BE VERY SLOW
         vicinity = QtCore.QRectF(extendedX, extendedY, extendedWidth, extendedHeight)
-        if vicinity.contains(QtCore.QPointF(otherX, otherY)):
+        otherArea = QtCore.QRectF(otherX, otherY, otherWidth, otherHeight)
+        # checks all four corners
+        if vicinity.intersects(otherArea):
             return True
         return False
 
@@ -685,6 +773,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     
     # HERE END METHODS FOR POSITIONING 
 
+
     # HERE START METHODS RELATED TO MOVING THE CELL
 
     def _chooseDir(self):
@@ -692,12 +781,24 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # this method will be sort of a movement loop
     def move(self, dirAngle = 0):
-        if self._timeDir.isActive() == False: # if the timer has not started yet or if it has stopped
+        if Cell.cellDisjoint < Cell.CELL_GEN_POP: # if not all cells have the appropriate position
+            waitForAll = QtCore.QTimer() # wait untill all cells have their positions reset
+            waitForAll.singleShot(10, lambda: self.move())
+        if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 1000: # if the timer has not started yet or if it has stopped
             dirAngle = self._chooseDir()
             self._timeDir.start(rand.randrange(3, 5) * 1000)
         
+        # if it somehow ends up outside the scene(if the time between two frames is huge, this might happen)
+        if self.actualPos().x() <= 0 or self.actualPos().x() >= 1000:
+            self.setActualPos(self._originPoint.x(), self._originPoint.y())
+        elif self.actualPos().y() <= 0 or self.actualPos().y() >= 1000:
+            self.setActualPos(self._originPoint.x(), self._originPoint.y())
+
         timeElapsed = self._movementFrameTime.restart() / 20 # the timeElapsed is used for keeping the speed constant
-        self._moveInDir(timeElapsed, dirAngle)
+        if self._turnTime.elapsed() >= 1000:
+            self._moveInDir(timeElapsed, dirAngle)
+        else:
+            self._moveInDir(timeElapsed, dirAngle + 180)
         
         # check for collisions
         self._checkCol(dirAngle)
@@ -724,26 +825,19 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         scene = self.scene() # the qgraphicsscene in which this cell is contained
         if scene is None: # the cell is added to the scene only AFTER it is created, so for some brief time it might not be added to any scene yet
             return 
+        checkCellCol = True
+        if self._turnTime.elapsed() <= 1000: # during the turning time, no collision shall be checked
+            checkCellCol = False
         for item in scene.items():
             if util.getClassName(item) == "Wall":
                 if self.collidesWithItem(item):
                     self._handleWall(item) # this method pushes the cell out of the walls
             elif util.getClassName(item) == "Cell":
-                if self.cellIsInVicinity(item):
-                    pass#if self.collidesWithItem(item):
-                        #self._handleCellCol(item) 
+                if checkCellCol and self.cellIsInVicinity(item): # if it is not turning
+                    self._turnTime.restart()
+                    checkCellCol = False
 
-        
-
-    # handles cell collision
-    def _handleCellCol(self, otherCell):
-        pass
-
-    # the following methods are used for making Cell collision easier to manage
-    def isHitUpLeft(self, otherCell):
-        pass
-        
-
+       
     # move the cell outside the wall   
     def _handleWall(self, wall):
         if wall.side() == 1:
@@ -754,4 +848,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             self.setActualPos(self.actualPos().x(), wall.wallY() - self.height() - 4)
         elif wall.side() == 4:
             self.setActualPos(wall.wallX() + wall.wallWidth() + 4, self.actualPos().y())
+
+
 

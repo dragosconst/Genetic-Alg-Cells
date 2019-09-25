@@ -15,6 +15,7 @@ import numpy as np
 # here we import local modules
 from Cells import Cell
 from Walls import Wall
+import util
 import MainWindow as mw
 
 class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
@@ -35,7 +36,9 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._addWalls()
 
         self._cells = [] # all the cells
-        self._addCells(10)
+        self._addCells(Cell.CELL_GEN_POP)
+        Cell.resetCells(self.mapScene) # resets the cells positions so they dont hit each other
+
 
     # creates a number of cells and adds the to the scene
     def _addCells(self, number):
