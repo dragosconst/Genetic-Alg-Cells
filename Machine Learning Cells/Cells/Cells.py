@@ -735,7 +735,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         vicinity = QtCore.QRectF(extendedX, extendedY, extendedWidth, extendedHeight)
         otherArea = QtCore.QRectF(otherX, otherY, otherWidth, otherHeight)
         # checks all four corners
-        if vicinity.intersects(otherArea):
+        if vicinity.contains(otherArea.topLeft()) or vicinity.contains(otherArea.topRight())\
+        or vicinity.contains(otherArea.bottomLeft()) or vicinity.contains(otherArea.bottomRight()):
             return True
         return False
 
@@ -794,7 +795,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # this method will be sort of a movement loop
     def move(self, dirAngle = 0):
-        if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 1000: # if the timer has not started yet or if it has stopped
+        if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 250: # if the timer has not started yet or if it has stopped
             dirAngle = self._chooseDir()
             self._timeDir.start(rand.randrange(3, 5) * 1000)
         
@@ -805,7 +806,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             self.setActualPos(self._originPoint.x(), self._originPoint.y())
 
         timeElapsed = self._movementFrameTime.restart() / 20 # the timeElapsed is used for keeping the speed constant
-        if self._turnTime.elapsed() >= 1000:
+        if self._turnTime.elapsed() >= 250:
             self._moveInDir(timeElapsed, dirAngle)
         else:
             self._moveInDir(timeElapsed, dirAngle + 180)
@@ -836,7 +837,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         if scene is None: # the cell is added to the scene only AFTER it is created, so for some brief time it might not be added to any scene yet
             return 
         checkCellCol = True
-        if self._turnTime.elapsed() <= 1000: # during the turning time, no collision shall be checked
+        if self._turnTime.elapsed() <= 250: # during the turning time, no collision shall be checked
             checkCellCol = False
         for item in scene.items():
             if util.getClassName(item) == "Wall":
