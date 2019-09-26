@@ -24,7 +24,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # this function resets the position of every cell, one by one
     @classmethod
-    def resetCells(cls, scene):
+    def resetCells(cls, scene, simDia):
         if scene is None: # if the scene object was not constructed, wait a bit for it(by recalling the function 10 ms later)
             reset = QtCore.QTimer()
             reset.singleShot(10, lambda: cls.resetCells(scene))
@@ -34,8 +34,10 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
                 if item.collidingItems() != []: # if the item collides with anything
                     cls.resetCellPos(scene, item)
                     cls.cellDisjoint += 1
+                    simDia.loadNewSim.setValue(cls.cellDisjoint / cls.CELL_GEN_POP * 100)
                 else:
                     cls.cellDisjoint += 1
+                    simDia.loadNewSim.setValue(cls.cellDisjoint / cls.CELL_GEN_POP * 100)
 
 
     # this function resets the position of an individual cell

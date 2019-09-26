@@ -5,7 +5,7 @@
     <ProjectGuid>9f400719-8ff3-448c-9632-fa2951c7d9f1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>Main.py</StartupFile>
-    <SearchPath>..\Machine Learning Cells;Cells;Utilities;Walls;GUI</SearchPath>
+    <SearchPath>..\Machine Learning Cells;Cells;Utilities;Walls;GUI;GUI\Dialogs\NewSimDia</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Machine Learning Cells</Name>
@@ -20,18 +20,23 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="GUI\Dialogs\NewSimDia\" />
     <Folder Include="GUI\" />
     <Folder Include="Cells\" />
+    <Folder Include="GUI\Dialogs\" />
     <Folder Include="Walls\" />
     <Folder Include="Utilities\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="GUI\Dialogs\NewSimDia\new_simulation.ui" />
     <Content Include="GUI\main_window.ui" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cells\Cells.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GUI\Dialogs\NewSimDia\NewSimBase.py" />
+    <Compile Include="GUI\Dialogs\NewSimDia\NewSimDia.py" />
     <Compile Include="GUI\MainWindow.py" />
     <Compile Include="Main.py">
       <SubType>Code</SubType>

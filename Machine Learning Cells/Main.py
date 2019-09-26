@@ -5,7 +5,7 @@ import sys
 import functools
 
 # here we import third party libraries\modules
-from PyQt5 import QtCore, QtGui, QtWidgets, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.figure import Figure # at this point, these are imported only for testing stuff, although they might prove to be useful later on
 from matplotlib.backends.backend_qt5agg import(
     FigureCanvasQTAgg as FigureCanvas,
@@ -17,6 +17,7 @@ from Cells import Cell
 from Walls import Wall
 import util
 import MainWindow as mw
+from NewSimDia import NewSimDia
 
 class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def __init__(self): 
@@ -33,12 +34,27 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._timers = [] # all the timers for every tab
             
         self._walls = [] # the walls that mark the boundaries of the graphics scene(and view)
-        self._addWalls()
 
         self._cells = [] # all the cells
+
+        self.actionNew_generation.triggered.connect(lambda: self._newSimDia()) # when the "New gen" menu option is clicked
+
+
+    # opens a dialog for creating a new generation
+    def _newSimDia(self):
+        newSimDialog = NewSimDia(self)
+        newSimDialog.exec_()
+
+
+    # starts a new simulation
+    def _startNewSim(self, simDia, cellNo, secs):
+        self._addWalls()
+        
+        Cell.CELL_GEN_POP = cellNo # set the number of cells in generation
         self._addCells(Cell.CELL_GEN_POP)
-        Cell.resetCells(self.mapScene) # resets the cells positions so they dont hit each other
+        Cell.resetCells(self.mapScene, simDia) # resets the cells positions so they dont hit each other
         Cell.startMoving(self.mapScene) # starts moving all the cells
+
 
 
     # creates a number of cells and adds the to the scene

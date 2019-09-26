@@ -81,9 +81,10 @@
      <string>File</string>
     </property>
     <addaction name="separator"/>
+    <addaction name="actionNew_generation"/>
+    <addaction name="actionOpen"/>
     <addaction name="actionSavew"/>
     <addaction name="actionSave_as"/>
-    <addaction name="actionOpen"/>
     <addaction name="actionExport_as"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -171,6 +172,11 @@
   <action name="actionStyle">
    <property name="text">
     <string>Style</string>
+   </property>
+  </action>
+  <action name="actionNew_generation">
+   <property name="text">
+    <string>New generation</string>
    </property>
   </action>
  </widget>
