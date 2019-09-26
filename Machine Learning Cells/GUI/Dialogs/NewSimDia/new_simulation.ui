@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>339</width>
-    <height>226</height>
+    <width>327</width>
+    <height>238</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
       </widget>
      </item>
      <item>
-      <layout class="QFormLayout" name="cellNoForm">
+      <layout class="QFormLayout" name="formLay">
        <item row="1" column="0">
         <widget class="QLabel" name="cellNoText">
          <property name="text">
@@ -51,11 +51,7 @@
          </property>
         </widget>
        </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QFormLayout" name="genDurForm">
-       <item row="0" column="0">
+       <item row="2" column="0">
         <widget class="QLabel" name="genDurText">
          <property name="contextMenuPolicy">
           <enum>Qt::ActionsContextMenu</enum>
@@ -69,7 +65,7 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="2" column="1">
         <widget class="QLineEdit" name="genDurLine">
          <property name="placeholderText">
           <string notr="true"/>

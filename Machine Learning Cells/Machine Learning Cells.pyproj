@@ -25,6 +25,7 @@
     <Folder Include="GUI\" />
     <Folder Include="Cells\" />
     <Folder Include="GUI\Dialogs\" />
+    <Folder Include="Algae\" />
     <Folder Include="Walls\" />
     <Folder Include="Utilities\" />
   </ItemGroup>
@@ -34,6 +35,9 @@
     <Content Include="GUI\main_window.ui" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algae\Algae.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Cells\Cells.py">
       <SubType>Code</SubType>
     </Compile>
