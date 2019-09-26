@@ -2,7 +2,6 @@
 
 # here we import standard libraries\modules
 import sys
-import functools
 
 # here we import third party libraries\modules
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -18,6 +17,8 @@ from Walls import Wall
 import util
 import MainWindow as mw
 from NewSimDia import NewSimDia
+from Algae import Alga
+from AlgaeBloom import Bloom
 
 class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def __init__(self): 
@@ -34,8 +35,9 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._timers = [] # all the timers for every tab
             
         self._walls = [] # the walls that mark the boundaries of the graphics scene(and view)
-
         self._cells = [] # all the cells
+        self._blooms = [] # the algae spawn zones
+        self._algae = [] # the algae
 
         self.actionNew_simulation.triggered.connect(lambda: self._newSimDia()) # when the "New gen" menu option is clicked
 
@@ -57,6 +59,9 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         # clear all lists
         self._cells.clear()
         self._walls.clear()
+        self._blooms.clear()
+        self._algae.clear()
+
 
         # remove items from scene
         self._clearScene()
@@ -67,11 +72,17 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
             self._delOldSim()
 
         self._addWalls()
+
+        Alga.DESIRED_POP = int(cellNo / 2)
+        Alga.disjoint = 0
+        Alga.population = 0
+        self._addAlgae()
+        Alga.resetAlgae(self.mapScene, simDia, Alga.DESIRED_POP + cellNo)
         
         Cell.CELL_GEN_POP = cellNo # set the number of cells in generation
         Cell.cellDisjoint = 0 # set the number of disjoint cells to 0; this is only relevant if older simulations took place before
         self._addCells(Cell.CELL_GEN_POP)
-        Cell.resetCells(self.mapScene, simDia) # resets the cells positions so they dont hit each other
+        Cell.resetCells(self.mapScene, simDia, Alga.DESIRED_POP + cellNo, Alga.DESIRED_POP) # resets the cells positions so they dont hit each other
         Cell.startMoving(self.mapScene) # starts moving all the cells
 
 
@@ -92,6 +103,16 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         for wall in self._walls: # add the walls to the scene
             self.mapScene.addItem(wall)
 
+    # adds some algae to the scene
+    def _addAlgae(self):
+        leftBloom = Bloom(100, 200, 300, 300)
+        rightBloom = Bloom(600, 600, 300, 300)
+        self._blooms.append(leftBloom); self._blooms.append(rightBloom)
+
+        algaNo = Alga.DESIRED_POP
+        for i in range(0, algaNo):
+            self._algae.append(Alga(10, 10, leftBloom, rightBloom))
+            self.mapScene.addItem(self._algae[i])
     # this function adds a new graph plot and navbar to the tab widget
     def addNewPlot(self, fig, axis, yVals):
 

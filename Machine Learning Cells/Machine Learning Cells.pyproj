@@ -5,7 +5,7 @@
     <ProjectGuid>9f400719-8ff3-448c-9632-fa2951c7d9f1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>Main.py</StartupFile>
-    <SearchPath>..\Machine Learning Cells;Cells;Utilities;Walls;GUI;GUI\Dialogs\NewSimDia;GUI\Dialogs\ErrDias</SearchPath>
+    <SearchPath>..\Machine Learning Cells;Cells;Utilities;Walls;GUI;GUI\Dialogs\NewSimDia;GUI\Dialogs\ErrDias;Algae</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Machine Learning Cells</Name>
@@ -36,6 +36,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algae\Algae.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Algae\AlgaeBloom.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Cells\Cells.py">

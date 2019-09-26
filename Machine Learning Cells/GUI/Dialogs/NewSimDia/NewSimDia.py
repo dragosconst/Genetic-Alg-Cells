@@ -9,20 +9,20 @@ class NewSimDia(Ui_NewSimDialogBase, QtWidgets.QDialog):
         self.setupUi(self)
 
         self.cancelButton.clicked.connect(lambda: self.close())
-        self.cellNoLine.setValidator(QtGui.QIntValidator())
-        self.genDurLine.setValidator(QtGui.QDoubleValidator())
+        self.cellNoLine.setValidator(QtGui.QIntValidator()) # the validators make sure the user can only input 
+        self.genDurLine.setValidator(QtGui.QDoubleValidator()) # integers or real numbers(in the case of the second line)
 
         self.okButton.clicked.connect(lambda: self._passData(MLwindow))
         
     def _passData(self, MLwindow):
-        if self.cellNoLine.text() == "" or self.genDurLine.text() == "":
+        if self.cellNoLine.text() == "" or self.genDurLine.text() == "": # if one of the fields is empty
             errDia = CellNoErr()
             errDia.errText.setText("Please enter a valid input\n for both fields!")
             errDia.setWindowTitle("Invalid Input")
             errDia.exec_()
             return
 
-        if int(self.cellNoLine.text()) > 50:
+        if int(self.cellNoLine.text()) > 50: # if the number for the cell generation is too huge, return an error dialog box
             errDia = CellNoErr()
             errDia.exec_()
             return

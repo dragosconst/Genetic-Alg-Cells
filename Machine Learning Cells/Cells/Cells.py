@@ -24,20 +24,23 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # this function resets the position of every cell, one by one
     @classmethod
-    def resetCells(cls, scene, simDia):
+    def resetCells(cls, scene, simDia = None, totalEntities = 0, soFar = 0):
         if scene is None: # if the scene object was not constructed, wait a bit for it(by recalling the function 10 ms later)
             reset = QtCore.QTimer()
             reset.singleShot(10, lambda: cls.resetCells(scene))
+            return
 
         for item in scene.items(): # check all cells
             if util.getClassName(item) == "Cell": # if it is a cell
                 if item.collidingItems() != []: # if the item collides with anything
                     cls.resetCellPos(scene, item)
                     cls.cellDisjoint += 1
-                    simDia.loadNewSim.setValue(cls.cellDisjoint / cls.CELL_GEN_POP * 100)
+                    if simDia is not None:
+                        simDia.loadNewSim.setValue((cls.cellDisjoint + soFar) / totalEntities * 100)
                 else:
                     cls.cellDisjoint += 1
-                    simDia.loadNewSim.setValue(cls.cellDisjoint / cls.CELL_GEN_POP * 100)
+                    if simDia is not None:
+                        simDia.loadNewSim.setValue((cls.cellDisjoint + soFar) / totalEntities * 100)
 
 
     # this function resets the position of an individual cell
@@ -69,6 +72,28 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
                     for i in range(yStart - 100, yStop - 100): 
                         for j in range(xStart - 100, xStop - 100):
                             allCoords[i][j] = -1 # -1 means that it cannot spawn on this point
+                elif util.getClassName(item) == "Alga": # look for algae too
+                    yStart = item.pos().y() - cell.height() # the bounds in which this cell cannot spawn 
+                    yStop = item.pos().y() + item.radius() * 2 # in refernence to the alga it is currently checking
+                    if yStart <= 100:
+                        yStart = 100
+                    if yStop >= 800:
+                        yStop = 800
+                    xStart = item.pos().x() - cell.width()
+                    xStop = item.pos().x() + item.radius() * 2
+                    if xStart <= 100:
+                        xStart = 100
+                    if xStop >= 800:
+                        xStop = 800
+
+                    yStart = int(yStart) # given that they might probably end up with floating coordinates 
+                    yStop = int(yStop) # they should be casted to whole numbers
+                    xStart = int(xStart)
+                    xStop = int(xStop)
+                    for i in range(yStart - 100, yStop - 100): 
+                        for j in range(xStart - 100, xStop - 100):
+                            allCoords[i][j] = -1 # -1 means that it cannot spawn on this point
+
 
             possibleCoords = [] # these will be all the coords in which a cell could be spawn alright
             for i  in range(0, 701):
@@ -720,7 +745,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._movementFrameTime.start()
 
     # checks if another cell is very close to this cell
-    def cellIsInVicinity(self, otherCell):
+    def _cellIsInVicinity(self, otherCell):
         if otherCell is self: # if they are the same cell
             return False
         extendedX = self.actualPos().x() # the extended things represent the dimensions and coordinates
@@ -734,6 +759,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         otherHeight = otherCell.height()
 
         # EXPERIMENTAL - MIGHT PROVE TO BE VERY SLOW
+        # 26.09.2019 - IT PROVED TO BE QUITE FAST
         vicinity = QtCore.QRectF(extendedX, extendedY, extendedWidth, extendedHeight)
         otherArea = QtCore.QRectF(otherX, otherY, otherWidth, otherHeight)
         # checks all four corners
@@ -846,9 +872,12 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
                 if self.collidesWithItem(item):
                     self._handleWall(item) # this method pushes the cell out of the walls
             elif util.getClassName(item) == "Cell":
-                if checkCellCol and self.cellIsInVicinity(item): # if it is not turning
+                if checkCellCol and self._cellIsInVicinity(item): # if it is not turning
                     self._turnTime.restart()
                     checkCellCol = False
+            elif util.getClassName(item) == "Alga":
+                if self._algaIsInVicinity(item):
+                    self._handleAlga(item) # similar to the wall, it pushes the cell out of the alga
 
        
     # move the cell outside the wall   
@@ -862,5 +891,32 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         elif wall.side() == 4:
             self.setActualPos(wall.wallX() + wall.wallWidth() + 4, self.actualPos().y())
 
+    # checks if the cell is too close to an alga
+    def _algaIsInVicinity(self, alga):
+        extendedX = self.actualPos().x() # the extended things represent the dimensions and coordinates
+        extendedY = self.actualPos().y() # of the vicinity
+        extendedWidth = self.width() # the vicinity will extend by the cell's dimensions
+        extendedHeight = self.height()
+
+        vicinity = QtCore.QRectF(extendedX, extendedY, extendedWidth, extendedHeight)
+        algaArea = QtCore.QRectF(alga.x(), alga.y(), alga.radius() * 2, alga.radius() * 2)
+        if vicinity.intersects(algaArea):
+            return True
+        return False
+
+    # move the cell outside the alga
+    def _handleAlga(self, alga):
+        algaCenter = QtCore.QPointF(alga.x() + alga.radius(), alga.y() + alga.radius())
+        cellPos = self.actualPos()
+        lineHit = QtCore.QLineF(algaCenter, cellPos)
+        hitAngle = lineHit.angle()
+
+        lineDist = QtCore.QLineF() # line trick yet again
+        lineDist.setP1(algaCenter)
+        lineDist.setAngle(hitAngle)
+        lineDist.setLength(lineHit.length() + 5)
+
+        newPos = lineDist.p2()
+        self.setActualPos(newPos.x(), newPos.y())
 
 
