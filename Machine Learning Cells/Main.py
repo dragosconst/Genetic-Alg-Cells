@@ -159,6 +159,8 @@ if __name__ == '__main__': # yeah i guess we have to use this
     axes1.plot(yValues1)
     axes2.plot(yValues2)
 
+
+
     app = QtWidgets.QApplication(sys.argv)
     qtApp = MLCellWindow()
     qtApp.addNewPlot(fig1, axes1, yValues1)
