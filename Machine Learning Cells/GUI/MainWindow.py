@@ -9,6 +9,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -85,10 +86,10 @@ class Ui_MainWindow(object):
         self.actionColors.setObjectName("actionColors")
         self.actionStyle = QtWidgets.QAction(MainWindow)
         self.actionStyle.setObjectName("actionStyle")
-        self.actionNew_generation = QtWidgets.QAction(MainWindow)
-        self.actionNew_generation.setObjectName("actionNew_generation")
+        self.actionNew_simulation = QtWidgets.QAction(MainWindow)
+        self.actionNew_simulation.setObjectName("actionNew_simulation")
         self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionNew_generation)
+        self.menuFile.addAction(self.actionNew_simulation)
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSavew)
         self.menuFile.addAction(self.actionSave_as)
@@ -127,4 +128,4 @@ class Ui_MainWindow(object):
         self.actionPause.setText(_translate("MainWindow", "Pause"))
         self.actionColors.setText(_translate("MainWindow", "Colors"))
         self.actionStyle.setText(_translate("MainWindow", "Style"))
-        self.actionNew_generation.setText(_translate("MainWindow", "New generation"))
+        self.actionNew_simulation.setText(_translate("MainWindow", "New simulation"))

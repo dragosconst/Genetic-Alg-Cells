@@ -69,7 +69,7 @@ class Ui_NewSimDialogBase(object):
 
     def retranslateUi(self, NewSimDialogBase):
         _translate = QtCore.QCoreApplication.translate
-        NewSimDialogBase.setWindowTitle(_translate("NewSimDialogBase", "New Generation"))
+        NewSimDialogBase.setWindowTitle(_translate("NewSimDialogBase", "New Simulation"))
         self.welcomeText.setText(_translate("NewSimDialogBase", "Create a new simulation..."))
         self.cellNoText.setText(_translate("NewSimDialogBase", "Write here how many cells\n"
 " should be in a generation"))

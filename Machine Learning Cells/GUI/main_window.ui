@@ -81,7 +81,7 @@
      <string>File</string>
     </property>
     <addaction name="separator"/>
-    <addaction name="actionNew_generation"/>
+    <addaction name="actionNew_simulation"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSavew"/>
     <addaction name="actionSave_as"/>
@@ -174,9 +174,9 @@
     <string>Style</string>
    </property>
   </action>
-  <action name="actionNew_generation">
+  <action name="actionNew_simulation">
    <property name="text">
-    <string>New generation</string>
+    <string>New simulation</string>
    </property>
   </action>
  </widget>

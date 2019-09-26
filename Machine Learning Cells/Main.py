@@ -37,7 +37,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
 
         self._cells = [] # all the cells
 
-        self.actionNew_generation.triggered.connect(lambda: self._newSimDia()) # when the "New gen" menu option is clicked
+        self.actionNew_simulation.triggered.connect(lambda: self._newSimDia()) # when the "New gen" menu option is clicked
 
 
     # opens a dialog for creating a new generation
