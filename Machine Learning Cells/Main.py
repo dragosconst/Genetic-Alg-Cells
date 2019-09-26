@@ -45,12 +45,31 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         newSimDialog = NewSimDia(self)
         newSimDialog.exec_()
 
+    # clears the old scene, should a new simulation be created
+    def _clearScene(self):
+        scene = self.mapScene
+        for item in scene.items():
+            scene.removeItem(item)
+            del item
+
+    # removes all items from the previous scene and clears all lists
+    def _delOldSim(self):
+        # clear all lists
+        self._cells.clear()
+        self._walls.clear()
+
+        # remove items from scene
+        self._clearScene()
 
     # starts a new simulation
     def _startNewSim(self, simDia, cellNo, secs):
+        if(len(self._cells) > 0): # if there already is another simulation working, kill it in order to make space for the new simulation
+            self._delOldSim()
+
         self._addWalls()
         
         Cell.CELL_GEN_POP = cellNo # set the number of cells in generation
+        Cell.cellDisjoint = 0 # set the number of disjoint cells to 0; this is only relevant if older simulations took place before
         self._addCells(Cell.CELL_GEN_POP)
         Cell.resetCells(self.mapScene, simDia) # resets the cells positions so they dont hit each other
         Cell.startMoving(self.mapScene) # starts moving all the cells
