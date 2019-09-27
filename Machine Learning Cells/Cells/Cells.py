@@ -157,27 +157,33 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self.win = window
         self._actionRadiusCirc = None # this is the graphics item made with the action radius
 
-        # FROM HERE ON START THE A.I.-RELATED VARIABLES
+        ### FROM HERE ON START THE A.I.-RELATED VARIABLES
+        ## THESE ARE VARIABLES THAT ARE DIRECTLY TIED TO EVOLUTION
         self.size = self._area
         self.speed = 0
         self.speedFactor = 0
         self.hunger = 0.0
-        self.hungerTime = QtCore.QTimer()
+        self.hungerTime = QtCore.QTime()
+        self.hungerSeconds = 20
         self.kills = 0
         self.algae = 0
         self.secondsAlive = 0
         self.survivability = 0
-        self.initFoodPref = 0
+        self.initFoodPref = 0.5
         self.actualFoodPref = 0
 
-    #boundinfRect override
+        ## THESE ARE A.I.-RELATED VARS THAT ARE NOT TIED TO EVOLUTION
+        self._target = None
+
+
+    #boundinGRect override
     def boundingRects(self):
         bounds = QtCore.QRectF(self.actualPos().x() - self.pos().x(), self.actualPos().y() - self.pos().y(),
                                self.width(), self.height())
         return bounds
 
 
-    # INTERNAL LOGIC OF THE CELL STARTS  HERE
+    ### INTERNAL LOGIC OF THE CELL STARTS  HERE
         
     # METHODS FOR CHOOSING SOME RANDOM VALUES
     def _chooseShape(self):
@@ -511,7 +517,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     def _chooseCoordsRhomb(self, side, radius):
         
         sideX = sideY = opSideX = opSideY = 0
-        noSmallCircs = 1 # this constant is used for the bounds of the coordinates, to make sure that no small circles appear
+        noSmallCircs = 0 # this constant is used for the bounds of the coordinates, to make sure that no small circles appear
         line1, line2, line3, line4 = self._getRhombLines()
     
         leftX = self._baseShape.polygon()[3].x() # this is the way the points are added in the polygon; the most upward point is the last one
@@ -742,10 +748,10 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     # HERE END THE METHODS THAT DEAL WITH CREATING THE FINAL SHAPE POLYGON
 
 
-    # INTERNAL LOGIC OF THE CELL ENDS HERE
+    ### INTERNAL LOGIC OF THE CELL ENDS HERE
 
     
-    # EXTERNAL LOGIC STARTS HERE
+    ### EXTERNAL LOGIC STARTS HERE
     
     # METHOD FOR RESETING THE ORIGIN POINT
     def resetOrigin(self, origin):
@@ -827,23 +833,26 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         x -= actualPos.x() - itemPos.x()
         y -= actualPos.y() - itemPos.y()
         self.setPos(x, y)
-        circCenterX = self.actualPos().x() + self.width() / 2 # set the radius circle's position, too
-        circCenterY = self.actualPos().y() + self.height() / 2
-        self._actionRadiusCirc.setPos(circCenterX - self._actionRadius, circCenterY - self._actionRadius)
+        if self._actionRadiusCirc is not None: # while the cells are being reset, they sometimes set their actual position and, obviously, the action radios is None at the time
+            circCenterX = self.actualPos().x() + self.width() / 2 # set the radius circle's position, too
+            circCenterY = self.actualPos().y() + self.height() / 2
+            self._actionRadiusCirc.setPos(circCenterX - self._actionRadius, circCenterY - self._actionRadius)
     
     # HERE END METHODS FOR POSITIONING 
 
 
     # HERE START METHODS RELATED TO MOVING THE CELL
-
+    
     def _chooseDir(self):
         return rand.randrange(0, 360)
 
     # this method will be sort of a movement loop
     def move(self, dirAngle = 0):
-        if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 250: # if the timer has not started yet or if it has stopped
+        if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 250 and self._target is None: # if the timer has not started yet or if it has stopped
             dirAngle = self._chooseDir()
             self._timeDir.start(rand.randrange(3, 5) * 1000)
+        if self._turnTime.elapsed() >= 250 and self._target is not None:
+            dirAngle = QtCore.QLineF(self.actualPos(), self._target.actualPos()).angle()
         
         # if it somehow ends up outside the scene(if the time between two frames is huge, this might happen)
         if self.actualPos().x() <= 0 or self.actualPos().x() >= 1000:
@@ -857,6 +866,9 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         else:
             self._moveInDir(timeElapsed, dirAngle + 180)
         
+        # check radius
+        self._checkRadius(self.scene())
+
         # check for collisions
         self._checkCol(dirAngle)
 
@@ -875,7 +887,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
         self.moveBy(lineDir.p2().x(), lineDir.p2().y())
         self._actionRadiusCirc.moveBy(lineDir.p2().x(), lineDir.p2().y())
-        self.win.mapScene.addItem(self._actionRadiusCirc)        
 
     # METHODS FOR DETECTING AND HANDLING COLLISIONS
 
@@ -895,6 +906,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
                 if checkCellCol and self._cellIsInVicinity(item): # if it is not turning
                     self._turnTime.restart()
                     checkCellCol = False
+                    if item == self._target:
+                        self._fightCell()
             elif util.getClassName(item) == "Alga":
                 if self._algaIsInVicinity(item):
                     self._handleAlga(item) # similar to the wall, it pushes the cell out of the alga
@@ -941,7 +954,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # METHODS FOR DETECTING AND HANDLING COLLISIONS END HERE
 
-    # METHODS FOR INITIALIZING THE RADIUS
+    # METHOD FOR INITIALIZING THE RADIUS
 
     # returns the circle radius
     def createActionRadCirc(self):
@@ -951,5 +964,72 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         circle = QtWidgets.QGraphicsEllipseItem(0, 0, self._actionRadius * 2, self._actionRadius * 2)
         circle.setPos(centerX - self._actionRadius, centerY - self._actionRadius) # coordinate trick
         self._actionRadiusCirc = circle 
-        self.win.mapScene.addItem(self._actionRadiusCirc) # debugging
         
+    # METHODS FOR INITIALIZING THE RADIUS END
+
+    # METHODS FOR EATING STUFF
+
+    # returns the length from the first point of the first line to the second line
+    def _lenToLine(self, line1, line2):
+        interPoint = QtCore.QPointF()
+        intersects = line1.intersect(line2, interPoint)
+        if intersects == 0: # if they dont intersect
+            return 999999 # return a very high value if they are paralel
+        return QtCore.QLineF(line1.p1(), interPoint).length()
+
+    # returns the distance to the point on the intersection between the given line and the closest side of a given rect
+    def _nearestPointOnRectDist(self, rect, line):
+        p1 = rect.topLeft()
+        p2 = rect.topRight()
+        p3 = rect.bottomRight()
+        p4 = rect.bottomLeft()
+
+        line1 = QtCore.QLineF(p1, p2)
+        line2 = QtCore.QLineF(p2, p3)
+        line3 = QtCore.QLineF(p3, p4)
+        line4 = QtCore.QLineF(p4, p1)
+
+        return min(self._lenToLine(line, line1), self._lenToLine(line, line2), self._lenToLine(line, line3),\
+                    self._lenToLine(line, line4))
+        
+
+        
+    # this checks if the item intersects with the radius
+    def _intersectRadius(self, item):
+        circCenterX = self._actionRadiusCirc.x() + self._actionRadius
+        circCenterY = self._actionRadiusCirc.y() + self._actionRadius
+
+        itemCenterX = item.actualPos().x() + item.width()
+        itemCenterY = item.actualPos().y() + item.height()
+    
+        distLine = QtCore.QLineF(QtCore.QPointF(itemCenterX, itemCenterY), QtCore.QPointF(circCenterX, circCenterY))
+        totLen = distLine.length() # total length between the two centers
+        cellRect = QtCore.QRectF(0, 0, item.width(), item.height())
+        cellRect.setTopLeft(item.actualPos())
+        cellDist = self._nearestPointOnRectDist(cellRect, distLine) # distance from rect center to whatever rect side the line intersects
+        if cellDist + self._actionRadius > totLen:
+            return True
+        return False
+
+    # this checks which items are inside the radius and handles them
+    def _checkRadius(self, scene):
+        if scene is None: # if it wasn't added in the scene or the scene doesn't exist
+            return
+
+        for item in scene.items():
+            if util.getClassName(item) == "Cell" and item is not self:
+                if self._intersectRadius(item):
+                    #item.setBrush(QtGui.QBrush(QtGui.QColor("red")))
+                    attackChance = rand.choice(list(range(1, 61))) # right now the attacking chance is picked purely at random
+                    if attackChance == 1 and self._target is None:
+                        self._target = item
+                        self.setBrush(QtGui.QBrush(QtGui.QColor("red")))
+
+    def _fightCell(self):
+        per = self.size / self._target.size
+        if per >= 1:
+            self.scene().removeItem(self._target)
+            del self._target
+            self._target = None # reset the target to None
+            self.setBrush(QtGui.QBrush(QtGui.QColor("yellow")))
+            

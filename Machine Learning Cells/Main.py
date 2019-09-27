@@ -171,7 +171,6 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._updateTabNames() # update the tab names
 
 if __name__ == '__main__': # yeah i guess we have to use this
-
     fig1, fig2, fig3 = Figure(), Figure(), Figure() # some testing code
     axes1 = fig1.add_subplot(111)
     axes2 = fig2.add_subplot(111)
