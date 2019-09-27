@@ -848,6 +848,11 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # this method will be sort of a movement loop
     def move(self, dirAngle = 0):
+        # if someone else ate its prey
+        if self._target is not None and not util.itemIsInScene(self.scene(), self._target):
+            self._target = None
+            self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue")))     
+
         if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 250 and self._target is None: # if the timer has not started yet or if it has stopped
             dirAngle = self._chooseDir()
             self._timeDir.start(rand.randrange(3, 5) * 1000)
