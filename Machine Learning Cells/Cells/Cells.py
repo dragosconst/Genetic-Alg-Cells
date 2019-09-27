@@ -112,6 +112,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             for item in scene.items():
                 if util.getClassName(item) == "Cell":
                     item.startFrameClock()
+                    item.createActionRadCirc() 
                     item.move()
         else:
             tryAgain = QtCore.QTimer()
@@ -120,7 +121,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # OBJECT\INSTANCE METHODS START
 
-    def __init__(self):
+    def __init__(self, window):
         super().__init__()
         self._area = rand.randrange(50, 101) # selects a random _area for the cell
         self._sides = [0, 0] # the value for the width and height(they are equivalent for squares and rhombuses(? hope this is the plural))
@@ -148,12 +149,26 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
         self._timeDir = QtCore.QTimer() # this timer is used for storing the time during which the cell moves in a certain direction
         self._timeDir.setSingleShot(True) # sets the timer to work only as a single shot
-
         self._movementFrameTime = QtCore.QTime() # this clock will be used for determining the elapsed time between calls of the move method
-
         self._turnTime = QtCore.QTime() # this clock will be used to count the second during which a cell turns
         self._turnTime.start()
 
+        self._actionRadius = self.height() + self.width() # this is the radius in which the cell can sense things 
+        self.win = window
+        self._actionRadiusCirc = None # this is the graphics item made with the action radius
+
+        # FROM HERE ON START THE A.I.-RELATED VARIABLES
+        self.size = self._area
+        self.speed = 0
+        self.speedFactor = 0
+        self.hunger = 0.0
+        self.hungerTime = QtCore.QTimer()
+        self.kills = 0
+        self.algae = 0
+        self.secondsAlive = 0
+        self.survivability = 0
+        self.initFoodPref = 0
+        self.actualFoodPref = 0
 
     #boundinfRect override
     def boundingRects(self):
@@ -812,6 +827,9 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         x -= actualPos.x() - itemPos.x()
         y -= actualPos.y() - itemPos.y()
         self.setPos(x, y)
+        circCenterX = self.actualPos().x() + self.width() / 2 # set the radius circle's position, too
+        circCenterY = self.actualPos().y() + self.height() / 2
+        self._actionRadiusCirc.setPos(circCenterX - self._actionRadius, circCenterY - self._actionRadius)
     
     # HERE END METHODS FOR POSITIONING 
 
@@ -856,6 +874,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         lineDir.setAngle(angle)
 
         self.moveBy(lineDir.p2().x(), lineDir.p2().y())
+        self._actionRadiusCirc.moveBy(lineDir.p2().x(), lineDir.p2().y())
+        self.win.mapScene.addItem(self._actionRadiusCirc)        
 
     # METHODS FOR DETECTING AND HANDLING COLLISIONS
 
@@ -919,4 +939,17 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         newPos = lineDist.p2()
         self.setActualPos(newPos.x(), newPos.y())
 
+    # METHODS FOR DETECTING AND HANDLING COLLISIONS END HERE
 
+    # METHODS FOR INITIALIZING THE RADIUS
+
+    # returns the circle radius
+    def createActionRadCirc(self):
+        centerX = self.actualPos().x() + self.width() / 2 # the centerish of the Cell
+        centerY = self.actualPos().y() + self.height() / 2
+
+        circle = QtWidgets.QGraphicsEllipseItem(0, 0, self._actionRadius * 2, self._actionRadius * 2)
+        circle.setPos(centerX - self._actionRadius, centerY - self._actionRadius) # coordinate trick
+        self._actionRadiusCirc = circle 
+        self.win.mapScene.addItem(self._actionRadiusCirc) # debugging
+        

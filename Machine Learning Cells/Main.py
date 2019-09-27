@@ -67,13 +67,13 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._clearScene()
 
     # starts a new simulation
-    def _startNewSim(self, simDia, cellNo, secs):
+    def _startNewSim(self, simDia, cellNo, secs, algaNo):
         if(len(self._cells) > 0): # if there already is another simulation working, kill it in order to make space for the new simulation
             self._delOldSim()
 
         self._addWalls()
 
-        Alga.DESIRED_POP = int(cellNo / 2)
+        Alga.DESIRED_POP = int(cellNo / 2) if algaNo == 0 else algaNo
         Alga.disjoint = 0
         Alga.population = 0
         self._addAlgae()
@@ -90,7 +90,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     # creates a number of cells and adds the to the scene
     def _addCells(self, number):
         for i in range(0, number):
-            self._cells.append(Cell())
+            self._cells.append(Cell(self))
             self.mapScene.addItem(self._cells[i])
 
     # creates the walls and adds them to the scene

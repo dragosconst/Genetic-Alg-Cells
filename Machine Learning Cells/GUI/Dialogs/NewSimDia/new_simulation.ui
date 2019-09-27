@@ -72,6 +72,25 @@
          </property>
         </widget>
        </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="algaeText">
+         <property name="text">
+          <string>Write here how many algae
+should a generation have
+(optional)</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="algaeNoLine">
+         <property name="placeholderText">
+          <string>No more than the cell pop...</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>

@@ -11,9 +11,11 @@ class NewSimDia(Ui_NewSimDialogBase, QtWidgets.QDialog):
         self.cancelButton.clicked.connect(lambda: self.close())
         self.cellNoLine.setValidator(QtGui.QIntValidator()) # the validators make sure the user can only input 
         self.genDurLine.setValidator(QtGui.QDoubleValidator()) # integers or real numbers(in the case of the second line)
+        self.algaeNoLine.setValidator(QtGui.QIntValidator())
 
         self.okButton.clicked.connect(lambda: self._passData(MLwindow))
         
+
     def _passData(self, MLwindow):
         if self.cellNoLine.text() == "" or self.genDurLine.text() == "": # if one of the fields is empty
             errDia = CellNoErr()
@@ -27,6 +29,15 @@ class NewSimDia(Ui_NewSimDialogBase, QtWidgets.QDialog):
             errDia.exec_()
             return
 
-        MLwindow._startNewSim(self, int(self.cellNoLine.text()), float(self.genDurLine.text()))
+        if self.algaeNoLine.text() != "" and int(self.algaeNoLine.text()) > int(self.cellNoLine.text()):
+            errDia = CellNoErr()
+            errDia.errText.setText("Don't enter a number greater\n than the cell population!")
+            errDia.setWindowTitle("Invalid Input")
+            errDia.exec_()
+            return
+
+
+        MLwindow._startNewSim(self, int(self.cellNoLine.text()), float(self.genDurLine.text()),\
+           int(self.algaeNoLine.text()) if self.algaeNoLine.text() != "" else 0)
         self.close()
 

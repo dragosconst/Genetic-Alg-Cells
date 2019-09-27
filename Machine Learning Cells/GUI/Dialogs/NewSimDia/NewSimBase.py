@@ -43,6 +43,13 @@ class Ui_NewSimDialogBase(object):
         self.genDurLine.setPlaceholderText("")
         self.genDurLine.setObjectName("genDurLine")
         self.formLay.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.genDurLine)
+        self.algaeText = QtWidgets.QLabel(NewSimDialogBase)
+        self.algaeText.setAlignment(QtCore.Qt.AlignCenter)
+        self.algaeText.setObjectName("algaeText")
+        self.formLay.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.algaeText)
+        self.algaeNoLine = QtWidgets.QLineEdit(NewSimDialogBase)
+        self.algaeNoLine.setObjectName("algaeNoLine")
+        self.formLay.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.algaeNoLine)
         self.mainLayout.addLayout(self.formLay)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.mainLayout.addItem(spacerItem)
@@ -73,5 +80,9 @@ class Ui_NewSimDialogBase(object):
         self.cellNoLine.setPlaceholderText(_translate("NewSimDialogBase", "No more than 50 cells..."))
         self.genDurText.setText(_translate("NewSimDialogBase", "Write here how many seconds\n"
 " should a generation last"))
+        self.algaeText.setText(_translate("NewSimDialogBase", "Write here how many algae\n"
+"should a generation have\n"
+"(optional)"))
+        self.algaeNoLine.setPlaceholderText(_translate("NewSimDialogBase", "No more than the cell pop..."))
         self.okButton.setText(_translate("NewSimDialogBase", "OK"))
         self.cancelButton.setText(_translate("NewSimDialogBase", "Cancel"))
