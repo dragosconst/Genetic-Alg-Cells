@@ -877,11 +877,11 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self.hunger -= self._movementFrameTime.elapsed() / self.lifeSpawn
 
         # if someone else ate its prey
-        if self._prey is not None and not util.itemIsInScene(self.scene(), self._prey):
+        if self._prey is not None and (not util.itemIsInScene(self.scene(), self._prey) or self._prey.dead == True):
             self._prey = None
             self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue"))) 
         # if someone else ate its alga
-        if self._alga is not None and not util.itemIsInScene(self.scene(), self._alga):
+        if self._alga is not None and (not util.itemIsInScene(self.scene(), self._alga) or self._alga.dead == True):
             self._alga = None
             self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue"))) 
 
@@ -1101,6 +1101,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
                
 
     def _fightCell(self):
+        if self.dead == True: # the name thing
+            return
         self.hunger += self._prey.size / self.size
         if self.hunger > 1:
             self.hunger = 1
@@ -1111,6 +1113,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self.kills += 1
 
     def _eatAlga(self):
+        if self.dead == True: # the name thing
+            return
         self.hunger += self._alga.size / self.size
         if self.hunger > 1:
             self.hunger = 1
@@ -1126,7 +1130,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         # calculate all the post-mortem variables
         self.secondsAlive = self.hungerTime.elapsed()
         self.survivability = self.secondsAlive + max(self.kills, self.algae)
-        self.actualFoodPref = self.kills / (self.algae + self.kills) if self.algae + self.kills > 0 else 1
+        self.actualFoodPref = self.kills / (self.algae + self.kills) if self.algae + self.kills > 0 else -1
         print(self, "Time alive", self.secondsAlive, "SA", self.survivability, "Actual food pref", self.actualFoodPref)
 
         # kill self

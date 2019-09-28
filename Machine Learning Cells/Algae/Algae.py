@@ -83,6 +83,7 @@ class Alga(QtWidgets.QGraphicsEllipseItem):
         self._bloom = None # the bloom in which the alga takes part; if it is set to None, it means that the Alga is currently not on the map
         self._selectInitPos(bloom1, bloom2)
         self.size = np.pi * (float_1 / 2) ** 2
+        self.dead = False
 
         Alga.population += 1
 
@@ -119,4 +120,5 @@ class Alga(QtWidgets.QGraphicsEllipseItem):
     
     def die(self):
         self.scene().removeItem(self)
+        self.dead = True
         del self
