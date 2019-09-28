@@ -26,3 +26,10 @@ the formula for speed is as follows:
 - the food preference is a variable that takes a value between 0 and 1 and represents exactly what its name says: whether a cell prefers algae or other cells. there are two types of food preferences: the _initial_ and the _actual_ food preference of a cell. The _initial_ food preference is set at 0.5 and is affected by previous generations and random mutations, while the _actual_ food preference is calculated based on what the cell ate while it was alive. The _actual_ food preference of a cell is used for future generations for determining their _initial_ food preference. The _actual_ food preference is calculated in the following manner:  
 ![fp equation](https://user-images.githubusercontent.com/38582034/65249092-0448bb80-dafc-11e9-94d0-5799cf7e9ad6.gif)  
 If the Cell hasn't eaten anything at all, its _actual_ food preference will be automatically set to -1 and this cell won't be used at all for any future generations. After all, if it hasn't eaten anything, then it didn't contribute in any meaningful way to the gene pool.
+
+***
+
+
+The algorithm for the cell battles is the following:
+- the damage a cell can do to another cell is calculated by this formula : 10%**FP** + 90%**SR**, where **FP** is the initial food preference of the cell and **SR** the size ratio of this cell and its prey, multiplied by 100%.
+- the **food preference** of a cell is used for a weighted-dice style algorithm for choosing whether this cell will attack another one or not.
