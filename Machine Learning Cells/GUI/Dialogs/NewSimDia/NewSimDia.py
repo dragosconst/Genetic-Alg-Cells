@@ -31,7 +31,7 @@ class NewSimDia(Ui_NewSimDialogBase, QtWidgets.QDialog):
 
         if self.algaeNoLine.text() != "" and int(self.algaeNoLine.text()) > int(self.cellNoLine.text()):
             errDia = CellNoErr()
-            errDia.errText.setText("Don't enter a number greater\n than the cell population!")
+            errDia.errText.setText("Don't enter an algae number greater\n than the cell population!")
             errDia.setWindowTitle("Invalid Input")
             errDia.exec_()
             return

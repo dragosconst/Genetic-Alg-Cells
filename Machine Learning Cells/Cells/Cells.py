@@ -19,6 +19,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     cellDisjoint = 0 # this represents how many cells do not intersect with other cells; will be used for making
                      # all cells start movement only when all cells have been correctly positioned
     CELL_GEN_POP = 40 # how many cells will be in a generation
+    EAT_CELL_THRESHOLD = 130 # the amount of Food Points a cell should exceed in order to eat another celll
 
     # CLASS METHODS START
 
@@ -111,9 +112,10 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         if cls.cellDisjoint == cls.CELL_GEN_POP:
             for item in scene.items():
                 if util.getClassName(item) == "Cell":
-                    item.startFrameClock()
-                    item.createActionRadCirc() 
-                    item.move()
+                    item.createActionRadCirc()
+                    item.startFrameClock() 
+                    item.startHungerClock()
+                    item.updateLoop()
         else:
             tryAgain = QtCore.QTimer()
             tryAgain.singleShot(10, lambda: cls.startMoving(scene))
@@ -123,7 +125,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     def __init__(self, window):
         super().__init__()
-        self._area = rand.randrange(50, 101) # selects a random _area for the cell
+        ## VARIABLES DIRECTLY RELATED TO THE BASE SHAPE AND THE SEMI-CIRCLES
+        self._area = rand.randrange(50, 251) # selects a random _area for the cell
         self._sides = [0, 0] # the value for the width and height(they are equivalent for squares and rhombuses(? hope this is the plural))
         self._angle = rand.randrange(30, 161) # this is only relevant for the rhombus
         self._baseShapeKey = self._chooseShape() # this is the shape from whitch the cell is drawn
@@ -132,9 +135,11 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._circles = [] # here will be saved the circles drawn on the cell
         self._circNum = self._chooseNumberOfCircles() # chooses whether to draw one or two circles(and their symmetric counterparts)
         self._sidesWithCircles = [] # similar to the older turtle algorithm, it won't draw two circles on the same side    
+        ##
 
         self._createShape() # creates the base shape
 
+        ## VARIABLES DIRECTLY RELATED TO THE CREATION OF THE FINAL ITEM(AND TO THE ITEM ITSELF)
         self._prepCircles(0, 0) # this methods prepares the circles for being drawn and adds them to the scene, after they are prepared
         self.setPolygon(self._createPoly()) # the Final Item of the Cell becomes
         initPos = QtCore.QPointF(rand.randrange(200, 601), rand.randrange(200, 601))
@@ -144,9 +149,11 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._height = None # the height of the Final Shape(and Final Item)
         self._width = None
         self._topLeftPoint = None # the top-left point of the Final Shape
+        ##
         # for rotation
         #self.rotateBy(360 * 3)
 
+        ## VARIABLES DIRECTLY RELATED TO CELL MOVEMEMNT
         self._timeDir = QtCore.QTimer() # this timer is used for storing the time during which the cell moves in a certain direction
         self._timeDir.setSingleShot(True) # sets the timer to work only as a single shot
         self._movementFrameTime = QtCore.QTime() # this clock will be used for determining the elapsed time between calls of the move method
@@ -156,15 +163,16 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._actionRadius = self.height() + self.width() # this is the radius in which the cell can sense things 
         self.win = window
         self._actionRadiusCirc = None # this is the graphics item made with the action radius
+        ##
 
         ### FROM HERE ON START THE A.I.-RELATED VARIABLES
         ## THESE ARE VARIABLES THAT ARE DIRECTLY TIED TO EVOLUTION
         self.size = self._area
-        self.speed = 0
-        self.speedFactor = 0
-        self.hunger = 0.0
+        self.speedFactor = 0 
+        self.hunger = 1.0
         self.hungerTime = QtCore.QTime()
-        self.hungerSeconds = 20
+        self.lifeSpawn = 20 * 1000 
+        self.speed = 1 / (self.size ** 2) * 1000 + self.speedFactor + 1 / (1 + self.hunger)
         self.kills = 0
         self.algae = 0
         self.secondsAlive = 0
@@ -173,7 +181,9 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self.actualFoodPref = 0
 
         ## THESE ARE A.I.-RELATED VARS THAT ARE NOT TIED TO EVOLUTION
-        self._target = None
+        self._prey = None # this is the prey the cell locked on for eating
+        self._alga = None # this is the alga it wants to eat
+        self.dead = False
 
 
     #boundinGRect override
@@ -391,7 +401,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # !!READ THIS!!
     # this method is the same for both the square and the rect, because the only difference whatsoever between them is the way the radius
-    # is calculated(for the square the minimum radius is 60, while for the rect it can be smaller, depending on the width and height)
+    # is calculated(for the square the minimum radius is set in the _chooseCoords method, while for the rect it can be smaller, depending on the width and height)
     # this can be easily solved by passing the radius as a parameter
     def _chooseCoordsSquareOrRect(self, side, radius): # this method will return a list of the top-left coords of the rects of the both circles
         
@@ -401,7 +411,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         while foundGoodCoords == False:
             foundGoodCoords = True
 
-            if tries >= 1000: # if the loop is executed this many times, it almost surely means there is no space for a circle of minimum 60 radius
+            if tries >= 1000: # if the loop is executed this many times, it almost surely means there is no space for a circle of minimum radius
                 self._circNum -= 1
                 return [0, 0, 0, 0]
 
@@ -473,7 +483,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         # here ends this for loop
         return actualRadius 
 
-    # this methods resets the "fixed" coords of the circle based on the radius parameter
+    # this methods resets the "fixed" coords of the circles based on the radius parameter
     # what I mean by "fixed" coords are the coords that are constant on a given side, ie the y coords on side 1(or side 3)
     # again, the method for the square and rect is one and the same
     def _resetCoordsSquareOrRect(self, sidex, sidey, opsidex, opsidey, side, radius, coords = None, newCoords = None):
@@ -514,10 +524,12 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     # this algorithm is a bit weirder, given the nature of rhombuses, from the points chosen by this method it might still not be possible
     # for a circle of specified radius to be drawn, due to the way rhombuses' "inwards" are. oof this doesn't really makes sense, does it
     # it should be noted that it returns the coordinates projected on the rhombus, not of the rectangle in which the ellipse is included
+    # to further clarify the last comment, the method returns the coordinates of the center of the circle(which are on one of the rhomb's
+    # sides)
     def _chooseCoordsRhomb(self, side, radius):
         
         sideX = sideY = opSideX = opSideY = 0
-        noSmallCircs = 0 # this constant is used for the bounds of the coordinates, to make sure that no small circles appear
+        noSmallCircs = 0 # this constant is irrelevant for smaller cells, but it is kept in the code for the sake of compatibility
         line1, line2, line3, line4 = self._getRhombLines()
     
         leftX = self._baseShape.polygon()[3].x() # this is the way the points are added in the polygon; the most upward point is the last one
@@ -631,7 +643,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         l4 = QtCore.QLineF(p4, p1)
         return l1, l2, l3, l4
 
-    # this method finds the smallest distances from this point to any of the rhombus' lines and then returns the smallest of these
+    # this method finds the smallest distances from this point to all of the rhombus' lines and then returns the smallest of these
     def _smallestDistRhomb(self, point, side):
         line1, line2, line3, line4 = self._getRhombLines()
         dist1 = self._disToLine(point, line1) if side != 1 else line1.length() * 1000 # calculates the minimum distance to every line, keeping both circles in mind
@@ -696,8 +708,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         circleCenter = circle.rect().center()
         radius = circle.rect().height() / 2
 
-        # because I'm adding the points in a clockwise manner, while the angles on the circle work in a counter clockwise manner
-        # I will start from what is technically the last point of the semi-circle and end on its first point
+        # add every point on the circle, one by one
         radiusLine = QtCore.QLineF()
         radiusLine.setP1(circleCenter)
         radiusLine.setLength(radius)
@@ -706,14 +717,14 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         for addAngle in range(1, 180 * 16 + 1):
             lastPoint = radiusLine.p2()
             points.append(lastPoint)
-            angle = angle - (1 if circIndex % 2 == 0 else -1) # same as the previous conditional expression
+            angle = angle - (1 if circIndex % 2 == 0 else -1) # same as the previous conditional expression(it is explained in the wiki)
             radiusLine.setAngle(angle / 16)
 
         return points
 
     # adds a semi-circle to the polygon of the final shape
     def _addCirclePoints(self, side, poly):
-        nextCircleIndex = self._findCircle(side) # searches for the first side
+        nextCircleIndex = self._findCircle(side) # searches for this side
         if nextCircleIndex >= 0: # if the index is greater than equal to 0, it means that the program could find a circle on this side
             circPoints = self._getCirclePoints(nextCircleIndex)
             for point in circPoints:
@@ -761,6 +772,10 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # MISCELLANEOUS METHODS
 
+    # start the hunger clock; this function comes in handy for the class method that makes all the cells move
+    def startHungerClock(self):
+        self.hungerTime.start()
+
     # start the frame clock; this function comes in handy for the class method that makes all the cells move
     def startFrameClock(self):
         self._movementFrameTime.start()
@@ -801,9 +816,9 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # METHODS FOR POSITIONS AND STUFF RELATED TO POSITIONS
 
-    # i have no idea what the pos() of a polygon graphics item is, either way this looks in the polygon's points
+    # i have no idea what the pos() of a polygon graphics item is; either way this looks in the polygon's points
     # and finds its extremities. im adding self.pos() to every point because the points' coordonate system is in relation
-    # to the original graphics item, not the scene itself
+    # to the original graphics item(ie the Final Item), not the scene itself
     def actualPos(self):
         if self._topLeftPoint == None: # if the top-left point has not been yet determined
             topY = 1000
@@ -833,7 +848,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         x -= actualPos.x() - itemPos.x()
         y -= actualPos.y() - itemPos.y()
         self.setPos(x, y)
-        if self._actionRadiusCirc is not None: # while the cells are being reset, they sometimes set their actual position and, obviously, the action radios is None at the time
+        if self._actionRadiusCirc is not None: # while the cells are being reset, they sometimes change their actual position and, obviously, the action radius is None at the time
             circCenterX = self.actualPos().x() + self.width() / 2 # set the radius circle's position, too
             circCenterY = self.actualPos().y() + self.height() / 2
             self._actionRadiusCirc.setPos(circCenterX - self._actionRadius, circCenterY - self._actionRadius)
@@ -846,18 +861,38 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     def _chooseDir(self):
         return rand.randrange(0, 360)
 
-    # this method will be sort of a movement loop
-    def move(self, dirAngle = 0):
-        # if someone else ate its prey
-        if self._target is not None and not util.itemIsInScene(self.scene(), self._target):
-            self._target = None
-            self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue")))     
+    # this method will be sort of an update loop
+    def updateLoop(self, dirAngle = 0):
+        # due to the weird way names work in python, there might be left some names of this cell even after it was killed
+        # so this kills them all
+        if self.dead == True:
+            del self
+            return
 
-        if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 250 and self._target is None: # if the timer has not started yet or if it has stopped
+        # check if the cell died of hunger
+        if self.hunger <= 0:
+            self.die()
+            return # stop the update loop
+        # hunger percentage
+        self.hunger -= self._movementFrameTime.elapsed() / self.lifeSpawn
+
+        # if someone else ate its prey
+        if self._prey is not None and not util.itemIsInScene(self.scene(), self._prey):
+            self._prey = None
+            self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue"))) 
+        # if someone else ate its alga
+        if self._alga is not None and not util.itemIsInScene(self.scene(), self._alga):
+            self._alga = None
+            self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue"))) 
+
+
+        if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 250 and self._prey is None: # if the timer has not started yet or if it has stopped
             dirAngle = self._chooseDir()
             self._timeDir.start(rand.randrange(3, 5) * 1000)
-        if self._turnTime.elapsed() >= 250 and self._target is not None:
-            dirAngle = QtCore.QLineF(self.actualPos(), self._target.actualPos()).angle()
+        if self._turnTime.elapsed() >= 250 and self._prey is not None:
+            dirAngle = QtCore.QLineF(self.actualPos(), self._prey.actualPos()).angle()
+        if self._turnTime.elapsed() >= 250 and self._alga is not None:
+            dirAngle = QtCore.QLineF(self.actualPos(), self._alga.pos()).angle()
         
         # if it somehow ends up outside the scene(if the time between two frames is huge, this might happen)
         if self.actualPos().x() <= 0 or self.actualPos().x() >= 1000:
@@ -878,7 +913,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._checkCol(dirAngle)
 
         tempTimer = QtCore.QTimer() # this timer only serves to call the movement loop back
-        tempTimer.singleShot(20, lambda: self.move(dirAngle))
+        tempTimer.singleShot(20, lambda: self.updateLoop(dirAngle))
 
 
     # moves the Final Item in the direction given by the angle
@@ -887,7 +922,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         lineDir = QtCore.QLineF() # im using the line trick again, it's just so much better than doing the maths
 
         lineDir.setP1(startPoint)
-        lineDir.setLength(1 * timeElapsed)
+        lineDir.setLength(1 * timeElapsed * self.speed)
         lineDir.setAngle(angle)
 
         self.moveBy(lineDir.p2().x(), lineDir.p2().y())
@@ -911,12 +946,13 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
                 if checkCellCol and self._cellIsInVicinity(item): # if it is not turning
                     self._turnTime.restart()
                     checkCellCol = False
-                    if item == self._target:
+                    if item == self._prey:
                         self._fightCell()
             elif util.getClassName(item) == "Alga":
                 if self._algaIsInVicinity(item):
                     self._handleAlga(item) # similar to the wall, it pushes the cell out of the alga
-
+                    if item == self._alga:
+                        self._eatAlga()
        
     # move the cell outside the wall   
     def _handleWall(self, wall):
@@ -979,7 +1015,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         interPoint = QtCore.QPointF()
         intersects = line1.intersect(line2, interPoint)
         if intersects == 0: # if they dont intersect
-            return 999999 # return a very high value if they are paralel
+            return 999999 # return a very high value if they are parallel
         return QtCore.QLineF(line1.p1(), interPoint).length()
 
     # returns the distance to the point on the intersection between the given line and the closest side of a given rect
@@ -999,13 +1035,13 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         
 
         
-    # this checks if the item intersects with the radius
-    def _intersectRadius(self, item):
+    # this checks if the item(other cell) intersects with the radius
+    def _cellIntersectRadius(self, item):
         circCenterX = self._actionRadiusCirc.x() + self._actionRadius
         circCenterY = self._actionRadiusCirc.y() + self._actionRadius
 
-        itemCenterX = item.actualPos().x() + item.width()
-        itemCenterY = item.actualPos().y() + item.height()
+        itemCenterX = item.actualPos().x() + item.width() / 2
+        itemCenterY = item.actualPos().y() + item.height() / 2
     
         distLine = QtCore.QLineF(QtCore.QPointF(itemCenterX, itemCenterY), QtCore.QPointF(circCenterX, circCenterY))
         totLen = distLine.length() # total length between the two centers
@@ -1015,26 +1051,85 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         if cellDist + self._actionRadius > totLen:
             return True
         return False
+    # this checks if the item(alga) intersects with the radius
+    def _algaIntersectRadius(self, item):
+        circCenterX = self._actionRadiusCirc.x() + self._actionRadius
+        circCenterY = self._actionRadiusCirc.y() + self._actionRadius
+
+        itemCenterX = item.pos().x() + item.rect().width() / 2
+        itemCenterY = item.pos().y() + item.rect().height() / 2
+    
+        distLine = QtCore.QLineF(QtCore.QPointF(itemCenterX, itemCenterY), QtCore.QPointF(circCenterX, circCenterY))
+        totLen = distLine.length() # total length between the two centers
+        if item.rect().height() / 2 + self._actionRadius > totLen: # the action radius and the alga radius
+            return True
+        return False
 
     # this checks which items are inside the radius and handles them
     def _checkRadius(self, scene):
-        if scene is None: # if it wasn't added in the scene or the scene doesn't exist
+        if scene is None: # if the cell wasn't added in the scene or the scene doesn't exist
             return
 
-        for item in scene.items():
-            if util.getClassName(item) == "Cell" and item is not self:
-                if self._intersectRadius(item):
-                    #item.setBrush(QtGui.QBrush(QtGui.QColor("red")))
-                    attackChance = rand.choice(list(range(1, 61))) # right now the attacking chance is picked purely at random
-                    if attackChance == 1 and self._target is None:
-                        self._target = item
-                        self.setBrush(QtGui.QBrush(QtGui.QColor("red")))
+        if self.hunger <= 0.8 and self._prey is None and self._alga is None: # only search for food when it is kinda hungry and when it isn't already lock on something
+            maxFood = 0 # find out the best thing it can eat
+            maxItem = None
+            for item in scene.items():
+                if util.getClassName(item) == "Cell" and item is not self:
+                    if self._cellIntersectRadius(item):
+                        foodPoints = 0
+                        foodPoints += self.size / item.size * 100 # this is how much damage it can deal to the other cell
+                        foodPoints += self.initFoodPref * 100
+                        if foodPoints > Cell.EAT_CELL_THRESHOLD and maxFood < self.size / item.size:
+                            maxFood = self.size / item.size
+                            maxItem = item
+                elif util.getClassName(item) == "Alga":
+                    if self._algaIntersectRadius(item):
+                        foodPoints = item.size / self.size
+                        foodPoints -= self.initFoodPref / 2
+                        if foodPoints > 0 and maxFood < item.size / self.size:
+                            maxFood = item.size / self.size
+                            maxItem = item
+            
+            
+            if maxItem is not None and util.getClassName(maxItem) == "Cell":
+                self._prey = maxItem
+                self.setBrush(QtGui.QBrush(QtGui.QColor("red")))
+            elif maxItem is not None and util.getClassName(maxItem) == "Alga":
+                self._alga = maxItem
+                self.setBrush(QtGui.QBrush(QtGui.QColor("green")))
+                
+               
 
     def _fightCell(self):
-        per = self.size / self._target.size
-        if per >= 1:
-            self.scene().removeItem(self._target)
-            del self._target
-            self._target = None # reset the target to None
-            self.setBrush(QtGui.QBrush(QtGui.QColor("yellow")))
+        self.hunger += self._prey.size / self.size
+        if self.hunger > 1:
+            self.hunger = 1
+        # kill the prey
+        self._prey.die()
+        self._prey = None
+        self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue")))
+        self.kills += 1
+
+    def _eatAlga(self):
+        self.hunger += self._alga.size / self.size
+        if self.hunger > 1:
+            self.hunger = 1
+        # kill the alga
+        self._alga.die()
+        self._alga = None
+        self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue")))
+        self.algae += 1
             
+
+    # METHOD FOR DYING
+    def die(self):
+        # calculate all the post-mortem variables
+        self.secondsAlive = self.hungerTime.elapsed()
+        self.survivability = self.secondsAlive + max(self.kills, self.algae)
+        self.actualFoodPref = self.kills / (self.algae + self.kills) if self.algae + self.kills > 0 else 1
+        print(self, "Time alive", self.secondsAlive, "SA", self.survivability, "Actual food pref", self.actualFoodPref)
+
+        # kill self
+        self.scene().removeItem(self)
+        self.dead = True
+        del self

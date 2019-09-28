@@ -1,6 +1,7 @@
 import random as rand
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import numpy as np
 
 from AlgaeBloom import Bloom
 import util
@@ -81,6 +82,7 @@ class Alga(QtWidgets.QGraphicsEllipseItem):
         self.setBrush(QtGui.QBrush(QtGui.QColor("darkseagreen")))
         self._bloom = None # the bloom in which the alga takes part; if it is set to None, it means that the Alga is currently not on the map
         self._selectInitPos(bloom1, bloom2)
+        self.size = np.pi * (float_1 / 2) ** 2
 
         Alga.population += 1
 
@@ -114,4 +116,7 @@ class Alga(QtWidgets.QGraphicsEllipseItem):
 
     def radius(self):
         return self.rect().height() / 2
-
+    
+    def die(self):
+        self.scene().removeItem(self)
+        del self
