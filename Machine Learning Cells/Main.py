@@ -19,6 +19,7 @@ import MainWindow as mw
 from NewSimDia import NewSimDia
 from Algae import Alga
 from AlgaeBloom import Bloom
+from Sims import Sim
 
 class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def __init__(self): 
@@ -34,10 +35,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._navtbs = [] # this list will contain every nav toolbar from every tab
         self._timers = [] # all the timers for every tab
             
-        self._walls = [] # the walls that mark the boundaries of the graphics scene(and view)
-        self._cells = [] # all the cells
-        self._blooms = [] # the algae spawn zones
-        self._algae = [] # the algae
+        self._currentSim = None # the current simulation
 
         self.actionNew_simulation.triggered.connect(lambda: self._newSimDia()) # when the "New gen" menu option is clicked
 
@@ -56,63 +54,20 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
 
     # removes all items from the previous scene and clears all lists
     def _delOldSim(self):
-        # clear all lists
-        self._cells.clear()
-        self._walls.clear()
-        self._blooms.clear()
-        self._algae.clear()
-
+        # kill the simulation
+        self._currentSim.killSim()
+        self._currentSim = None
 
         # remove items from scene
         self._clearScene()
 
     # starts a new simulation
     def _startNewSim(self, simDia, cellNo, secs, algaNo):
-        if(len(self._cells) > 0): # if there already is another simulation working, kill it in order to make space for the new simulation
+        if self._currentSim is not None: # if there was another sim running previous to this one
             self._delOldSim()
+        self._currentSim = Sim(self.mapScene, cellNo, int(cellNo / 2) if algaNo == 0 else algaNo, secs, simDia)
+        self._currentSim.startSim()
 
-        self._addWalls()
-
-        Alga.DESIRED_POP = int(cellNo / 2) if algaNo == 0 else algaNo
-        Alga.disjoint = 0
-        Alga.population = 0
-        self._addAlgae()
-        Alga.resetAlgae(self.mapScene, simDia, Alga.DESIRED_POP + cellNo)
-        
-        Cell.CELL_GEN_POP = cellNo # set the number of cells in generation
-        Cell.cellDisjoint = 0 # set the number of disjoint cells to 0; this is only relevant if older simulations took place before
-        self._addCells(Cell.CELL_GEN_POP)
-        Cell.resetCells(self.mapScene, simDia, Alga.DESIRED_POP + cellNo, Alga.DESIRED_POP) # resets the cells positions so they dont hit each other
-        Cell.startMoving(self.mapScene) # starts moving all the cells
-
-
-
-    # creates a number of cells and adds the to the scene
-    def _addCells(self, number):
-        for i in range(0, number):
-            self._cells.append(Cell(self))
-            self.mapScene.addItem(self._cells[i])
-
-    # creates the walls and adds them to the scene
-    def _addWalls(self):
-        self._walls.append(Wall(1)) # a wall for each side
-        self._walls.append(Wall(2))
-        self._walls.append(Wall(3))
-        self._walls.append(Wall(4))
-
-        for wall in self._walls: # add the walls to the scene
-            self.mapScene.addItem(wall)
-
-    # adds some algae to the scene
-    def _addAlgae(self):
-        leftBloom = Bloom(100, 200, 300, 300)
-        rightBloom = Bloom(600, 600, 300, 300)
-        self._blooms.append(leftBloom); self._blooms.append(rightBloom)
-
-        algaNo = Alga.DESIRED_POP
-        for i in range(0, algaNo):
-            self._algae.append(Alga(10, 10, leftBloom, rightBloom))
-            self.mapScene.addItem(self._algae[i])
     # this function adds a new graph plot and navbar to the tab widget
     def addNewPlot(self, fig, axis, yVals):
 

@@ -123,7 +123,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # OBJECT\INSTANCE METHODS START
 
-    def __init__(self, window):
+    def __init__(self):
         super().__init__()
         ## VARIABLES DIRECTLY RELATED TO THE BASE SHAPE AND THE SEMI-CIRCLES
         self._area = rand.randrange(50, 251) # selects a random _area for the cell
@@ -161,7 +161,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._turnTime.start()
 
         self._actionRadius = self.height() + self.width() # this is the radius in which the cell can sense things 
-        self.win = window
         self._actionRadiusCirc = None # this is the graphics item made with the action radius
         ##
 
@@ -1133,9 +1132,10 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self.secondsAlive = self.hungerTime.elapsed()
         self.survivability = self.secondsAlive + max(self.kills, self.algae)
         self.actualFoodPref = self.kills / (self.algae + self.kills) if self.algae + self.kills > 0 else -1 # if it ate nothing, set its FP to -1
-        print(self, "Time alive", self.secondsAlive, "SA", self.survivability, "Actual food pref", self.actualFoodPref)
 
         # kill self
         self.scene().removeItem(self)
         self.dead = True
         del self
+
+    # EXTERNAL LOGIC ENDS HERE
