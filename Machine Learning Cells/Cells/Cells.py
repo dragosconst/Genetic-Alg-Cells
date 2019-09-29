@@ -149,7 +149,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         initPos = QtCore.QPointF(rand.randrange(200, 601), rand.randrange(200, 601))
         self._originPoint = initPos
         self.setPos(initPos.x(), initPos.y())
-        self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue")))
         self._height = None # the height of the Final Shape(and Final Item)
         self._width = None
         self._topLeftPoint = None # the top-left point of the Final Shape
@@ -186,6 +185,21 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             self.actualFoodPref = 0
         else:
             self.buildFromParents(parents)
+        
+        # the rgb for skyblue is 135, 206, 235
+        red = 135
+        green = 206
+        blue = 235
+        if self.initFoodPref > 0.5:
+            red += (self.initFoodPref - 0.5) * 240
+            green -= (self.initFoodPref - 0.5) * 412    
+            blue -= (self.initFoodPref - 0.5) * 470
+        else:
+            red -= (0.5 - self.initFoodPref) * 270
+            green += (0.5 - self.initFoodPref) * 98
+            blue -= (0.5 - self.initFoodPref) * 470
+
+        self.setBrush(QtGui.QBrush(QtGui.QColor(red, green, blue)))
         ##
 
         ## THESE ARE A.I.-RELATED VARS THAT ARE NOT TIED TO EVOLUTION
@@ -890,11 +904,9 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         # if someone else ate its prey
         if self._prey is not None and (not util.itemIsInScene(self.scene(), self._prey) or self._prey.dead == True):
             self._prey = None
-            self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue"))) 
         # if someone else ate its alga
         if self._alga is not None and (not util.itemIsInScene(self.scene(), self._alga) or self._alga.dead == True):
             self._alga = None
-            self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue"))) 
 
 
         if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 250 and self._prey is None: # if the timer has not started yet or if it has stopped
@@ -1108,10 +1120,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             
             if maxItem is not None and util.getClassName(maxItem) == "Cell":
                 self._prey = maxItem
-                self.setBrush(QtGui.QBrush(QtGui.QColor("red")))
             elif maxItem is not None and util.getClassName(maxItem) == "Alga":
                 self._alga = maxItem
-                self.setBrush(QtGui.QBrush(QtGui.QColor("green")))
                 
                
 
@@ -1192,13 +1202,17 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     # managing mutations for cells with parents
     def mutate(self):
         sizeMutate = rand.uniform(-10, 10)
-        self.size += self.size * sizeMutate / 100
+        self.size += (self.size * sizeMutate / 100)
         if self.size < 30: # some evolution locks
             self.size = 30
         if self.size > 400:
             self.size = 400
         speedFMutate = rand.uniform(-10, 10)
-        self.speedFactor += self.speedFactor * speedFMutate / 100
+        self.speedFactor += (self.speedFactor * speedFMutate / 100)
         initFPMutate = rand.uniform(-10, 10)
-        self.initFoodPref += self.initFoodPref * initFPMutate / 100
+        self.initFoodPref += (self.initFoodPref * initFPMutate / 100)
+        if self.initFoodPref > 1: # more evolution locks
+            self.initFoodPref = 1
+        if self.initFoodPref < 0:
+            self.initFoodPref = 0
     # EXTERNAL LOGIC ENDS HERE

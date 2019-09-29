@@ -64,4 +64,5 @@ class Gen():
                 item.die() # the die method removes cells\algae from the scene and deletes their instances
         self._genData.setCellsData(sorted(self._genData.cellsData(), key=lambda cellData: cellData.data["survivability"], reverse=True))
         self._simData.addGen(self._genData)
+        
     

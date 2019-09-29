@@ -43,6 +43,7 @@ class Sim():
     # for generations starting from the second
     def startAnotherGen(self):
         olderGen = self._simData.gens()[len(self._simData.gens()) - 1]
+       
         genNo = len(self._simData.gens()) + 1
         self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, None, 
                                     olderGen, genNo))
@@ -57,6 +58,7 @@ class Sim():
     # call this to kill the ongoing generation
     def killCurrGen(self):
         self._currentGen[len(self._currentGen) - 1].killGen()
+        print("Average fitness score so far is:", self._simData.medianSimSurv())
         self.startAnotherGen()
 
        
