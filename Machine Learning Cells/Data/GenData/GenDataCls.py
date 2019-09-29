@@ -75,6 +75,9 @@ class GenData():
         self._updateActFPMed(cellData)
         self._updateSizeMed(cellData)
     
+    def setCellsData(self, cellsData):
+        self._cellsData = cellsData
+
     # some methods for updating the median values
     def _updateSurvMedian(self, cellData):
         self._medianSurvivability *= (len(self._cellsData) - 1)

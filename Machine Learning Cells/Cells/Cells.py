@@ -6,6 +6,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy as np
 
 import util
+from GenDataCls import CellData
 
 
 
@@ -123,8 +124,11 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # OBJECT\INSTANCE METHODS START
 
-    def __init__(self):
+    def __init__(self, genData, genNumber = None, parents = None):
         super().__init__()
+        ## VARIABLES TIED TO GENERATION DATA
+        self._genData = genData
+
         ## VARIABLES DIRECTLY RELATED TO THE BASE SHAPE AND THE SEMI-CIRCLES
         self._area = rand.randrange(50, 251) # selects a random _area for the cell
         self._sides = [0, 0] # the value for the width and height(they are equivalent for squares and rhombuses(? hope this is the plural))
@@ -166,23 +170,29 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
         ### FROM HERE ON START THE A.I.-RELATED VARIABLES
         ## THESE ARE VARIABLES THAT ARE DIRECTLY TIED TO EVOLUTION
-        self.size = self._area
-        self.speedFactor = 0 
-        self.hunger = 1.0
-        self.hungerTime = QtCore.QTime()
-        self.lifeSpawn = 20 * 1000 
-        self.speed = 1 / (self.size ** 2) * 1000 + self.speedFactor + 1 / (1 + self.hunger)
-        self.kills = 0
-        self.algae = 0
-        self.secondsAlive = 0
-        self.survivability = 0
-        self.initFoodPref = 0.5
-        self.actualFoodPref = 0
+        # this checks if this cell has parents
+        if parents == None:
+            self.size = self._area
+            self.speedFactor = rand.uniform(-0.1, 0.1) 
+            self.hunger = 1.0
+            self.hungerTime = QtCore.QTime()
+            self.lifeSpawn = (20 - self.speedFactor * 20) * 1000 
+            self.speed = 1 / (self.size ** 2) * 1000 + self.speedFactor + 1 / (1 + self.hunger)
+            self.kills = 0
+            self.algae = 0
+            self.secondsAlive = 0
+            self.survivability = 0
+            self.initFoodPref = 0.5
+            self.actualFoodPref = 0
+        else:
+            self.buildFromParents(parents)
+        ##
 
         ## THESE ARE A.I.-RELATED VARS THAT ARE NOT TIED TO EVOLUTION
         self._prey = None # this is the prey the cell locked on for eating
         self._alga = None # this is the alga it wants to eat
         self.dead = False
+        ##
 
 
     #boundinGRect override
@@ -872,6 +882,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         if self.hunger <= 0:
             self.die()
             return # stop the update loop
+        # update the speed 
+        self._updateSpeed()
         # hunger percentage
         self.hunger -= self._movementFrameTime.elapsed() / self.lifeSpawn
 
@@ -914,6 +926,10 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         tempTimer = QtCore.QTimer() # this timer only serves to call the movement loop back
         tempTimer.singleShot(20, lambda: self.updateLoop(dirAngle))
 
+
+    # method for updating the speed
+    def _updateSpeed(self):
+        self.speed = 1 / (self.size ** 2) * 1000 + self.speedFactor + 1 / (1 + self.hunger)
 
     # moves the Final Item in the direction given by the angle
     def _moveInDir(self, timeElapsed, angle):
@@ -1136,6 +1152,53 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         # kill self
         self.scene().removeItem(self)
         self.dead = True
+        cellInfo = CellData()
+        cellInfo.setData(self.size, self.speedFactor, self.secondsAlive, self.kills, self.algae, self.survivability, self.initFoodPref, self.actualFoodPref)
+        self._genData.addCellData(cellInfo)
         del self
 
+
+    # METHOD FOR BUILDING A CELL BASED ON TWO GIVEN PARENTS
+    def buildFromParents(self, parents):
+        parent1 = parents[0]
+        parent2 = parents[1]
+
+        # choose the parent from which it take two traits and the one from which it takes one trait
+        twoTraitsPar = rand.choice(parents)
+        oneTraitPar = parent1 if parent2 == twoTraitsPar else parent2
+        sizeDice = rand.choice([1, 2, 3])
+        self.size = twoTraitsPar.data["size"] if sizeDice <= 2 else oneTraitPar.data["size"]
+        if sizeDice == 3: # this means that the trait from the one trait parent was just used
+            self.speedFactor = twoTraitsPar.data["speedFactor"]
+            self.initFoodPref = twoTraitsPar.data["actualFoodPref"]
+        else:
+            speedFDice = rand.choice([1, 2])
+            self.speedFactor = twoTraitsPar.data["speedFactor"] if speedFDice <= 1 else oneTraitPar.data["speedFactor"]
+            if speedFDice == 2: # this means that the trait from the one trait parent was just used
+                self.initFoodPref = twoTraitsPar.data["actualFoodPref"]
+            else:
+                self.initFoodPref = oneTraitPar.data["actualFoodPref"]
+        self.hunger = 1.0
+        self.hungerTime = QtCore.QTime()
+        self.lifeSpawn = (20 + self.speedFactor * 20) * 1000 
+        self.speed = 1 / (self.size ** 2) * 1000 + self.speedFactor + 1 / (1 + self.hunger)
+        self.kills = 0
+        self.algae = 0
+        self.secondsAlive = 0
+        self.survivability = 0
+        self.actualFoodPref = 0
+        self.mutate()
+
+    # managing mutations for cells with parents
+    def mutate(self):
+        sizeMutate = rand.uniform(-10, 10)
+        self.size += self.size * sizeMutate / 100
+        if self.size < 30: # some evolution locks
+            self.size = 30
+        if self.size > 400:
+            self.size = 400
+        speedFMutate = rand.uniform(-10, 10)
+        self.speedFactor += self.speedFactor * speedFMutate / 100
+        initFPMutate = rand.uniform(-10, 10)
+        self.initFoodPref += self.initFoodPref * initFPMutate / 100
     # EXTERNAL LOGIC ENDS HERE

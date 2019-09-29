@@ -1,3 +1,6 @@
+import random as rand
+
+
 
 from Cells import Cell
 from AlgaeBloom import Bloom
@@ -6,18 +9,33 @@ from GenDataCls import GenData
 import util
 
 class Gen():
-    def __init__(self, scene, cellsNo, algaeNo, genSec, simDia = None):
+    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simDia = None, olderGen = None, genNumber = 1):
         # basic generation values
         self._scene = scene
         self._cellsNo = cellsNo
         self._algaeNo = algaeNo
         self._genSec = genSec
+        self._simData = simData
         self._simDia = simDia
+        self._olderGen = olderGen
+        self._genNumber = genNumber
+        self._genData = GenData()
 
     # adds the specified cells number to the scene
     def _addCells(self):
-        for i in range(0, self._cellsNo):
-            self._scene.addItem(Cell())
+        # the first generation simply makes some random cells
+        if self._genNumber == 1:
+            for i in range(0, self._cellsNo):
+                self._scene.addItem(Cell(self._genData))
+        else:
+            oneFifth = int(len(self._olderGen.cellsData()) / 5)
+            parentsList = self._olderGen.cellsData()[:oneFifth]
+            noParentedCells = self._cellsNo / 2 - self._genNumber + 2 if self._cellsNo / 2 - self._genNumber + 2 >= 3 else 3 
+            noParentedCells = int(noParentedCells)
+            for i in range(0, self._cellsNo - noParentedCells): # + 2 because the first generation with parents is the second one
+                self._scene.addItem(Cell(self._genData, self._genNumber, [rand.choice(parentsList), rand.choice(parentsList)]))
+            for i in range(0, noParentedCells): # the rest are randomly generated
+                self._scene.addItem(Cell(self._genData))
     # adds the specified number of algae to the scene
     def _addAlgae(self):
         leftBloom = Bloom(100, 200, 300, 300)
@@ -44,4 +62,6 @@ class Gen():
         for item in self._scene.items():
             if util.getClassName(item) != "Wall": # dont delete the walls
                 item.die() # the die method removes cells\algae from the scene and deletes their instances
+        self._genData.setCellsData(sorted(self._genData.cellsData(), key=lambda cellData: cellData.data["survivability"], reverse=True))
+        self._simData.addGen(self._genData)
     
