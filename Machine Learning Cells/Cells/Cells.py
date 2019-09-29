@@ -1127,10 +1127,12 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # METHOD FOR DYING
     def die(self):
+        if self.dead == True:
+            return
         # calculate all the post-mortem variables
         self.secondsAlive = self.hungerTime.elapsed()
         self.survivability = self.secondsAlive + max(self.kills, self.algae)
-        self.actualFoodPref = self.kills / (self.algae + self.kills) if self.algae + self.kills > 0 else -1
+        self.actualFoodPref = self.kills / (self.algae + self.kills) if self.algae + self.kills > 0 else -1 # if it ate nothing, set its FP to -1
         print(self, "Time alive", self.secondsAlive, "SA", self.survivability, "Actual food pref", self.actualFoodPref)
 
         # kill self

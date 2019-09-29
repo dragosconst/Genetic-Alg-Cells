@@ -5,7 +5,7 @@
     <ProjectGuid>9f400719-8ff3-448c-9632-fa2951c7d9f1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>Main.py</StartupFile>
-    <SearchPath>..\Machine Learning Cells;Cells;Utilities;Walls;GUI;GUI\Dialogs\NewSimDia;GUI\Dialogs\ErrDias;Algae</SearchPath>
+    <SearchPath>..\Machine Learning Cells;Cells;Utilities;Walls;GUI;GUI\Dialogs\NewSimDia;GUI\Dialogs\ErrDias;Algae;Data;Data\GenData</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Machine Learning Cells</Name>
@@ -20,12 +20,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Data\GenData\" />
     <Folder Include="GUI\Dialogs\ErrDias\" />
     <Folder Include="GUI\Dialogs\NewSimDia\" />
     <Folder Include="GUI\" />
     <Folder Include="Cells\" />
     <Folder Include="GUI\Dialogs\" />
     <Folder Include="Algae\" />
+    <Folder Include="Data\" />
     <Folder Include="Walls\" />
     <Folder Include="Utilities\" />
   </ItemGroup>
@@ -42,6 +44,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Cells\Cells.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Data\GenData\GenDataCls.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Data\SimDataCls.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GUI\Dialogs\ErrDias\CellNoErrBase.py" />
