@@ -210,7 +210,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
 
     #boundinGRect override
-    def boundingRects(self):
+    def boundingRect(self):
         bounds = QtCore.QRectF(self.actualPos().x() - self.pos().x(), self.actualPos().y() - self.pos().y(),
                                self.width(), self.height())
         return bounds
@@ -829,7 +829,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # rotation thingy
     def rotateBy(self, degrees):
-        self.setTransformOriginPoint(self.boundingRect().center().x(), selfboundingRect().center().y())
+        self.setTransformOriginPoint(self.boundingRect().center().x(), self.boundingRect().center().y())
         timer = QtCore.QTimer()
         if degrees < 5:
             self.setRotation(self.rotation() + degrees)
@@ -1134,7 +1134,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         # kill the prey
         self._prey.die()
         self._prey = None
-        self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue")))
         self.kills += 1
 
     def _eatAlga(self):
@@ -1146,7 +1145,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         # kill the alga
         self._alga.die()
         self._alga = None
-        self.setBrush(QtGui.QBrush(QtGui.QColor("skyblue")))
         self.algae += 1
             
 

@@ -1,6 +1,6 @@
 import random as rand
 
-
+from PyQt5 import QtCore
 
 from Cells import Cell
 from AlgaeBloom import Bloom
@@ -9,7 +9,7 @@ from GenDataCls import GenData
 import util
 
 class Gen():
-    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simDia = None, olderGen = None, genNumber = 1):
+    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simObj, simDia = None, olderGen = None, genNumber = 1):
         # basic generation values
         self._scene = scene
         self._cellsNo = cellsNo
@@ -20,6 +20,10 @@ class Gen():
         self._olderGen = olderGen
         self._genNumber = genNumber
         self._genData = GenData()
+        self.killed = False
+        self._simObj = simObj
+        tempTimer = QtCore.QTimer()
+        tempTimer.singleShot(genSec * 1000, lambda: self.killGen())
 
     # adds the specified cells number to the scene
     def _addCells(self):
@@ -57,12 +61,29 @@ class Gen():
         self._addCells()
         Cell.resetCells(self._scene, self._simDia, self._algaeNo + self._cellsNo, self._algaeNo)
         Cell.startMoving(self._scene)
+        self._checkIfAlive()
+
+    def _checkIfAlive(self):
+        dontKill = False
+        for item in self._scene.items():
+            if util.getClassName(item) == "Cell":
+                dontKill = True
+                break
+        if not dontKill:
+            self.killGen()
+            return
+        tempTimer = QtCore.QTimer()
+        tempTimer.singleShot(1000, lambda: self._checkIfAlive())
 
     def killGen(self):
+        if self.killed == True:
+            return
+        self.killed = True
         for item in self._scene.items():
             if util.getClassName(item) != "Wall": # dont delete the walls
                 item.die() # the die method removes cells\algae from the scene and deletes their instances
         self._genData.setCellsData(sorted(self._genData.cellsData(), key=lambda cellData: cellData.data["survivability"], reverse=True))
         self._simData.addGen(self._genData)
+        self._simObj.startAnotherGen()
         
     

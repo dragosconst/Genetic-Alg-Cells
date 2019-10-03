@@ -2,6 +2,7 @@
 
 # here we import standard libraries\modules
 import sys
+from enum import Enum
 
 # here we import third party libraries\modules
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -19,8 +20,23 @@ import MainWindow as mw
 from NewSimDia import NewSimDia
 from Algae import Alga
 from AlgaeBloom import Bloom
-from Sims import Sim
+import Sims
 
+# this enum class is used for encoding the tabs
+class Tabs(Enum):
+    SimSurvTab = 1
+    SimSurvTitle = "Sim Median Survivability over Gens"
+    SimSizeTab = 2
+    SimSizeTitle= "Sim Median Size over Gens"
+    SimCarnSizeTab = 3
+    SimHerbSizeTab = 4
+    SimSecAliveTab = 5
+    SimActFPTab = 6
+    SimInitFPTab = 7
+
+# this class contains the main window of the application
+# its methods handle stuff directly related to the functionality of the main window AND JUST THAT
+# all the classes and methods relevant to the evolutionary algorithm can be found in other files
 class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def __init__(self): 
         super().__init__()
@@ -32,8 +48,9 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
 
         self._tabLayouts = [] # this list will contain every layout from every tab
         self._plots = [] # this list will contain every math plot from every tab
+        self._axes = [] # the axis of the plots
+        self._figs = [] # the figure objects
         self._navtbs = [] # this list will contain every nav toolbar from every tab
-        self._timers = [] # all the timers for every tab
             
         self._currentSim = None # the current simulation
 
@@ -65,55 +82,42 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def _startNewSim(self, simDia, cellNo, secs, algaNo):
         if self._currentSim is not None: # if there was another sim running previous to this one
             self._delOldSim()
-        self._currentSim = Sim(self.mapScene, cellNo, int(cellNo / 2) if algaNo == 0 else algaNo, secs, simDia)
+        self._currentSim = Sims.Sim(self.mapScene, cellNo, int(cellNo / 2) if algaNo == 0 else algaNo, secs, simDia, self)
         self._currentSim.startSim()
 
     # this function adds a new graph plot and navbar to the tab widget
-    def addNewPlot(self, fig, axis, yVals):
+    def addTab(self, fig, axis, title=""):
 
-        newTab = QtWidgets.QWidget(self.graphs, objectName = "Canvas " + str(self.graphs.count())) # creating a new tab
+        newTab = QtWidgets.QWidget(self.graphs, objectName = title) # creating a new tab
+        self._axes.append(axis)
+        self._figs.append(fig)
         self.graphs.addTab(newTab, newTab.objectName()) # adding it to the graphs tab widget
         self.graphs.setCurrentWidget(newTab) # setting the current widget(tab) to this tab
 
         self._tabLayouts.append(QtWidgets.QVBoxLayout(newTab)) # here I add a new vertical layout to the current tab widget
         self._plots.append(FigureCanvas(fig)) # adds a new widget to the plots list, constructed with the fig parameter
-        currentIndex = self.graphs.count() - 1 # I substract 1 because the index for the lists start at 0
+        currentIndex = self.graphs.count() - 1 # I subtract 1 because the index for the lists start at 0
         self._tabLayouts[currentIndex].addWidget(self._plots[currentIndex])
         self._navtbs.append(NavToolbar(self._plots[currentIndex], newTab, coordinates = True)) # adds a nav toolbar under the graph
         self._tabLayouts[currentIndex].addWidget(self._navtbs[currentIndex])
         
-        # add a QTimer
-        self._timers.append(QtCore.QTimer())
-
-        self.updateTab(currentIndex, fig, axis, yVals)
 
 
     # this function should change a tab's content with the newly given plot
-    def updateTab(self, index, newPlot, axis, yVals):
-        #axis.cla()
+    def updateTab(self, index, fig, axis, xVals, yVals, title=""):
+        if index > len(self._plots): # if the update method is called on a non existent tab
+            self.addTab(fig, axis, title)
+            return
+        index -= 1 # the index used will be greater with one than the index of the tab in order to correctly add a new
+                   # tab if this tab doesn't already exist
 
-        # following code is for making a real nice live update
-        newYVals = yVals
-        newYVals = np.delete(newYVals, range(1)) # deletes the first five elements of the array 
-        newYVals = np.append(newYVals, np.random.rand(1)) # adds five elements to the end of the array
-        #axis.plot(newYVals) # plots the new functions
-        #newPlot.canvas.draw() # this redraws the plot
-        self.mapScene.items()
+        print(index, xVals, yVals)
+        currAxis = self._axes[index]
+        oldFig = self._figs[index]
+        currAxis.cla()
+        currAxis.plot(xVals, yVals)
+        oldFig.canvas.draw()
         
-        time = self._timers[index]
-        time.singleShot(1000, lambda: self.updateTab(index, newPlot, axis, newYVals)) # not using singleShot makes some weird problems, where there are multiple timers working at the same time, instead of just one(or how many tabs are open)
-     
-         
-
-    # this function updates all the tab names(and objectNames) accordingly, it is a private function because I feel that, at the moment at least
-    # there is no good reason for this to be called outside class functions
-    # this function might also prove to be useless later on, since this tab naming is currently used just for testing
-    def _updateTabNames(self):
-        for i in range(self.graphs.count()):
-            self.graphs.setCurrentIndex(i) # it opens the current tab
-            currentTab = self.graphs.currentWidget() # objects are passed by reference(they are mutable), therefore any modifications done here change the widget for the current tab too
-            currentTab.setObjectName("Canvas " + str(i))
-            self.graphs.setTabText(i, "Canvas " + str(i))
 
     # this functions deletes the tab specified by the index
     def removeTab(self, index):
@@ -123,23 +127,10 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         del self._navtbs[index]
         del self._timers[index]
         del toDelete # not sure if manual deletion is necessary, doing it anyway
-        self._updateTabNames() # update the tab names
 
 if __name__ == '__main__': # yeah i guess we have to use this
-    fig1, fig2, fig3 = Figure(), Figure(), Figure() # some testing code
-    axes1 = fig1.add_subplot(111)
-    axes2 = fig2.add_subplot(111)
-    yValues1 = np.random.rand(50)
-    yValues2 = np.random.rand(50)
-    axes1.plot(yValues1)
-    axes2.plot(yValues2)
-
-
-
     app = QtWidgets.QApplication(sys.argv)
     qtApp = MLCellWindow()
-    qtApp.addNewPlot(fig1, axes1, yValues1)
-    qtApp.addNewPlot(fig2, axes2, yValues2)
     qtApp.show()
 
     
