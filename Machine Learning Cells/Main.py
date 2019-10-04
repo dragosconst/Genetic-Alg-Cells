@@ -25,14 +25,19 @@ import Sims
 # this enum class is used for encoding the tabs
 class Tabs(Enum):
     SimSurvTab = 1
-    SimSurvTitle = "Sim Median Survivability over Gens"
+    SimSurvTitle = "Survivability"
     SimSizeTab = 2
-    SimSizeTitle= "Sim Median Size over Gens"
+    SimSizeTitle= "Size"
     SimCarnSizeTab = 3
+    SimCarnSizeTitle = "Carn Size"
     SimHerbSizeTab = 4
+    SimHerbSizeTitle = "Herb Size"
     SimSecAliveTab = 5
+    SimSecAliveTitle = "Secs Alive"
     SimActFPTab = 6
+    SimActFPTitle = "Actual FP"
     SimInitFPTab = 7
+    SimInitFPTitle = "Init FP"
 
 # this class contains the main window of the application
 # its methods handle stuff directly related to the functionality of the main window AND JUST THAT
@@ -70,6 +75,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
             del item
 
     # removes all items from the previous scene and clears all lists
+    # also clears the graphs
     def _delOldSim(self):
         # kill the simulation
         self._currentSim.killSim()
@@ -77,6 +83,16 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
 
         # remove items from scene
         self._clearScene()
+
+        # remove the graphs
+        for axis in self._axes:
+            axis.cla()
+        self._axes.clear()
+        self._figs.clear()
+        self.removeTabs()
+        self._plots.clear()
+        self._navtbs.clear()
+        self._tabLayouts.clear()
 
     # starts a new simulation
     def _startNewSim(self, simDia, cellNo, secs, algaNo):
@@ -104,29 +120,29 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
 
 
     # this function should change a tab's content with the newly given plot
-    def updateTab(self, index, fig, axis, xVals, yVals, title=""):
+    def updateTab(self, index, fig, axis, xVals, yVals, title="", col="blue"):
         if index > len(self._plots): # if the update method is called on a non existent tab
             self.addTab(fig, axis, title)
             return
         index -= 1 # the index used will be greater with one than the index of the tab in order to correctly add a new
                    # tab if this tab doesn't already exist
 
-        print(index, xVals, yVals)
         currAxis = self._axes[index]
         oldFig = self._figs[index]
         currAxis.cla()
-        currAxis.plot(xVals, yVals)
+        currAxis.plot(xVals, yVals, color=col)
         oldFig.canvas.draw()
         
 
     # this functions deletes the tab specified by the index
-    def removeTab(self, index):
-        toDelete = self.graphs.findChild(QtWidgets.QWidget, "Canvas" + str(index))
-        self.graphs.removeTab(index) # this only removes the tab from the tab widget, it doesn't actually delete the widget used for the tab
-        del self._plots[index] # removes the objects associated with this tab
-        del self._navtbs[index]
-        del self._timers[index]
-        del toDelete # not sure if manual deletion is necessary, doing it anyway
+    def removeTabs(self):
+        tabNo = self.graphs.count()
+        while tabNo >= 0:
+            currWid = self.graphs.widget(tabNo)
+            self.graphs.removeTab(tabNo)
+            del currWid
+            tabNo -= 1
+
 
 if __name__ == '__main__': # yeah i guess we have to use this
     app = QtWidgets.QApplication(sys.argv)

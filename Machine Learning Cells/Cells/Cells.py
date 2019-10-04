@@ -888,7 +888,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     def updateLoop(self, dirAngle = 0):
         # due to the weird way names work in python, there might be left some names of this cell even after it was killed
         # so this kills them all
-        if self.dead == True:
+        if self.dead == True or self.scene() == None:
             del self
             return
 

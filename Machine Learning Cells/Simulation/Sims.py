@@ -23,8 +23,13 @@ class Sim():
         self._mlWindow = mlWindow # this is the main window object
 
         self._currentGen = [] # the current generation
-        self._medianSimSurvOverTime = [] # for drawing the graphs, the list will contain the median sim surv over generations
-        self._medianSimSizeOverTime = [] # like the previous list, but for sizes
+        self._averageSimSurvOverTime = [] # for drawing the graphs, the list will contain the average sim surv over generations
+        self._averageSimSizeOverTime = [] # like the previous list, but for sizes
+        self._averageSimCarnSizeOverTime = []
+        self._averageSimHerbSizeOverTime = []
+        self._averageSimSecAliveOverTime = []
+        self._averageSimActFPOverTime = []
+        self._averageInitFPOverTime = []
 
     # add walls to the scene
     # this method is handled by this class, because the walls remain the same throughout all the generations
@@ -41,21 +46,37 @@ class Sim():
         self._addWalls()
         self.startFirstGen()
 
+    # because this method starts the first generation, it does not need any data from previous generations(because they don't
+    # exist)
     def startFirstGen(self):
+        # this updateGraphs call will just draw some empty graphs on their reserved area of the screen
+        # if the method is not called here, the window would look weird with a big empty white square on the bottom right corner
         self.updateGraphs()
         self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._simDia))
         self._currentGen[len(self._currentGen) - 1].startGeneration()
 
     # for generations starting from the second
     def startAnotherGen(self):
-        self._medianSimSurvOverTime.append(self._simData.medianSimSurv())
-        self._medianSimSizeOverTime.append(self._simData.medianSimSize())
+        # these lists are all related to graph drawing
+        self._averageSimSurvOverTime.append(self._simData.averageSimSurv())
+        self._averageSimSizeOverTime.append(self._simData.averageSimSize())
+        self._averageSimCarnSizeOverTime.append(self._simData.averageSimCarnSize())
+        self._averageSimHerbSizeOverTime.append(self._simData.averageSimHerbSize())
+        self._averageSimSecAliveOverTime.append(self._simData.averageSimSecondsAlive())
+        self._averageSimActFPOverTime.append(self._simData.averageSimActFP())
+        self._averageInitFPOverTime.append(self._simData.averageSimInitFP())
+        # here end the graph-related lists
+
+        # update the graph drawings
         self.updateGraphs()
+
+        # this is needed for creating a new generation(it must have data from the old generation)
         olderGen = self._simData.gens()[len(self._simData.gens()) - 1]
        
         genNo = len(self._simData.gens()) + 1
         self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None, 
                                     olderGen, genNo))
+        # finally, start the generation
         self._currentGen[len(self._currentGen) - 1].startGeneration()
 
     # call this to kill the current sim
@@ -66,11 +87,26 @@ class Sim():
     # method that handles drawing graphs in between generations
     def updateGraphs(self):
         allGens = list(range(1, len(self._currentGen) + 1))
-        figSurv, axSurv = util.createGraph(allGens, self._medianSimSurvOverTime)
-        self._mlWindow.updateTab(Main.Tabs.SimSurvTab.value, figSurv, axSurv, allGens, self._medianSimSurvOverTime, Main.Tabs.SimSurvTitle.value)
+        figSurv, axSurv = util.createGraph(allGens, self._averageSimSurvOverTime, "blue")
+        self._mlWindow.updateTab(Main.Tabs.SimSurvTab.value, figSurv, axSurv, allGens, self._averageSimSurvOverTime, Main.Tabs.SimSurvTitle.value, "blue")
 
-        figSize, axSize = util.createGraph(allGens, self._medianSimSizeOverTime)
-        self._mlWindow.updateTab(Main.Tabs.SimSizeTab.value, figSize, axSize, allGens, self._medianSimSizeOverTime, Main.Tabs.SimSizeTitle.value)
+        figSize, axSize = util.createGraph(allGens, self._averageSimSizeOverTime, "olive")
+        self._mlWindow.updateTab(Main.Tabs.SimSizeTab.value, figSize, axSize, allGens, self._averageSimSizeOverTime, Main.Tabs.SimSizeTitle.value, "olive")
+        
+        figCarnSize, axCarnSize = util.createGraph(allGens, self._averageSimCarnSizeOverTime, "darkred")
+        self._mlWindow.updateTab(Main.Tabs.SimCarnSizeTab.value, figCarnSize, axCarnSize, allGens, self._averageSimCarnSizeOverTime, Main.Tabs.SimCarnSizeTitle.value, "darkred")
+
+        figHerbSize, axHerbSize = util.createGraph(allGens, self._averageSimHerbSizeOverTime, "greenyellow")
+        self._mlWindow.updateTab(Main.Tabs.SimHerbSizeTab.value, figHerbSize, axHerbSize, allGens, self._averageSimHerbSizeOverTime, Main.Tabs.SimHerbSizeTitle.value, "greenyellow")
+
+        figSecs, axSecs = util.createGraph(allGens, self._averageSimSecAliveOverTime, "steelblue")
+        self._mlWindow.updateTab(Main.Tabs.SimSecAliveTab.value, figSecs, axSecs, allGens, self._averageSimSecAliveOverTime, Main.Tabs.SimSecAliveTitle.value, "steelblue")
+
+        figActFP, axActFP = util.createGraph(allGens, self._averageSimActFPOverTime, "crimson")
+        self._mlWindow.updateTab(Main.Tabs.SimActFPTab.value, figActFP, axActFP, allGens, self._averageSimActFPOverTime, Main.Tabs.SimActFPTitle.value, "crimson")
+
+        figInitFP, axInitFP = util.createGraph(allGens, self._averageInitFPOverTime, "darkmagenta")
+        self._mlWindow.updateTab(Main.Tabs.SimInitFPTab.value, figInitFP, axInitFP, allGens, self._averageInitFPOverTime, Main.Tabs.SimInitFPTitle.value, "darkmagenta")
 
     # call this to kill the ongoing generation
     def killCurrGen(self):

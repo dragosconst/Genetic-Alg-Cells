@@ -40,14 +40,14 @@ class GenData():
         self._deadFromHunger = 0 # how many cells died from hunger, without eating anything at all
         self._cellsAteSomething = 0 # how many cells actually ate something before dying
         ##
-        ## some median values
-        self._medianSurvivability = 0
-        self._medianSecondsAlive = 0
-        self._medianActualFoodPref = 0
-        self._medianInitFoodPref = 0
-        self._medianSize = 0
-        self._medianCarnSize = 0
-        self._medianHerbSize = 0
+        ## some average values
+        self._averageSurvivability = 0
+        self._averageSecondsAlive = 0
+        self._averageActualFoodPref = 0
+        self._averageInitFoodPref = 0
+        self._averageSize = 0
+        self._averageCarnSize = 0
+        self._averageHerbSize = 0
         ##
 
     # CellData objects should be added to the _cellsData list only through this method
@@ -64,52 +64,53 @@ class GenData():
             self._cellsAteSomething += 1
         if cellData["actualFoodPref"] != -1 and cellData["actualFoodPref"] >= 0.5:
             self._carnCells += 1
-            self._updateCarnSizeMed(cellData)
+            self._updateCarnSizeAvg(cellData)
         elif cellData["actualFoodPref"] != -1 and cellData["actualFoodPref"] < 0.5:
             self._herbCells += 1
-            self._updateHerbSizeMed(cellData)
+            self._updateHerbSizeAvg(cellData)
 
-        # update the medians
-        self._updateSurvMedian(cellData)
-        self._updateSecAliveMedian(cellData)
-        self._updateActFPMed(cellData)
-        self._updateSizeMed(cellData)
+        # update the averages
+        self._updateSurvAvgian(cellData)
+        self._updateSecAliveAvgian(cellData)
+        self._updateActFPAvg(cellData)
+        self._updateInitFPAvg(cellData)
+        self._updateSizeAvg(cellData)
     
     def setCellsData(self, cellsData):
         self._cellsData = cellsData
 
-    # some methods for updating the median values
-    def _updateSurvMedian(self, cellData):
-        self._medianSurvivability *= (len(self._cellsData) - 1)
-        self._medianSurvivability += cellData["survivability"]
-        self._medianSurvivability /= len(self._cellsData)
-    def _updateSecAliveMedian(self, cellData):
-        self._medianSecondsAlive *= (len(self._cellsData) - 1)
-        self._medianSecondsAlive += cellData["secondsAlive"]
-        self._medianSecondsAlive /= len(self._cellsData)
-    def _updateActFPMed(self, cellData):
+    # some methods for updating the average values
+    def _updateSurvAvgian(self, cellData):
+        self._averageSurvivability *= (len(self._cellsData) - 1)
+        self._averageSurvivability += cellData["survivability"]
+        self._averageSurvivability /= len(self._cellsData)
+    def _updateSecAliveAvgian(self, cellData):
+        self._averageSecondsAlive *= (len(self._cellsData) - 1)
+        self._averageSecondsAlive += cellData["secondsAlive"]
+        self._averageSecondsAlive /= len(self._cellsData)
+    def _updateActFPAvg(self, cellData):
         if cellData["actualFoodPref"] != -1: # if this cell ate anything at all
-            self._medianActualFoodPref *= (self._cellsAteSomething - 1)
-            self._medianActualFoodPref += cellData["actualFoodPref"]
-            self._medianActualFoodPref /= self._cellsAteSomething
+            self._averageActualFoodPref *= (self._cellsAteSomething - 1)
+            self._averageActualFoodPref += cellData["actualFoodPref"]
+            self._averageActualFoodPref /= self._cellsAteSomething
         else:
             return
-    def _updateInitFPMed(self, cellData):
-        self._medianInitFoodPref *= (len(self._cellsData) - 1)
-        self._medianInitFoodPref += cellData["initFoodPref"]
-        self._medianInitFoodPref /= len(self._cellsData)
-    def _updateSizeMed(self, cellData):
-        self._medianSize *= (len(self._cellsData) - 1)
-        self._medianSize += cellData["size"]
-        self._medianSize /= len(self._cellsData)
-    def _updateCarnSizeMed(self, cellData):
-        self._medianCarnSize *= (self._carnCells - 1)
-        self._medianCarnSize += cellData["size"]
-        self._medianCarnSize /= self._carnCells
-    def _updateHerbSizeMed(self, cellData):
-        self._medianHerbSize *= (self._herbCells - 1)
-        self._medianHerbSize += cellData["size"]
-        self._medianHerbSize /= self._herbCells
+    def _updateInitFPAvg(self, cellData):
+        self._averageInitFoodPref *= (len(self._cellsData) - 1)
+        self._averageInitFoodPref += cellData["initFoodPref"]
+        self._averageInitFoodPref /= len(self._cellsData)
+    def _updateSizeAvg(self, cellData):
+        self._averageSize *= (len(self._cellsData) - 1)
+        self._averageSize += cellData["size"]
+        self._averageSize /= len(self._cellsData)
+    def _updateCarnSizeAvg(self, cellData):
+        self._averageCarnSize *= (self._carnCells - 1)
+        self._averageCarnSize += cellData["size"]
+        self._averageCarnSize /= self._carnCells
+    def _updateHerbSizeAvg(self, cellData):
+        self._averageHerbSize *= (self._herbCells - 1)
+        self._averageHerbSize += cellData["size"]
+        self._averageHerbSize /= self._herbCells
 
     # methods for getting object vars
     def cellsData(self):
@@ -126,17 +127,17 @@ class GenData():
         return self._deadFromHunger
     def cellsAteSomething(self):
         return self._cellsAteSomething
-    def medianSurvivability(self):
-        return self._medianSurvivability
-    def medianSecondsAlive(self):
-        return self._medianSecondsAlive
-    def medianActualFoodPref(self):
-        return self._medianActualFoodPref
-    def medianInitFoodPref(self):
-        return self._medianInitFoodPref
-    def medianSize(self):
-        return self._medianSize
-    def medianCarnSize(self):
-        return self._medianCarnSize
-    def medianHerbSize(self):
-        return self._medianHerbSize
+    def averageSurvivability(self):
+        return self._averageSurvivability
+    def averageSecondsAlive(self):
+        return self._averageSecondsAlive
+    def averageActualFoodPref(self):
+        return self._averageActualFoodPref
+    def averageInitFoodPref(self):
+        return self._averageInitFoodPref
+    def averageSize(self):
+        return self._averageSize
+    def averageCarnSize(self):
+        return self._averageCarnSize
+    def averageHerbSize(self):
+        return self._averageHerbSize

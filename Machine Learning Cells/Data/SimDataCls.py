@@ -16,14 +16,14 @@ class SimData():
         self._totalTime = 0 # this is for how long the simulation has been going
         ##
 
-        ## a bunch of median values of the whole simulation
-        self._medianSimSize = 0 # the median size of cells throughout the simulation
-        self._medianSimCarnSize = 0 # the median size of the carnivorous cells throughout the sim
-        self._medianSimHerbSize = 0 # the median size of the herbivorous cells throughout the sim
-        self._medianSimSecondsAlive = 0 # the median seconds alive of cells throughout the sim
-        self._medianSimActFP = 0 # the median actual food preference of the cells in the sim
-        self._medianSimInitFP = 0 # same as before but for initial fp
-        self._medianSimSurv = 0 # the median survivability of the cells in the sim
+        ## a bunch of average values of the whole simulation
+        self._averageSimSize = 0 # the average size of cells throughout the simulation
+        self._averageSimCarnSize = 0 # the average size of the carnivorous cells throughout the sim
+        self._averageSimHerbSize = 0 # the average size of the herbivorous cells throughout the sim
+        self._averageSimSecondsAlive = 0 # the average seconds alive of cells throughout the sim
+        self._averageSimActFP = 0 # the average actual food preference of the cells in the sim
+        self._averageSimInitFP = 0 # same as before but for initial fp
+        self._averageSimSurv = 0 # the average survivability of the cells in the sim
         ##
 
     # this is the method that has to be used for adding a new GenData object to the SimData, never directly append
@@ -40,49 +40,49 @@ class SimData():
         self._deadFromHunger += genData.deadFromHunger()
         self._cellsAteSomething += genData.cellsAteSomething()
 
-        # update the median values
-        self._updateSimSizeMed(genData)
-        if genData.medianCarnSize() > 0: # if there were any carnivorous cells at all
-            self._updateSimCarnSizeMed(genData)
-        if genData.medianHerbSize() > 0: # if there were any herb cells at all
-            self._updateSimHerbSizeMed(genData)
-        self._updateSimSecAliveMedian(genData)
-        self._updateSimActFPMed(genData)
-        self._updateSimInitFPMed(genData)
-        self._updateSimSurvMedian(genData)
+        # update the average values
+        self._updateSimSizeAvg(genData)
+        if genData.averageCarnSize() > 0: # if there were any carnivorous cells at all
+            self._updateSimCarnSizeAvg(genData)
+        if genData.averageHerbSize() > 0: # if there were any herb cells at all
+            self._updateSimHerbSizeAvg(genData)
+        self._updateSimSecAliveAvgian(genData)
+        self._updateSimActFPAvg(genData)
+        self._updateSimInitFPAvg(genData)
+        self._updateSimSurvAvgian(genData)
 
     # some update methods
-    def _updateSimSurvMedian(self, genData):
-        self._medianSimSurv *= (len(self._gens) - 1)
-        self._medianSimSurv += genData.medianSurvivability()
-        self._medianSimSurv /= len(self._gens)
-    def _updateSimSecAliveMedian(self, genData):
-        self._medianSimSecondsAlive *= (len(self._gens) - 1)
-        self._medianSimSecondsAlive += genData.medianSecondsAlive()
-        self._medianSimSecondsAlive /= len(self._gens)
-    def _updateSimActFPMed(self, genData):
-        if genData.medianActualFoodPref() != -0: # if this gen's cells ate anything at all
-            self._medianSimActFP *= (self._cellsAteSomething - 1)
-            self._medianSimActFP += genData.medianActualFoodPref()
-            self._medianSimActFP /= self._cellsAteSomething
+    def _updateSimSurvAvgian(self, genData):
+        self._averageSimSurv *= (len(self._gens) - 1)
+        self._averageSimSurv += genData.averageSurvivability()
+        self._averageSimSurv /= len(self._gens)
+    def _updateSimSecAliveAvgian(self, genData):
+        self._averageSimSecondsAlive *= (len(self._gens) - 1)
+        self._averageSimSecondsAlive += genData.averageSecondsAlive()
+        self._averageSimSecondsAlive /= len(self._gens)
+    def _updateSimActFPAvg(self, genData):
+        if genData.averageActualFoodPref() != -0: # if this gen's cells ate anything at all
+            self._averageSimActFP *= (self._cellsAteSomething - 1)
+            self._averageSimActFP += genData.averageActualFoodPref()
+            self._averageSimActFP /= self._cellsAteSomething
         else:
             return
-    def _updateSimInitFPMed(self, genData):
-        self._medianSimInitFP *= (len(self._gens) - 1)
-        self._medianSimInitFP += genData.medianInitFoodPref()
-        self._medianSimInitFP /= len(self._gens)
-    def _updateSimSizeMed(self, genData):
-        self._medianSimSize *= (len(self._gens) - 1)
-        self._medianSimSize += genData.medianSize()
-        self._medianSimSize /= len(self._gens)
-    def _updateSimCarnSizeMed(self, genData):
-        self._medianSimCarnSize *= (self._carnCells - 1)
-        self._medianSimCarnSize += genData.medianCarnSize()
-        self._medianSimCarnSize /= self._carnCells
-    def _updateSimHerbSizeMed(self, genData):
-        self._medianSimHerbSize *= (self._herbCells - 1)
-        self._medianSimHerbSize += genData.medianHerbSize()
-        self._medianSimHerbSize /= self._herbCells
+    def _updateSimInitFPAvg(self, genData):
+        self._averageSimInitFP *= (len(self._gens) - 1)
+        self._averageSimInitFP += genData.averageInitFoodPref()
+        self._averageSimInitFP /= len(self._gens)
+    def _updateSimSizeAvg(self, genData):
+        self._averageSimSize *= (len(self._gens) - 1)
+        self._averageSimSize += genData.averageSize()
+        self._averageSimSize /= len(self._gens)
+    def _updateSimCarnSizeAvg(self, genData):
+        self._averageSimCarnSize *= (self._carnCells - 1)
+        self._averageSimCarnSize += genData.averageCarnSize()
+        self._averageSimCarnSize /= self._carnCells
+    def _updateSimHerbSizeAvg(self, genData):
+        self._averageSimHerbSize *= (self._herbCells - 1)
+        self._averageSimHerbSize += genData.averageHerbSize()
+        self._averageSimHerbSize /= self._herbCells
 
     # some methods that return various instance objects
     def gens(self):
@@ -103,17 +103,17 @@ class SimData():
         return self._cellsAteSomething
     def totalTime(self):
         return self._totalTime
-    def medianSimSize(self):
-        return self._medianSimSize
-    def medianSimCarnSize(self):
-        return self._medianSimCarnSize
-    def medianSimHerbSize(self):
-        return self._medianSimHerbSize
-    def medianSimSecondsAlive(self):
-        return self._medianSimSecondsAlive
-    def medianSimActFP(self):
-        return self._medianSimActFP
-    def medianSimInitFP(self):
-        return self._medianSimInitFP
-    def medianSimSurv(self):
-        return self._medianSimSurv
+    def averageSimSize(self):
+        return self._averageSimSize
+    def averageSimCarnSize(self):
+        return self._averageSimCarnSize
+    def averageSimHerbSize(self):
+        return self._averageSimHerbSize
+    def averageSimSecondsAlive(self):
+        return self._averageSimSecondsAlive
+    def averageSimActFP(self):
+        return self._averageSimActFP
+    def averageSimInitFP(self):
+        return self._averageSimInitFP
+    def averageSimSurv(self):
+        return self._averageSimSurv

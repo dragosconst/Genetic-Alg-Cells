@@ -28,8 +28,8 @@ def itemIsInScene(scene, item):
     return False
 
 # creates a graph with given coords and returns the FigureCanvas and all the other things
-def createGraph(xVals, yVals):
+def createGraph(xVals, yVals, col="blue"):
     fig = Figure()
     axis = fig.add_subplot(111)
-    axis.plot(xVals, yVals)
+    axis.plot(xVals, yVals, color=col)
     return fig, axis
