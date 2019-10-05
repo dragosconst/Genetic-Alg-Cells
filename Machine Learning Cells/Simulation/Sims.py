@@ -52,7 +52,7 @@ class Sim():
         # this updateGraphs call will just draw some empty graphs on their reserved area of the screen
         # if the method is not called here, the window would look weird with a big empty white square on the bottom right corner
         self.updateGraphs()
-        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._simDia))
+        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._mlWindow, self._simDia))
         self._currentGen[len(self._currentGen) - 1].startGeneration()
 
     # for generations starting from the second
@@ -74,7 +74,7 @@ class Sim():
         olderGen = self._simData.gens()[len(self._simData.gens()) - 1]
        
         genNo = len(self._simData.gens()) + 1
-        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None, 
+        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._mlWindow, None, 
                                     olderGen, genNo))
         # finally, start the generation
         self._currentGen[len(self._currentGen) - 1].startGeneration()
@@ -107,6 +107,13 @@ class Sim():
 
         figInitFP, axInitFP = util.createGraph(allGens, self._averageInitFPOverTime, "darkmagenta")
         self._mlWindow.updateTab(Main.Tabs.SimInitFPTab.value, figInitFP, axInitFP, allGens, self._averageInitFPOverTime, Main.Tabs.SimInitFPTitle.value, "darkmagenta")
+
+    # pause a simulation
+    def pauseSim(self):
+        self._currentGen[len(self._currentGen) - 1].pauseGen()
+    # restart a simulation after a pause
+    def restartSim(self):
+        self._currentGen[len(self._currentGen) - 1].restartGen()
 
     # call this to kill the ongoing generation
     def killCurrGen(self):

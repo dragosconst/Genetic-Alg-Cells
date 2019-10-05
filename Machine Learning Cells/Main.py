@@ -60,7 +60,25 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._currentSim = None # the current simulation
 
         self.actionNew_simulation.triggered.connect(lambda: self._newSimDia()) # when the "New gen" menu option is clicked
+        self.actionPause.triggered.connect(lambda: self.pauseApp())
 
+        self.pausable = False # this property will check if the pause button should be accesible or not
+        self._isPaused = False # stores whether the current simulation is paused or not, in order to know what the pause button should do
+
+    # sets the app's pausability to given boolean value
+    def setPauseability(self, val):
+        self.pausable = val
+
+    def pauseApp(self):
+        if self.pausable == True:
+            if self._isPaused == False:
+                self._currentSim.pauseSim()
+                self.actionPause.setText("Unpause")
+                self._isPaused = True
+            else:
+                self._currentSim.restartSim()
+                self.actionPause.setText("Pause")
+                self._isPaused = False
 
     # opens a dialog for creating a new generation
     def _newSimDia(self):

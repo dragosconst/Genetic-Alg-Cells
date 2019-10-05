@@ -165,6 +165,11 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
         self._actionRadius = self.height() + self.width() # this is the radius in which the cell can sense things 
         self._actionRadiusCirc = None # this is the graphics item made with the action radius
+
+        self._paused = False # these variables will be used far handling pauses
+        self._pauseClock = QtCore.QTime()
+        self._timePaused = 0
+        self._turnTimeLeft = 0 # this will store for how much time the cell was supposed to go in a certain direction it has chosen before pausing
         ##
 
         ### FROM HERE ON START THE A.I.-RELATED VARIABLES
@@ -878,6 +883,15 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     
     # HERE END METHODS FOR POSITIONING 
 
+    # METHODS FOR HANDLING PAUSING AND UNPAUSING
+    def pauseCell(self):
+        self._paused = True
+        self._pauseClock.restart()
+        self._turnTimeLeft = self._timeDir.remainingTime() if self._timeDir.isActive() else 0
+    def restartCell(self):
+        self._paused = False
+        self._timePaused += self._pauseClock.elapsed()
+        self._timeDir.start(self._turnTimeLeft) # restart the timeDir with how much time it had left before the pause
 
     # HERE START METHODS RELATED TO MOVING THE CELL
     
@@ -890,6 +904,13 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         # so this kills them all
         if self.dead == True or self.scene() == None:
             del self
+            return
+
+        # if the simulation is paused, the cell should stay paused too
+        if self._paused == True:
+            self._movementFrameTime.restart()
+            tempTimer = QtCore.QTimer() # this timer only serves to call the movement loop back
+            tempTimer.singleShot(20, lambda: self.updateLoop(dirAngle))
             return
 
         # check if the cell died of hunger
@@ -909,13 +930,16 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             self._alga = None
 
 
-        if self._timeDir.isActive() == False and self._turnTime.elapsed() >= 250 and self._prey is None: # if the timer has not started yet or if it has stopped
+        if self._timeDir.isActive() == False and self._turnTime.elapsed() - self._timePaused >= 250 and self._prey is None: # if the timer has not started yet or if it has stopped
             dirAngle = self._chooseDir()
             self._timeDir.start(rand.randrange(3, 5) * 1000)
-        if self._turnTime.elapsed() >= 250 and self._prey is not None:
+            self._timePaused = 0 # time paused only affects the turn time timer and timeDir timer directly 
+        if self._turnTime.elapsed() - self._timePaused >= 250 and self._prey is not None:
             dirAngle = QtCore.QLineF(self.actualPos(), self._prey.actualPos()).angle()
-        if self._turnTime.elapsed() >= 250 and self._alga is not None:
+            self._timePaused = 0 # time paused only affects the turn time timer and timeDir timer directly 
+        if self._turnTime.elapsed() - self._timePaused >= 250 and self._alga is not None:
             dirAngle = QtCore.QLineF(self.actualPos(), self._alga.pos()).angle()
+            self._timePaused = 0 # time paused only affects the turn time timer and timeDir timer directly 
         
         # if it somehow ends up outside the scene(if the time between two frames is huge, this might happen)
         if self.actualPos().x() <= 0 or self.actualPos().x() >= 1000:
@@ -963,7 +987,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         if scene is None: # the cell is added to the scene only AFTER it is created, so for some brief time it might not be added to any scene yet
             return 
         checkCellCol = True
-        if self._turnTime.elapsed() <= 250: # during the turning time, no collision shall be checked
+        if self._turnTime.elapsed() - self._timePaused <= 250: # during the turning time, no collision shall be checked
             checkCellCol = False
         for item in scene.items():
             if util.getClassName(item) == "Wall":
