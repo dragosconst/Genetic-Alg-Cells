@@ -16,6 +16,12 @@ class SimData():
         self._totalTime = 0 # this is for how long the simulation has been going
         ##
 
+        ## values that help with calculating the average values
+        self._gensWithActualFP = 0
+        self._gensWithCarn = 0
+        self._gensWithHerb = 0
+        ##
+
         ## a bunch of average values of the whole simulation
         self._averageSimSize = 0 # the average size of cells throughout the simulation
         self._averageSimCarnSize = 0 # the average size of the carnivorous cells throughout the sim
@@ -43,8 +49,10 @@ class SimData():
         # update the average values
         self._updateSimSizeAvg(genData)
         if genData.averageCarnSize() > 0: # if there were any carnivorous cells at all
+            self._gensWithCarn += 1
             self._updateSimCarnSizeAvg(genData)
         if genData.averageHerbSize() > 0: # if there were any herb cells at all
+            self._gensWithHerb += 1
             self._updateSimHerbSizeAvg(genData)
         self._updateSimSecAliveAvgian(genData)
         self._updateSimActFPAvg(genData)
@@ -61,10 +69,11 @@ class SimData():
         self._averageSimSecondsAlive += genData.averageSecondsAlive()
         self._averageSimSecondsAlive /= len(self._gens)
     def _updateSimActFPAvg(self, genData):
-        if genData.averageActualFoodPref() != -0: # if this gen's cells ate anything at all
-            self._averageSimActFP *= (self._cellsAteSomething - 1)
+        if genData.averageActualFoodPref() > 0: # if this gen's cells ate anything at all
+            self._gensWithActualFP += 1
+            self._averageSimActFP *= (self._gensWithActualFP - 1)
             self._averageSimActFP += genData.averageActualFoodPref()
-            self._averageSimActFP /= self._cellsAteSomething
+            self._averageSimActFP /= self._gensWithActualFP
         else:
             return
     def _updateSimInitFPAvg(self, genData):
@@ -76,13 +85,13 @@ class SimData():
         self._averageSimSize += genData.averageSize()
         self._averageSimSize /= len(self._gens)
     def _updateSimCarnSizeAvg(self, genData):
-        self._averageSimCarnSize *= (self._carnCells - 1)
+        self._averageSimCarnSize *= (self._gensWithCarn - 1)
         self._averageSimCarnSize += genData.averageCarnSize()
-        self._averageSimCarnSize /= self._carnCells
+        self._averageSimCarnSize /= self._gensWithCarn
     def _updateSimHerbSizeAvg(self, genData):
-        self._averageSimHerbSize *= (self._herbCells - 1)
+        self._averageSimHerbSize *= (self._gensWithHerb - 1)
         self._averageSimHerbSize += genData.averageHerbSize()
-        self._averageSimHerbSize /= self._herbCells
+        self._averageSimHerbSize /= self._gensWithHerb
 
     # some methods that return various instance objects
     def gens(self):

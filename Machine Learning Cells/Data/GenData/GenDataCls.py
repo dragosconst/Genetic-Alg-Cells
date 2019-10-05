@@ -62,7 +62,7 @@ class GenData():
             self._deadFromHunger += 1
         else:
             self._cellsAteSomething += 1
-        if cellData["actualFoodPref"] != -1 and cellData["actualFoodPref"] >= 0.5:
+        if cellData["actualFoodPref"] != -1 and cellData["actualFoodPref"] > 0.5:
             self._carnCells += 1
             self._updateCarnSizeAvg(cellData)
         elif cellData["actualFoodPref"] != -1 and cellData["actualFoodPref"] < 0.5:
