@@ -21,6 +21,7 @@ from NewSimDia import NewSimDia
 from Algae import Alga
 from AlgaeBloom import Bloom
 import Sims
+import Saves
 
 # this enum class is used for encoding the tabs
 class Tabs(Enum):
@@ -59,17 +60,42 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
             
         self._currentSim = None # the current simulation
 
+        self._savePath = None # this will be used for storing the current save path
+
         self.actionNew_simulation.triggered.connect(lambda: self._newSimDia()) # when the "New gen" menu option is clicked
-        self.actionPause.triggered.connect(lambda: self.pauseApp())
+        self.actionPause.triggered.connect(lambda: self._pauseApp())
+        self.actionSavew.triggered.connect(lambda: self._saveSimulation())
+        self.actionSave_as.triggered.connect(lambda: self._saveAsSimulation())
 
         self.pausable = False # this property will check if the pause button should be accesible or not
         self._isPaused = False # stores whether the current simulation is paused or not, in order to know what the pause button should do
+
+
+    # save a simulation
+    def _saveSimulation(self):
+        if self.pausable == True: # only save when the sim can be paused, otherwise it's probably loading a generation and saving might corrupt data or something
+            if self._savePath == None:
+                self._saveAsSimulation()
+            else:
+                self._pauseApp() # pause before saving
+                newSave = Saves.SaveSim(self._currentSim, self._savePath)
+                newSave.saveSim()
+                self._pauseApp() # unpause
+
+    # for the save as action
+    def _saveAsSimulation(self):
+        if self.pausable == True:
+            self._pauseApp() # pause before savings
+            self._savePath, _extension = QtWidgets.QFileDialog.getSaveFileName(self, "Save Sim as", "C://", "Sim Files (*.sim)")
+            newSave = Saves.SaveSim(self._currentSim, self._savePath)
+            newSave.saveSim()
+            self._pauseApp() # unpause
 
     # sets the app's pausability to given boolean value
     def setPauseability(self, val):
         self.pausable = val
 
-    def pauseApp(self):
+    def _pauseApp(self):
         if self.pausable == True:
             if self._isPaused == False:
                 self._currentSim.pauseSim()

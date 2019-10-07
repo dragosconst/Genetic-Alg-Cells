@@ -91,8 +91,6 @@
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionAdd_cell"/>
-    <addaction name="actionAdd_food"/>
     <addaction name="actionPause"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -122,6 +120,9 @@
   <action name="actionSavew">
    <property name="text">
     <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionImport">
@@ -162,6 +163,9 @@
   <action name="actionPause">
    <property name="text">
     <string>Pause</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
   <action name="actionColors">

@@ -120,4 +120,8 @@ class Sim():
         self._currentGen[len(self._currentGen) - 1].killGen()
         self.startAnotherGen()
 
+    # methods that return stuff
+    def simData(self):
+        return self._simData
+
        

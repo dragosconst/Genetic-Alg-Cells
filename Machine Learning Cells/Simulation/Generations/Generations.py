@@ -42,7 +42,7 @@ class Gen():
         else:
             oneFifth = int(len(self._olderGen.cellsData()) / 5)
             parentsList = self._olderGen.cellsData()[:oneFifth]
-            noParentedCells = self._cellsNo / 2 - self._genNumber + 2 if self._cellsNo / 2 - self._genNumber + 2 >= 3 else 3 
+            noParentedCells = (self._cellsNo / 2 - self._genNumber + 2) if self._cellsNo / 2 - self._genNumber + 2 >= 3 else 3 
             noParentedCells = int(noParentedCells)
             for i in range(0, self._cellsNo - noParentedCells): # + 2 because the first generation with parents is the second one
                 self._scene.addItem(Cell(self._genData, self._genNumber, [rand.choice(parentsList), rand.choice(parentsList)]))
