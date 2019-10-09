@@ -11,7 +11,7 @@ import util
 class Gen():
     LIFETIME = 0 # this will be the amount of ms for which a generation lives
 
-    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simObj, mlWindow, simDia = None, olderGen = None, genNumber = 1):
+    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simObj, simDia = None, olderGen = None, genNumber = 1):
         Gen.LIFETIME = genSec * 1000
 
         # basic generation values
@@ -23,7 +23,6 @@ class Gen():
         self._simDia = simDia
         self._olderGen = olderGen
         self._genNumber = genNumber
-        self._mlWindow = mlWindow
         self._genData = GenData()
         self.killed = False
         self._simObj = simObj
@@ -88,7 +87,7 @@ class Gen():
         self._checkIfAlive()
 
         # set the app to be pausable
-        self._mlWindow.setPauseability(True)
+        self._simObj.setPauseability(True)
 
     def _checkIfAlive(self):
         if self._paused == True: # if the generation is paused, there is no reason to check if the generation should be killed
@@ -123,6 +122,6 @@ class Gen():
         self._simObj.startAnotherGen()
 
         # set the app to not be pausable
-        self._mlWindow.setPauseability(True)
+        self._simObj.setPauseability(True)
         
     

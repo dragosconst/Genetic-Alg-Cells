@@ -5,7 +5,7 @@
     <ProjectGuid>9f400719-8ff3-448c-9632-fa2951c7d9f1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>Main.py</StartupFile>
-    <SearchPath>..\Machine Learning Cells;Cells;Utilities;Walls;GUI;GUI\Dialogs\NewSimDia;GUI\Dialogs\ErrDias;Algae;Data;Data\GenData;Simulation;Simulation\Generations;Saving</SearchPath>
+    <SearchPath>..\Machine Learning Cells;Cells;Utilities;Walls;GUI;GUI\Dialogs\NewSimDia;GUI\Dialogs\ErrDias;Algae;Data;Data\GenData;Simulation;Simulation\Generations;Saving n Loading;Simulation</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Machine Learning Cells</Name>
@@ -28,7 +28,7 @@
     <Folder Include="GUI\Dialogs\" />
     <Folder Include="Algae\" />
     <Folder Include="Data\" />
-    <Folder Include="Saving\" />
+    <Folder Include="Saving n Loading\" />
     <Folder Include="Simulation\" />
     <Folder Include="Simulation\Generations\" />
     <Folder Include="Walls\" />
@@ -65,7 +65,10 @@
     <Compile Include="Main.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Saving\Saves.py">
+    <Compile Include="Saving n Loading\Loads.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Saving n Loading\Saves.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Simulation\Generations\Generations.py">

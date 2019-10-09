@@ -141,3 +141,33 @@ class GenData():
         return self._averageCarnSize
     def averageHerbSize(self):
         return self._averageHerbSize
+
+    # methods for directly setting gen vars
+    def setCellsData(self, cellsData):
+        self._cellsData = cellsData
+    def setCellsKilled(self, cellsKilled):
+        self._cellsKilled = cellsKilled
+    def setAlgaeEaten(self, algaeEaten):
+        self._algaeEaten = algaeEaten
+    def setCarnCells(self, carnCells):
+        self._carnCells = carnCells
+    def setHerbCells(self, herbCells):
+        self._herbCells = herbCells
+    def setDeadFromHunger(self, deadFromHunger):
+        self._deadFromHunger = deadFromHunger
+    def setCellsAteSomething(self, cellsAteSomething):
+        self._cellsAteSomething = cellsAteSomething
+    def setAverageSurvivability(self, averageSurvivability):
+        self._averageSurvivability = averageSurvivability
+    def setAverageSecondsAlive(self, averageSecondsAlive):
+        self._averageSecondsAlive = averageSecondsAlive
+    def setAverageActualFoodPref(self, averageActualFoodPref):
+        self._averageActualFoodPref = averageActualFoodPref
+    def setAverageInitFoodPref(self, averageInitFoodPref):
+        self._averageInitFoodPref = averageInitFoodPref
+    def setAverageSize(self, averageSize):
+        self._averageSize = averageSize
+    def setAverageCarnSize(self, averageCarnSize):
+        self._averageCarnSize = averageCarnSize
+    def setAverageHerbSize(self, averageHerbSize):
+        self._averageHerbSize = averageHerbSize

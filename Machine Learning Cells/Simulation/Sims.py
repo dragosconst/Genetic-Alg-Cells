@@ -21,6 +21,7 @@ class Sim():
         self._simDia = simDia
         self._simData = SimData()
         self._mlWindow = mlWindow # this is the main window object
+        self._pausable = False
 
         self._currentGen = [] # the current generation
         self._averageSimSurvOverTime = [] # for drawing the graphs, the list will contain the average sim surv over generations
@@ -30,6 +31,13 @@ class Sim():
         self._averageSimSecAliveOverTime = []
         self._averageSimActFPOverTime = []
         self._averageInitFPOverTime = []
+
+    # change pauseability value
+    def setPauseability(self, val):
+        self._pausable = val
+
+    def pauseability(self):
+        return self._pausable
 
     # add walls to the scene
     # this method is handled by this class, because the walls remain the same throughout all the generations
@@ -52,7 +60,7 @@ class Sim():
         # this updateGraphs call will just draw some empty graphs on their reserved area of the screen
         # if the method is not called here, the window would look weird with a big empty white square on the bottom right corner
         self.updateGraphs()
-        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._mlWindow, self._simDia))
+        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._simDia))
         self._currentGen[len(self._currentGen) - 1].startGeneration()
 
     # for generations starting from the second
@@ -74,10 +82,29 @@ class Sim():
         olderGen = self._simData.gens()[len(self._simData.gens()) - 1]
        
         genNo = len(self._simData.gens()) + 1
-        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._mlWindow, None, 
+        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None, 
                                     olderGen, genNo))
         # finally, start the generation
         self._currentGen[len(self._currentGen) - 1].startGeneration()
+
+
+    # for loading a simulation
+    def startLoadSim(self):
+        self._addWalls()
+
+        # update the graph drawings
+        self.updateGraphs()
+
+        # this is needed for creating a new generation(it must have data from the old generation)
+        olderGen = self._simData.gens()[len(self._simData.gens()) - 1]
+
+        genNo = len(self._simData.gens()) + 1
+        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
+                                    olderGen, genNo))
+        # finally, start the generation
+        self._currentGen[len(self._currentGen) - 1].startGeneration()
+
+
 
     # call this to kill the current sim
     def killSim(self):
@@ -123,5 +150,40 @@ class Sim():
     # methods that return stuff
     def simData(self):
         return self._simData
+    def cellsNo(self):
+        return self._cellsNo
+    def algaeNo(self):
+        return self._algaeNo
+    def genSec(self):
+        return self._genSec
+    def averageSimSurvOverTime(self):
+        return self._averageSimSurvOverTime
+    def averageSimSizeOverTime(self):
+        return self._averageSimSizeOverTime
+    def averageSimCarnSizeOverTime(self):
+        return self._averageSimCarnSizeOverTime
+    def averageSimHerbSizeOverTime(self):
+        return self._averageSimHerbSizeOverTime
+    def averageSimSecAliveOverTime(self):
+        return self._averageSimSecAliveOverTime
+    def averageSimActFPOverTime(self):
+        return self._averageSimActFPOverTime
+    def averageInitFPOverTime(self):
+        return self._averageInitFPOverTime
+    def currentGen(self):
+        return self._currentGen
 
+    # for setting the values directly
+    def setGraphVals(self, size, csize, hsize, secs, actfp, inifp, surv):
+        self._averageSimSizeOverTime = size
+        self._averageSimCarnSizeOverTime = csize
+        self._averageSimHerbSizeOverTime = hsize
+        self._averageSimSecAliveOverTime = secs
+        self._averageSimActFPOverTime = actfp
+        self._averageInitFPOverTime = inifp
+        self._averageSimSurvOverTime = surv
+    def setCrGen(self, currGen):
+        self._currentGen = currGen
+    def setSimData(self, simData):
+        self._simData = simData
        

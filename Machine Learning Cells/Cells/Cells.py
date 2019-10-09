@@ -168,7 +168,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
         self._paused = False # these variables will be used far handling pauses
         self._pauseClock = QtCore.QTime()
-        self._timePaused = 0
+        self._timePaused = 0 # this only affects some stuff in the update loop
+        self._timePausedDead = 0 # this is for the die method
         self._turnTimeLeft = 0 # this will store for how much time the cell was supposed to go in a certain direction it has chosen before pausing
         ##
 
@@ -891,6 +892,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     def restartCell(self):
         self._paused = False
         self._timePaused += self._pauseClock.elapsed()
+        self._timePausedDead += self._pauseClock.elapsed()
         self._timeDir.start(self._turnTimeLeft) # restart the timeDir with how much time it had left before the pause
 
     # HERE START METHODS RELATED TO MOVING THE CELL
@@ -1177,7 +1179,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         if self.dead == True:
             return
         # calculate all the post-mortem variables
-        self.secondsAlive = self.hungerTime.elapsed()
+        self.secondsAlive = self.hungerTime.elapsed() - self._timePausedDead
         self.survivability = self.secondsAlive + max(self.kills, self.algae)
         self.actualFoodPref = self.kills / (self.algae + self.kills) if self.algae + self.kills > 0 else -1 # if it ate nothing, set its FP to -1
 

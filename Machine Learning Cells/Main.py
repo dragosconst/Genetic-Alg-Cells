@@ -22,6 +22,7 @@ from Algae import Alga
 from AlgaeBloom import Bloom
 import Sims
 import Saves
+import Loads
 
 # this enum class is used for encoding the tabs
 class Tabs(Enum):
@@ -66,14 +67,27 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self.actionPause.triggered.connect(lambda: self._pauseApp())
         self.actionSavew.triggered.connect(lambda: self._saveSimulation())
         self.actionSave_as.triggered.connect(lambda: self._saveAsSimulation())
+        self.actionOpen.triggered.connect(lambda: self._loadSim())
 
-        self.pausable = False # this property will check if the pause button should be accesible or not
         self._isPaused = False # stores whether the current simulation is paused or not, in order to know what the pause button should do
 
 
+    # load a simulation
+    def _loadSim(self):
+        if (self._currentSim is not None and self._currentSim.pauseability() == True) or self._currentSim == None: # dont load sims in pauses between generations of an ongoing sim
+            if self._currentSim is not None:
+                self._pauseApp() # pause the sim
+            loadPath, _extension = QtWidgets.QFileDialog.getOpenFileName(self, "Select a Sim to load", "C://", "Sim Files (*.sim)")
+            if _extension != "":
+                oldSim = Loads.LoadSim(loadPath, self.mapScene, self)
+                self._currentSim = oldSim.loadSim()
+                self._currentSim.startLoadSim()
+            if self._currentSim is not None and self._isPaused == True:
+                self._pauseApp() # unpause the sim
+
     # save a simulation
     def _saveSimulation(self):
-        if self.pausable == True: # only save when the sim can be paused, otherwise it's probably loading a generation and saving might corrupt data or something
+        if self._currentSim is not None and self._currentSim.pauseability() == True: # only save when the sim can be paused, otherwise it's probably loading a generation and saving might corrupt data or something
             if self._savePath == None:
                 self._saveAsSimulation()
             else:
@@ -84,19 +98,16 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
 
     # for the save as action
     def _saveAsSimulation(self):
-        if self.pausable == True:
+        if self._currentSim is not None and self._currentSim.pauseability() == True:
             self._pauseApp() # pause before savings
             self._savePath, _extension = QtWidgets.QFileDialog.getSaveFileName(self, "Save Sim as", "C://", "Sim Files (*.sim)")
-            newSave = Saves.SaveSim(self._currentSim, self._savePath)
-            newSave.saveSim()
+            if _extension != "":
+                newSave = Saves.SaveSim(self._currentSim, self._savePath)
+                newSave.saveSim()
             self._pauseApp() # unpause
 
-    # sets the app's pausability to given boolean value
-    def setPauseability(self, val):
-        self.pausable = val
-
     def _pauseApp(self):
-        if self.pausable == True:
+        if self._currentSim is not None and self._currentSim.pauseability() == True:
             if self._isPaused == False:
                 self._currentSim.pauseSim()
                 self.actionPause.setText("Unpause")

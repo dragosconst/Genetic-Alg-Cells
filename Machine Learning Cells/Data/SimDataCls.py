@@ -126,3 +126,37 @@ class SimData():
         return self._averageSimInitFP
     def averageSimSurv(self):
         return self._averageSimSurv
+    
+    # methods for directly setting these vars, needed for loading old sims
+    def setGens(self, gens):
+        self._gens = gens
+    def setCells(self, cells):
+        self._cells = cells
+    def setCarnCells(self, carnCells):
+        self._carnCells = carnCells
+    def setHerbCells(self, herbCells):
+        self._herbCells = herbCells
+    def setCellsKilled(self, cellsKilled):
+        self._cellsKilled = cellsKilled
+    def setAlgaeEaten(self, algae):
+        self._algaeEaten = algae
+    def setDeadFromHunger(self, deadFromHunger):
+        self._deadFromHunger = deadFromHunger
+    def setCellsAteSomething(self, cellsAteSomething):
+        self._cellsAteSomething = cellsAteSomething
+    def setTotalTime(self, totalTime):
+        self._totalTime = totalTime
+    def setAverageSimSize(self, averageSimSize):
+        self._averageSimSize = averageSimSize
+    def setAverageSimCarnSize(self, averageSimCarnSize):
+        self._averageSimCarnSize = averageSimCarnSize
+    def setAverageSimHerbSize(self, averageSimHerbSize):
+        self._averageSimHerbSize = averageSimHerbSize
+    def setAverageSimSecondsAlive(self, averageSimSecondsAlive):
+        self._averageSimSecondsAlive = averageSimSecondsAlive
+    def setAverageSimActFP(self, averageSimActFP):
+        self._averageSimActFP = averageSimActFP
+    def setAverageSimInitFP(self, averageSimInitFP):
+        self._averageSimInitFP = averageSimInitFP
+    def setAverageSimSurv(self, averageSimSurv):
+        self._averageSimSurv = averageSimSurv
