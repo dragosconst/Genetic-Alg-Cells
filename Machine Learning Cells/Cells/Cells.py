@@ -2,7 +2,7 @@ import math
 import random as rand
 from enum import Enum
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PySide2 import QtCore, QtWidgets, QtGui
 import numpy as np
 
 import util
@@ -396,7 +396,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         perpLine = QtCore.QLineF(point.x(), point.y(), point.x(), 0.0)
         perpLine.setAngle(90 + line.angle()) # rotates the new line in such a way that it becomes perpendicular on the old line
         interPoint = QtCore.QPointF(0, 0)
-        line.intersect(perpLine, interPoint)
+        __interType, interPoint = line.intersect(perpLine)
         return interPoint
     # this method will calculate the distance between a line and a point in a clever way
     def _disToLine(self, point, line):
@@ -593,17 +593,17 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             interSidePoint = QtCore.QPointF(0, 0)
             interOpPoint = QtCore.QPointF(0, 0)
             if side == 1:
-                line1.intersect(interSideLine, interSidePoint)
-                line3.intersect(interOpLine, interOpPoint)
+                __interType, interSidePoint = line1.intersect(interSideLine)
+                __interType, interOpPoint = line3.intersect(interOpLine)
             elif side == 2:
-                line2.intersect(interSideLine, interSidePoint)
-                line4.intersect(interOpLine, interOpPoint)
+                __interType, interSidePoint = line2.intersect(interSideLine)
+                __interType, interOpPoint = line4.intersect(interOpLine)
             elif side == 3:
-                line3.intersect(interSideLine, interSidePoint)
-                line1.intersect(interOpLine, interOpPoint)
+                __interType, interSidePoint = line3.intersect(interSideLine)
+                __interType, interOpPoint = line1.intersect(interOpLine)
             else:
-                line4.intersect(interSideLine, interSidePoint)
-                line2.intersect(interOpLine, interOpPoint)
+                __interType, interSidePoint = line4.intersect(interSideLine)
+                __interType, interOpPoint = line2.intersect(interOpLine)
             sideY = interSidePoint.y()
             opSideY = interOpPoint.y()
 
@@ -941,7 +941,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             self._timePaused = 0 # time paused only affects the turn time timer and timeDir timer directly 
         if self._turnTime.elapsed() - self._timePaused >= 250 and self._alga is not None:
             dirAngle = QtCore.QLineF(self.actualPos(), self._alga.pos()).angle()
-            self._timePaused = 0 # time paused only affects the turn time timer and timeDir timer directly 
+            self._timePaused = 0 # time paused only affects the turn time timer and timeDir timer directly
         
         # if it somehow ends up outside the scene(if the time between two frames is huge, this might happen)
         if self.actualPos().x() <= 0 or self.actualPos().x() >= 1000:
@@ -1066,7 +1066,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     # returns the length from the first point of the first line to the second line
     def _lenToLine(self, line1, line2):
         interPoint = QtCore.QPointF()
-        intersects = line1.intersect(line2, interPoint)
+        intersects, interPoint = line1.intersect(line2)
         if intersects == 0: # if they dont intersect
             return 999999 # return a very high value if they are parallel
         return QtCore.QLineF(line1.p1(), interPoint).length()

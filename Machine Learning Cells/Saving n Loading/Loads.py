@@ -1,6 +1,6 @@
 import re
 
-from PyQt5 import QtCore
+from PySide2 import QtCore
 
 from GenDataCls import GenData, CellData
 from SimDataCls import SimData
@@ -25,7 +25,8 @@ class LoadSim():
             print(err, errMsg)
             return
         # the readAll returns a QByteArray, which is converted in the following manner to a regular string
-        saveStr = bytes(simFile.readAll()).decode()
+        textStream = QtCore.QTextStream(simFile)
+        saveStr = textStream.readAll()
         # separate the saveString in this way in order to simplify searching for values
         saveStr = re.split(": |\n|\t|\t\t", saveStr)
         simData = self._createSimDataFromStr(saveStr)

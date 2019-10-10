@@ -1,5 +1,7 @@
 
-from PyQt5 import QtCore
+from PySide2 import QtCore
+
+import util
 
 # this class will handle saving generations
 class SaveSim():
@@ -36,7 +38,6 @@ class SaveSim():
         saveStr += "\nthere are: " + str(len(self._simData.gens())) + "\tgenerations: "
         allGens = len(self._simData.gens())
         # add every generation
-        # don't save the ongoing generation yet
         for i in range(allGens - 1):
             thisGen = self._simData.gens()[i]
             # general data about the generation
@@ -78,8 +79,6 @@ class SaveSim():
                 saveStr += "\n\t\tcell survivability: " + str(thisCell.data["survivability"])
                 saveStr += "\n\t\tcell init food pref: " + str(thisCell.data["initFoodPref"])
                 saveStr += "\n\t\tcell actual food pref: " + str(thisCell.data["actualFoodPref"])
-            
-                
         return saveStr
 
     # create the save file

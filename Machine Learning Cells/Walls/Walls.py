@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PySide2 import QtWidgets, QtCore, QtGui
 
 # this will be the class of the walls that border the available area for 
 class Wall(QtWidgets.QGraphicsRectItem):

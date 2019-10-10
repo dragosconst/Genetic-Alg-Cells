@@ -1,5 +1,5 @@
 
-from PyQt5 import QtCore
+from PySide2 import QtCore
 from matplotlib.figure import Figure # at this point, these are imported only for testing stuff, although they might prove to be useful later on
 from matplotlib.backends.backend_qt5agg import(
     FigureCanvasQTAgg as FigureCanvas,
@@ -23,7 +23,8 @@ class Sim():
         self._mlWindow = mlWindow # this is the main window object
         self._pausable = False
 
-        self._currentGen = [] # the current generation
+        self._allGens = [] # a list containing all the generation objects of the simulation
+        self._currentGen = None # this will be the on-going generation
         self._averageSimSurvOverTime = [] # for drawing the graphs, the list will contain the average sim surv over generations
         self._averageSimSizeOverTime = [] # like the previous list, but for sizes
         self._averageSimCarnSizeOverTime = []
@@ -60,8 +61,9 @@ class Sim():
         # this updateGraphs call will just draw some empty graphs on their reserved area of the screen
         # if the method is not called here, the window would look weird with a big empty white square on the bottom right corner
         self.updateGraphs()
-        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._simDia))
-        self._currentGen[len(self._currentGen) - 1].startGeneration()
+        self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._simDia)
+        self._allGens.append(self._currentGen)
+        self._allGens[len(self._allGens) - 1].startGeneration()
 
     # for generations starting from the second
     def startAnotherGen(self):
@@ -82,10 +84,11 @@ class Sim():
         olderGen = self._simData.gens()[len(self._simData.gens()) - 1]
        
         genNo = len(self._simData.gens()) + 1
-        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None, 
-                                    olderGen, genNo))
+        self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
+                                    olderGen, genNo)
+        self._allGens.append(self._currentGen)
         # finally, start the generation
-        self._currentGen[len(self._currentGen) - 1].startGeneration()
+        self._allGens[len(self._allGens) - 1].startGeneration()
 
 
     # for loading a simulation
@@ -99,10 +102,11 @@ class Sim():
         olderGen = self._simData.gens()[len(self._simData.gens()) - 1]
 
         genNo = len(self._simData.gens()) + 1
-        self._currentGen.append(Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
-                                    olderGen, genNo))
+        self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
+                                    olderGen, genNo)
+        self._allGens.append(self._currentGen)
         # finally, start the generation
-        self._currentGen[len(self._currentGen) - 1].startGeneration()
+        self._allGens[len(self._allGens) - 1].startGeneration()
 
 
 
@@ -113,7 +117,7 @@ class Sim():
 
     # method that handles drawing graphs in between generations
     def updateGraphs(self):
-        allGens = list(range(1, len(self._currentGen) + 1))
+        allGens = list(range(1, len(self._allGens) + 1))
         figSurv, axSurv = util.createGraph(allGens, self._averageSimSurvOverTime, "blue")
         self._mlWindow.updateTab(Main.Tabs.SimSurvTab.value, figSurv, axSurv, allGens, self._averageSimSurvOverTime, Main.Tabs.SimSurvTitle.value, "blue")
 
@@ -137,17 +141,19 @@ class Sim():
 
     # pause a simulation
     def pauseSim(self):
-        self._currentGen[len(self._currentGen) - 1].pauseGen()
+        self._currentGen.pauseGen()
     # restart a simulation after a pause
     def restartSim(self):
-        self._currentGen[len(self._currentGen) - 1].restartGen()
+        self._currentGen.restartGen()
 
     # call this to kill the ongoing generation
     def killCurrGen(self):
-        self._currentGen[len(self._currentGen) - 1].killGen()
+        self._currentGen.killGen()
         self.startAnotherGen()
 
     # methods that return stuff
+    def scene(self):
+        return self._scene
     def simData(self):
         return self._simData
     def cellsNo(self):
@@ -171,7 +177,7 @@ class Sim():
     def averageInitFPOverTime(self):
         return self._averageInitFPOverTime
     def currentGen(self):
-        return self._currentGen
+        return self._allGens
 
     # for setting the values directly
     def setGraphVals(self, size, csize, hsize, secs, actfp, inifp, surv):
@@ -183,7 +189,7 @@ class Sim():
         self._averageInitFPOverTime = inifp
         self._averageSimSurvOverTime = surv
     def setCrGen(self, currGen):
-        self._currentGen = currGen
+        self._allGens = currGen
     def setSimData(self, simData):
         self._simData = simData
        

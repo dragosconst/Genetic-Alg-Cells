@@ -5,7 +5,7 @@ import sys
 from enum import Enum
 
 # here we import third party libraries\modules
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtGui, QtWidgets
 from matplotlib.figure import Figure # at this point, these are imported only for testing stuff, although they might prove to be useful later on
 from matplotlib.backends.backend_qt5agg import(
     FigureCanvasQTAgg as FigureCanvas,
@@ -45,7 +45,7 @@ class Tabs(Enum):
 # its methods handle stuff directly related to the functionality of the main window AND JUST THAT
 # all the classes and methods relevant to the evolutionary algorithm can be found in other files
 class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
-    def __init__(self): 
+    def __init__(self):
         super().__init__()
         self.setupUi(self)
 
@@ -58,7 +58,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._axes = [] # the axis of the plots
         self._figs = [] # the figure objects
         self._navtbs = [] # this list will contain every nav toolbar from every tab
-            
+
         self._currentSim = None # the current simulation
 
         self._savePath = None # this will be used for storing the current save path
@@ -79,6 +79,8 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
                 self._pauseApp() # pause the sim
             loadPath, _extension = QtWidgets.QFileDialog.getOpenFileName(self, "Select a Sim to load", "C://", "Sim Files (*.sim)")
             if _extension != "":
+                if self._currentSim is not None: # if there was another sim running previous to this one
+                    self._delOldSim()
                 oldSim = Loads.LoadSim(loadPath, self.mapScene, self)
                 self._currentSim = oldSim.loadSim()
                 self._currentSim.startLoadSim()
@@ -100,6 +102,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def _saveAsSimulation(self):
         if self._currentSim is not None and self._currentSim.pauseability() == True:
             self._pauseApp() # pause before savings
+            print("pulicika ya")
             self._savePath, _extension = QtWidgets.QFileDialog.getSaveFileName(self, "Save Sim as", "C://", "Sim Files (*.sim)")
             if _extension != "":
                 newSave = Saves.SaveSim(self._currentSim, self._savePath)
@@ -119,6 +122,8 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
 
     # opens a dialog for creating a new generation
     def _newSimDia(self):
+        if self._currentSim is not None:
+            self._currentSim.pauseSim()
         newSimDialog = NewSimDia(self)
         newSimDialog.exec_()
 
@@ -171,8 +176,6 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._tabLayouts[currentIndex].addWidget(self._plots[currentIndex])
         self._navtbs.append(NavToolbar(self._plots[currentIndex], newTab, coordinates = True)) # adds a nav toolbar under the graph
         self._tabLayouts[currentIndex].addWidget(self._navtbs[currentIndex])
-        
-
 
     # this function should change a tab's content with the newly given plot
     def updateTab(self, index, fig, axis, xVals, yVals, title="", col="blue"):
@@ -187,7 +190,6 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         currAxis.cla()
         currAxis.plot(xVals, yVals, color=col)
         oldFig.canvas.draw()
-        
 
     # this functions deletes the tab specified by the index
     def removeTabs(self):
@@ -198,12 +200,16 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
             del currWid
             tabNo -= 1
 
+    # functions that return stuff
+    def currentSim(self):
+        return self._currentSim
+
 
 if __name__ == '__main__': # yeah i guess we have to use this
     app = QtWidgets.QApplication(sys.argv)
     qtApp = MLCellWindow()
     qtApp.show()
 
-    
+
     sys.exit(app.exec_())
 

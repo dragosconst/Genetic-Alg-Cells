@@ -182,6 +182,9 @@
    <property name="text">
     <string>New simulation</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
  </widget>
  <resources/>

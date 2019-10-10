@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PySide2 import QtCore, QtWidgets, QtGui
 
 from NewSimBase import Ui_NewSimDialogBase
 from CellNoErrDia import CellNoErr
@@ -14,6 +14,7 @@ class NewSimDia(Ui_NewSimDialogBase, QtWidgets.QDialog):
         self.algaeNoLine.setValidator(QtGui.QIntValidator())
 
         self.okButton.clicked.connect(lambda: self._passData(MLwindow))
+        self.cancelButton.clicked.connect(lambda: self.closeSelf(MLwindow))
         
 
     def _passData(self, MLwindow):
@@ -41,3 +42,8 @@ class NewSimDia(Ui_NewSimDialogBase, QtWidgets.QDialog):
            int(self.algaeNoLine.text()) if self.algaeNoLine.text() != "" else 0)
         self.close()
 
+    def closeSelf(self, MLwindow):
+        # unpause the current sim
+        if MLwindow.currentSim() is not None:
+            MLwindow.currentSim().restartSim()
+        self.close()

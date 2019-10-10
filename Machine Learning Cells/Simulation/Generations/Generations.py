@@ -1,6 +1,6 @@
 import random as rand
 
-from PyQt5 import QtCore
+from PySide2 import QtCore
 
 from Cells import Cell
 from AlgaeBloom import Bloom

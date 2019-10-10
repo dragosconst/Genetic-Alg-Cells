@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_window.ui'
+# Form implementation generated from reading ui file 'main_window.ui',
+# licensing of 'main_window.ui' applies.
 #
-# Created by: PyQt5 UI code generator 5.13.0
+# Created: Thu Oct 10 22:48:20 2019
+#      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
 
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PySide2 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -19,7 +19,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
-        MainWindow.setCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+        MainWindow.setCursor(QtCore.Qt.WaitCursor)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -108,24 +108,25 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.menuFile.setTitle(_translate("MainWindow", "File"))
-        self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
-        self.menuView.setTitle(_translate("MainWindow", "View"))
-        self.menuWindow.setTitle(_translate("MainWindow", "Window"))
-        self.menuHelp.setTitle(_translate("MainWindow", "Help"))
-        self.actionSavew.setText(_translate("MainWindow", "Save"))
-        self.actionSavew.setShortcut(_translate("MainWindow", "Ctrl+S"))
-        self.actionImport.setText(_translate("MainWindow", "Open"))
-        self.actionReset.setText(_translate("MainWindow", "Reset"))
-        self.actionSave_as.setText(_translate("MainWindow", "Save as..."))
-        self.actionOpen.setText(_translate("MainWindow", "Open"))
-        self.actionExport_as.setText(_translate("MainWindow", "Export as..."))
-        self.actionAdd_cell.setText(_translate("MainWindow", "Add cell"))
-        self.actionAdd_food.setText(_translate("MainWindow", "Add food"))
-        self.actionPause.setText(_translate("MainWindow", "Pause"))
-        self.actionPause.setShortcut(_translate("MainWindow", "Ctrl+P"))
-        self.actionColors.setText(_translate("MainWindow", "Colors"))
-        self.actionStyle.setText(_translate("MainWindow", "Style"))
-        self.actionNew_simulation.setText(_translate("MainWindow", "New simulation"))
+        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "MainWindow", None, -1))
+        self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))
+        self.menuEdit.setTitle(QtWidgets.QApplication.translate("MainWindow", "Edit", None, -1))
+        self.menuView.setTitle(QtWidgets.QApplication.translate("MainWindow", "View", None, -1))
+        self.menuWindow.setTitle(QtWidgets.QApplication.translate("MainWindow", "Window", None, -1))
+        self.menuHelp.setTitle(QtWidgets.QApplication.translate("MainWindow", "Help", None, -1))
+        self.actionSavew.setText(QtWidgets.QApplication.translate("MainWindow", "Save", None, -1))
+        self.actionSavew.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+S", None, -1))
+        self.actionImport.setText(QtWidgets.QApplication.translate("MainWindow", "Open", None, -1))
+        self.actionReset.setText(QtWidgets.QApplication.translate("MainWindow", "Reset", None, -1))
+        self.actionSave_as.setText(QtWidgets.QApplication.translate("MainWindow", "Save as...", None, -1))
+        self.actionOpen.setText(QtWidgets.QApplication.translate("MainWindow", "Open", None, -1))
+        self.actionExport_as.setText(QtWidgets.QApplication.translate("MainWindow", "Export as...", None, -1))
+        self.actionAdd_cell.setText(QtWidgets.QApplication.translate("MainWindow", "Add cell", None, -1))
+        self.actionAdd_food.setText(QtWidgets.QApplication.translate("MainWindow", "Add food", None, -1))
+        self.actionPause.setText(QtWidgets.QApplication.translate("MainWindow", "Pause", None, -1))
+        self.actionPause.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+P", None, -1))
+        self.actionColors.setText(QtWidgets.QApplication.translate("MainWindow", "Colors", None, -1))
+        self.actionStyle.setText(QtWidgets.QApplication.translate("MainWindow", "Style", None, -1))
+        self.actionNew_simulation.setText(QtWidgets.QApplication.translate("MainWindow", "New simulation", None, -1))
+        self.actionNew_simulation.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+N", None, -1))
+
