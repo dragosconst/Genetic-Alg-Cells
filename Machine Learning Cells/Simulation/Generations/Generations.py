@@ -11,7 +11,7 @@ import util
 class Gen():
     LIFETIME = 0 # this will be the amount of ms for which a generation lives
 
-    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simObj, simDia = None, olderGen = None, genNumber = 1):
+    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simObj, simDia = None, olderGen = None, genNumber = 1, nextGenBar = None):
         Gen.LIFETIME = genSec * 1000
 
         # basic generation values
@@ -23,6 +23,7 @@ class Gen():
         self._simDia = simDia
         self._olderGen = olderGen
         self._genNumber = genNumber
+        self._nextGenBar = nextGenBar
         self._genData = GenData()
         self.killed = False
         self._simObj = simObj
@@ -77,14 +78,16 @@ class Gen():
         Alga.disjoint = 0
         Alga.population = 0
         self._addAlgae()
-        Alga.resetAlgae(self._scene, self._simDia, self._algaeNo + self._cellsNo)
+        Alga.resetAlgae(self._scene, self._simDia, self._algaeNo + self._cellsNo, 0, None if self._genNumber == 1 else self._nextGenBar)
 
         Cell.CELL_GEN_POP = self._cellsNo
         Cell.cellDisjoint = 0
         self._addCells()
-        Cell.resetCells(self._scene, self._simDia, self._algaeNo + self._cellsNo, self._algaeNo)
+        Cell.resetCells(self._scene, self._simDia, self._algaeNo + self._cellsNo, self._algaeNo, None if self._genNumber == 1 else self._nextGenBar)
         Cell.startMoving(self._scene)
         self._checkIfAlive()
+        if self._nextGenBar is not None:
+            self._nextGenBar.setValue(0)
 
         # set the app to be pausable
         self._simObj.setPauseability(True)

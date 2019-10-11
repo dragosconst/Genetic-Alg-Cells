@@ -85,7 +85,7 @@ class Sim():
        
         genNo = len(self._simData.gens()) + 1
         self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
-                                    olderGen, genNo)
+                                    olderGen, genNo, self._mlWindow.nextGenBar)
         self._allGens.append(self._currentGen)
         # finally, start the generation
         self._allGens[len(self._allGens) - 1].startGeneration()
@@ -103,7 +103,7 @@ class Sim():
 
         genNo = len(self._simData.gens()) + 1
         self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
-                                    olderGen, genNo)
+                                    olderGen, genNo, self._mlWindow.nextGenBar)
         self._allGens.append(self._currentGen)
         # finally, start the generation
         self._allGens[len(self._allGens) - 1].startGeneration()

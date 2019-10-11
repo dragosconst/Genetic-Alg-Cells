@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main_window.ui',
 # licensing of 'main_window.ui' applies.
 #
-# Created: Thu Oct 10 22:48:20 2019
+# Created: Fri Oct 11 12:54:29 2019
 #      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,9 +36,25 @@ class Ui_MainWindow(object):
         self.mainLayout.addWidget(self.mapGView)
         self.statsLayout = QtWidgets.QVBoxLayout()
         self.statsLayout.setObjectName("statsLayout")
-        self.cellNfo = QtWidgets.QWidget(self.centralwidget)
-        self.cellNfo.setObjectName("cellNfo")
-        self.statsLayout.addWidget(self.cellNfo)
+        self.generalStatsLay = QtWidgets.QVBoxLayout()
+        self.generalStatsLay.setObjectName("generalStatsLay")
+        self.progBarLayout = QtWidgets.QHBoxLayout()
+        self.progBarLayout.setObjectName("progBarLayout")
+        self.nextGenText = QtWidgets.QLabel(self.centralwidget)
+        self.nextGenText.setAlignment(QtCore.Qt.AlignCenter)
+        self.nextGenText.setObjectName("nextGenText")
+        self.progBarLayout.addWidget(self.nextGenText)
+        self.nextGenBar = QtWidgets.QProgressBar(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.nextGenBar.sizePolicy().hasHeightForWidth())
+        self.nextGenBar.setSizePolicy(sizePolicy)
+        self.nextGenBar.setProperty("value", 0)
+        self.nextGenBar.setObjectName("nextGenBar")
+        self.progBarLayout.addWidget(self.nextGenBar)
+        self.generalStatsLay.addLayout(self.progBarLayout)
+        self.statsLayout.addLayout(self.generalStatsLay)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.statsLayout.addItem(spacerItem)
         self.graphs = QtWidgets.QTabWidget(self.centralwidget)
@@ -109,6 +125,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "MainWindow", None, -1))
+        self.nextGenText.setText(QtWidgets.QApplication.translate("MainWindow", "New Gen Loading progress", None, -1))
         self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))
         self.menuEdit.setTitle(QtWidgets.QApplication.translate("MainWindow", "Edit", None, -1))
         self.menuView.setTitle(QtWidgets.QApplication.translate("MainWindow", "View", None, -1))
@@ -120,6 +137,7 @@ class Ui_MainWindow(object):
         self.actionReset.setText(QtWidgets.QApplication.translate("MainWindow", "Reset", None, -1))
         self.actionSave_as.setText(QtWidgets.QApplication.translate("MainWindow", "Save as...", None, -1))
         self.actionOpen.setText(QtWidgets.QApplication.translate("MainWindow", "Open", None, -1))
+        self.actionOpen.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+O", None, -1))
         self.actionExport_as.setText(QtWidgets.QApplication.translate("MainWindow", "Export as...", None, -1))
         self.actionAdd_cell.setText(QtWidgets.QApplication.translate("MainWindow", "Add cell", None, -1))
         self.actionAdd_food.setText(QtWidgets.QApplication.translate("MainWindow", "Add food", None, -1))

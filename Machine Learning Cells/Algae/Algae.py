@@ -15,7 +15,7 @@ class Alga(QtWidgets.QGraphicsEllipseItem):
     ALGAE_RAD = 10 # at the moment, all algae have the same radius
 
     @classmethod
-    def resetAlgae(cls, scene, simDia = None, totalEntities = 0, soFar = 0):
+    def resetAlgae(cls, scene, simDia = None, totalEntities = 0, soFar = 0, nextGenBar = None):
         if scene is None: # if the scene object was not constructed, wait a bit for it(by recalling the function 10 ms later)
             reset = QtCore.QTimer()
             reset.singleShot(10, lambda: cls.resetAlgae(scene))
@@ -28,10 +28,15 @@ class Alga(QtWidgets.QGraphicsEllipseItem):
                     cls.disjoint += 1
                     if simDia is not None:
                         simDia.loadNewSim.setValue((cls.disjoint + soFar) / totalEntities)
+                    if nextGenBar is not None:
+                        nextGenBar.setValue((cls.disjoint + soFar) / totalEntities)
+
                 else:
                     cls.disjoint += 1
                     if simDia is not None:
                         simDia.loadNewSim.setValue((cls.disjoint + soFar) / totalEntities)
+                    if nextGenBar is not None:
+                        nextGenBar.setValue((cls.disjoint + soFar) / totalEntities)
 
     # this method works only at the init phase, in which the cells have not been drawn yet
     @classmethod
