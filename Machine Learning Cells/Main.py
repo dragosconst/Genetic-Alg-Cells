@@ -102,7 +102,6 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     def _saveAsSimulation(self):
         if self._currentSim is not None and self._currentSim.pauseability() == True:
             self._pauseApp() # pause before savings
-            print("pulicika ya")
             self._savePath, _extension = QtWidgets.QFileDialog.getSaveFileName(self, "Save Sim as", "C://", "Sim Files (*.sim)")
             if _extension != "":
                 newSave = Saves.SaveSim(self._currentSim, self._savePath)

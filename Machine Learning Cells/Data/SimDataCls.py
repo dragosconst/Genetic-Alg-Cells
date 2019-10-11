@@ -54,17 +54,17 @@ class SimData():
         if genData.averageHerbSize() > 0: # if there were any herb cells at all
             self._gensWithHerb += 1
             self._updateSimHerbSizeAvg(genData)
-        self._updateSimSecAliveAvgian(genData)
+        self._updateSimSecAliveAvg(genData)
         self._updateSimActFPAvg(genData)
         self._updateSimInitFPAvg(genData)
-        self._updateSimSurvAvgian(genData)
+        self._updateSimSurvAvg(genData)
 
     # some update methods
-    def _updateSimSurvAvgian(self, genData):
+    def _updateSimSurvAvg(self, genData):
         self._averageSimSurv *= (len(self._gens) - 1)
         self._averageSimSurv += genData.averageSurvivability()
         self._averageSimSurv /= len(self._gens)
-    def _updateSimSecAliveAvgian(self, genData):
+    def _updateSimSecAliveAvg(self, genData):
         self._averageSimSecondsAlive *= (len(self._gens) - 1)
         self._averageSimSecondsAlive += genData.averageSecondsAlive()
         self._averageSimSecondsAlive /= len(self._gens)
@@ -126,6 +126,12 @@ class SimData():
         return self._averageSimInitFP
     def averageSimSurv(self):
         return self._averageSimSurv
+    def gensWithCarn(self):
+        return self._gensWithCarn
+    def gensWithHerb(self):
+        return self._gensWithHerb
+    def gensActFP(self):
+        return self._gensWithActualFP
     
     # methods for directly setting these vars, needed for loading old sims
     def setGens(self, gens):
@@ -160,3 +166,9 @@ class SimData():
         self._averageSimInitFP = averageSimInitFP
     def setAverageSimSurv(self, averageSimSurv):
         self._averageSimSurv = averageSimSurv
+    def setGensCarn(self, gensCarn):
+        self._gensWithCarn = gensCarn
+    def setGensHerb(self, gensHerb):
+        self._gensWithHerb = gensHerb
+    def setGensActFP(self, gensActFP):
+        self._gensWithActualFP = gensActFP

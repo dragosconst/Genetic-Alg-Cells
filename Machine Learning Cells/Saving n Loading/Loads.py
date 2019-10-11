@@ -24,7 +24,7 @@ class LoadSim():
             err = simFile.error();
             print(err, errMsg)
             return
-        # the readAll returns a QByteArray, which is converted in the following manner to a regular string
+        # the readAll returns a string
         textStream = QtCore.QTextStream(simFile)
         saveStr = textStream.readAll()
         # separate the saveString in this way in order to simplify searching for values
@@ -53,7 +53,7 @@ class LoadSim():
         l_avgActFP = []
         l_avgInitFP = []
         l_avgSurv = []
-        for i in range(gensNo - 1):
+        for i in range(gensNo):
             avgSize = float(saveStr[saveStr[lastGenIndex:].index("average sim cell size in gen") + 1 + lastGenIndex])
             l_avgSize.append(avgSize)
             avgCarnSize = float(saveStr[saveStr[lastGenIndex:].index("average sim carn cells size in gen") + 1 + lastGenIndex])
@@ -106,9 +106,15 @@ class LoadSim():
         simData.setAverageSimInitFP(averageSimInitFP)
         averageSurv = float(saveStr[saveStr.index("average survivability") + 1])
         simData.setAverageSimSurv(averageSurv)
+        genCarns = int(saveStr[saveStr.index("gens with carns") + 1])
+        simData.setGensCarn(genCarns)
+        genHerbs = int(saveStr[saveStr.index("gens with herbs") + 1])
+        simData.setGensHerb(genHerbs)
+        genActFP = int(saveStr[saveStr.index("gens with act FP") + 1])
+        simData.setGensActFP(genActFP)
 
         oldGensData = [] # this list will contain all the gens data from the save file and will be used for setting the _gens list of the SimData obj
-        gensNo = int(saveStr[saveStr.index("there are") + 1]) - 1
+        gensNo = int(saveStr[saveStr.index("there are") + 1])
         lastGenIndex = saveStr.index("gen no") + 1
         while gensNo > 0:
             currGen = GenData()

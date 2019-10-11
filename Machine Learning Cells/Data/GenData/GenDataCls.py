@@ -70,8 +70,8 @@ class GenData():
             self._updateHerbSizeAvg(cellData)
 
         # update the averages
-        self._updateSurvAvgian(cellData)
-        self._updateSecAliveAvgian(cellData)
+        self._updateSurvAvg(cellData)
+        self._updateSecAliveAvg(cellData)
         self._updateActFPAvg(cellData)
         self._updateInitFPAvg(cellData)
         self._updateSizeAvg(cellData)
@@ -80,11 +80,11 @@ class GenData():
         self._cellsData = cellsData
 
     # some methods for updating the average values
-    def _updateSurvAvgian(self, cellData):
+    def _updateSurvAvg(self, cellData):
         self._averageSurvivability *= (len(self._cellsData) - 1)
         self._averageSurvivability += cellData["survivability"]
         self._averageSurvivability /= len(self._cellsData)
-    def _updateSecAliveAvgian(self, cellData):
+    def _updateSecAliveAvg(self, cellData):
         self._averageSecondsAlive *= (len(self._cellsData) - 1)
         self._averageSecondsAlive += cellData["secondsAlive"]
         self._averageSecondsAlive /= len(self._cellsData)

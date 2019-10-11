@@ -27,7 +27,10 @@ class SaveSim():
         saveStr += "\naverage sim secs alive: " + str(self._simData.averageSimSecondsAlive())
         saveStr += "\naverage sim actual FP: " + str(self._simData.averageSimActFP())
         saveStr += "\naverage sim init FP: " + str(self._simData.averageSimInitFP())
-        saveStr += "\naverage survivability: " + str(self._simData.averageSimInitFP())
+        saveStr += "\naverage survivability: " + str(self._simData.averageSimSurv())
+        saveStr += "\ngens with carns: " + str(self._simData.gensWithCarn())
+        saveStr += "\ngens with herbs: " + str(self._simData.gensWithHerb())
+        saveStr += "\ngens with act FP: " + str(self._simData.gensActFP())
 
         # save info about gen parameters, like cell number per gen etc
         saveStr += "\ncell nr per gen: " + str(self._simObj.cellsNo())
@@ -35,10 +38,10 @@ class SaveSim():
         saveStr += "\nsecs per gen: " + str(self._simObj.genSec())
 
         # add generations
-        saveStr += "\nthere are: " + str(len(self._simData.gens())) + "\tgenerations: "
-        allGens = len(self._simData.gens())
+        saveStr += "\nthere are: " + str(len(self._simData.gens()) - 1) + "\tgenerations: "
+        allGens = len(self._simData.gens()) - 1 # -1 so the current generation is not added
         # add every generation
-        for i in range(allGens - 1):
+        for i in range(allGens):
             thisGen = self._simData.gens()[i]
             # general data about the generation
             saveStr += "\n\tgen no: " + str(i)
@@ -89,4 +92,5 @@ class SaveSim():
         if not saveFile.open(QtCore.QIODevice.ReadWrite):
             print("Error OOPSIE")
             return
-        saveFile.write(QtCore.QByteArray().append(saveStr))
+        writeStream = QtCore.QTextStream(saveFile)
+        writeStream << saveStr
