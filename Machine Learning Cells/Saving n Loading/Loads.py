@@ -41,8 +41,14 @@ class LoadSim():
             algaeSpread = int(saveStr[saveStr.index("algae spread in sim") + 1])
         except ValueError:
             algaeSpread = ComboIndexes.RegularSpread.value
+        # a similar thing is done for the cell_eat_threshold const
+        cellThreshold = 0
+        try:
+            cellThreshold = int(saveStr[saveStr.index("cell eat threshold const") + 1])
+        except ValueError:
+            cellThreshold = 130
         # finally, create the simulation object
-        simulation = Sims.Sim(self._scene, cellNo, algaeNo, secsPerGen, None, self._mlWindow, algaeSpread)
+        simulation = Sims.Sim(self._scene, cellNo, algaeNo, secsPerGen, None, self._mlWindow, algaeSpread, cellThreshold)
         simulation.setSimData(simData)
         simulation.setGraphVals(*self._createGraphLists(saveStr))
         simulation.setCrGen([0] * len(simulation.simData().gens()))

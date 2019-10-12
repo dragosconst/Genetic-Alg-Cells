@@ -19,6 +19,7 @@ class SaveSim():
         saveStr += "\ncells killed in sim: " + str(self._simData.cellsKilled())
         algaeSpread = self._simObj._simDia.algaeSpreadCombo.currentIndex() if self._simObj._simDia is not None else self._simObj._algaeSpread
         saveStr += "\nalgae spread in sim: " + str(algaeSpread)
+        saveStr += "\ncell eat threshold const: " + str(self._simObj.threshold())
         saveStr += "\nalgae eaten in sim: " + str(self._simData.algaeEaten())
         saveStr += "\ncells dead from hunger in sim: " + str(self._simData.deadFromHunger())
         saveStr += "\ncells that ate sth in sim: " + str(self._simData.cellsAteSomething())

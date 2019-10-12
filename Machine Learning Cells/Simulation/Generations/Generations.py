@@ -12,7 +12,7 @@ import util
 class Gen():
     LIFETIME = 0 # this will be the amount of ms for which a generation lives
 
-    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simObj, simDia = None, olderGen = None, genNumber = 1, nextGenBar = None, algaeSpread = -1):
+    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simObj, simDia = None, olderGen = None, genNumber = 1, nextGenBar = None, algaeSpread = -1, threshold = 130):
         Gen.LIFETIME = genSec * 1000
 
         # basic generation values
@@ -26,6 +26,7 @@ class Gen():
             self._algaeSpread = self._simDia.algaeSpreadCombo.currentIndex() if self._simDia is not None else ComboIndexes.RegularSpread.value
         else:
             self._algaeSpread = algaeSpread
+        self._threshold = threshold
         self._olderGen = olderGen
         self._genNumber = genNumber
         self._nextGenBar = nextGenBar
@@ -53,6 +54,7 @@ class Gen():
                 self._scene.addItem(Cell(self._genData, self._genNumber, [rand.choice(parentsList), rand.choice(parentsList)]))
             for i in range(0, noParentedCells): # the rest are randomly generated
                 self._scene.addItem(Cell(self._genData))
+
     # adds the specified number of algae to the scene
     def _addAlgae(self):
         if self._algaeSpread == ComboIndexes.RegularSpread.value:
@@ -84,13 +86,16 @@ class Gen():
 
     # method for starting a generation
     def startGeneration(self):
+        # set algae related values
         Alga.DESIRED_POP = self._algaeNo
         Alga.disjoint = 0
         Alga.population = 0
         self._addAlgae()
         Alga.resetAlgae(self._scene, self._simDia, self._algaeNo + self._cellsNo, 0, None if self._genNumber == 1 else self._nextGenBar)
 
+        # set cell related values
         Cell.CELL_GEN_POP = self._cellsNo
+        Cell.EAT_CELL_THRESHOLD = self._threshold
         Cell.cellDisjoint = 0
         self._addCells()
         Cell.resetCells(self._scene, self._simDia, self._algaeNo + self._cellsNo, self._algaeNo, None if self._genNumber == 1 else self._nextGenBar)
@@ -139,5 +144,7 @@ class Gen():
 
         # set the app to not be pausable
         self._simObj.setPauseability(True)
-        
-    
+
+    # methods for directly setting gen vals
+    def setThreshold(self, thresh):
+        self._threshold = thresh

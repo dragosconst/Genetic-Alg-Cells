@@ -19,6 +19,7 @@ class NewSimDia(Ui_NewSimDialogBase, QtWidgets.QDialog):
         self.cellNoLine.setValidator(QtGui.QIntValidator()) # the validators make sure the user can only input 
         self.genDurLine.setValidator(QtGui.QDoubleValidator()) # integers or real numbers(in the case of the second line)
         self.algaeNoLine.setValidator(QtGui.QIntValidator())
+        self.threshLine.setValidator(QtGui.QIntValidator())
 
         self.okButton.clicked.connect(lambda: self._passData(MLwindow))
         self.cancelButton.clicked.connect(lambda: self.closeSelf(MLwindow))
@@ -46,7 +47,8 @@ class NewSimDia(Ui_NewSimDialogBase, QtWidgets.QDialog):
 
 
         MLwindow._startNewSim(self, int(self.cellNoLine.text()), float(self.genDurLine.text()),\
-           int(self.algaeNoLine.text()) if self.algaeNoLine.text() != "" else 0)
+           int(self.algaeNoLine.text()) if self.algaeNoLine.text() != "" else 0,\
+           int(self.threshLine.text()) if self.threshLine.text() != "" else 130)
         self.close()
 
     def closeSelf(self, MLwindow):

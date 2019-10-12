@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'new_simulation.ui',
 # licensing of 'new_simulation.ui' applies.
 #
-# Created: Sat Oct 12 12:48:38 2019
+# Created: Sat Oct 12 14:18:56 2019
 #      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -59,6 +59,13 @@ class Ui_NewSimDialogBase(object):
         self.algaeSpreadCombo.addItem("")
         self.algaeSpreadCombo.addItem("")
         self.formLay.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.algaeSpreadCombo)
+        self.threshText = QtWidgets.QLabel(NewSimDialogBase)
+        self.threshText.setAlignment(QtCore.Qt.AlignCenter)
+        self.threshText.setObjectName("threshText")
+        self.formLay.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.threshText)
+        self.threshLine = QtWidgets.QLineEdit(NewSimDialogBase)
+        self.threshLine.setObjectName("threshLine")
+        self.formLay.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.threshLine)
         self.mainLayout.addLayout(self.formLay)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.mainLayout.addItem(spacerItem)
@@ -96,6 +103,9 @@ class Ui_NewSimDialogBase(object):
         self.algaeSpreadText.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Choose algae spread", None, -1))
         self.algaeSpreadCombo.setItemText(0, QtWidgets.QApplication.translate("NewSimDialogBase", "Regular algae spread", None, -1))
         self.algaeSpreadCombo.setItemText(1, QtWidgets.QApplication.translate("NewSimDialogBase", "Full map algae spread", None, -1))
+        self.threshText.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Write the CELL_EAT_THRESHOLD\n"
+"value here\n"
+"(optional)", None, -1))
         self.okButton.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "OK", None, -1))
         self.cancelButton.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Cancel", None, -1))
 

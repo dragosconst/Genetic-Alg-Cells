@@ -150,10 +150,10 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self._tabLayouts.clear()
 
     # starts a new simulation
-    def _startNewSim(self, simDia, cellNo, secs, algaNo):
+    def _startNewSim(self, simDia, cellNo, secs, algaNo, threshold):
         if self._currentSim is not None: # if there was another sim running previous to this one
             self._delOldSim()
-        self._currentSim = Sims.Sim(self.mapScene, cellNo, int(cellNo / 2) if algaNo == 0 else algaNo, secs, simDia, self)
+        self._currentSim = Sims.Sim(self.mapScene, cellNo, int(cellNo / 2) if algaNo == 0 else algaNo, secs, simDia, self, -1, threshold)
         self._currentSim.startSim()
 
     # this function adds a new graph plot and navbar to the tab widget

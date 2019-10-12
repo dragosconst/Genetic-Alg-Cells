@@ -8,7 +8,7 @@ import Main
 
 # this class will be used for containing an entire simulation
 class Sim():
-    def __init__(self, scene, cellsNo, algaeNo, genSec, simDia, mlWindow, algaeSpread = -1):
+    def __init__(self, scene, cellsNo, algaeNo, genSec, simDia, mlWindow, algaeSpread = -1, threshold = 130):
         self._scene = scene # basic simulation values
         self._cellsNo = cellsNo
         self._algaeNo = algaeNo
@@ -17,6 +17,7 @@ class Sim():
         self._simData = SimData()
         self._mlWindow = mlWindow # this is the main window object
         self._algaeSpread = algaeSpread
+        self._threshold = threshold
         self._pausable = False
 
         self._allGens = [] # a list containing all the generation objects of the simulation
@@ -58,6 +59,8 @@ class Sim():
         # if the method is not called here, the window would look weird with a big empty white square on the bottom right corner
         self.updateGraphs()
         self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, self._simDia)
+        # manually set the threshold
+        self._currentGen.setThreshold(self._threshold)
         self._allGens.append(self._currentGen)
         self._allGens[len(self._allGens) - 1].startGeneration()
 
@@ -81,7 +84,7 @@ class Sim():
        
         genNo = len(self._simData.gens()) + 1
         self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
-                                    olderGen, genNo, self._mlWindow.nextGenBar, self._algaeSpread)
+                                    olderGen, genNo, self._mlWindow.nextGenBar, self._algaeSpread, self._threshold)
         self._allGens.append(self._currentGen)
         # finally, start the generation
         self._allGens[len(self._allGens) - 1].startGeneration()
@@ -99,7 +102,7 @@ class Sim():
 
         genNo = len(self._simData.gens()) + 1
         self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
-                                    olderGen, genNo, self._mlWindow.nextGenBar, self._algaeSpread)
+                                    olderGen, genNo, self._mlWindow.nextGenBar, self._algaeSpread, self._threshold)
         self._allGens.append(self._currentGen)
         # finally, start the generation
         self._allGens[len(self._allGens) - 1].startGeneration()
@@ -150,6 +153,8 @@ class Sim():
     # methods that return stuff
     def scene(self):
         return self._scene
+    def threshold(self):
+        return self._threshold
     def simData(self):
         return self._simData
     def cellsNo(self):

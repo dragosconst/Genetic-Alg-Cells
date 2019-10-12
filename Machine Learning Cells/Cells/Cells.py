@@ -27,14 +27,15 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     # this function resets the position of every cell, one by one
     @classmethod
     def resetCells(cls, scene, simDia = None, totalEntities = 0, soFar = 0, nextGenBar = None):
-        if scene is None: # if the scene object was not constructed, wait a bit for it(by recalling the function 10 ms later)
+        print(cls.EAT_CELL_THRESHOLD)
+        if scene is None: # if the scene object was not yet constructed, wait a bit for its construction(by recalling the function 10 ms later)
             reset = QtCore.QTimer()
             reset.singleShot(10, lambda: cls.resetCells(scene))
             return
 
-        for item in scene.items(): # check all cells
+        for item in scene.items(): # check all items
             if util.getClassName(item) == "Cell": # if it is a cell
-                if item.collidingItems() != []: # if the item collides with anything
+                if item.collidingItems() != []: # if the cell collides with anything
                     cls.resetCellPos(scene, item)
                     cls.cellDisjoint += 1
                     if simDia is not None:
@@ -157,8 +158,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._width = None
         self._topLeftPoint = None # the top-left point of the Final Shape
         ##
-        # for rotation
-        #self.rotateBy(360 * 3)
 
         ## VARIABLES DIRECTLY RELATED TO CELL MOVEMEMNT
         self._timeDir = QtCore.QTimer() # this timer is used for storing the time during which the cell moves in a certain direction
