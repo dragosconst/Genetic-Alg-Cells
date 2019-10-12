@@ -6,6 +6,7 @@ from GenDataCls import GenData, CellData
 from SimDataCls import SimData
 import Sims
 import Generations
+from NewSimDia import ComboIndexes
 
 # this class will handle loading data from a save file
 class LoadSim():
@@ -33,8 +34,15 @@ class LoadSim():
         cellNo = int(saveStr[saveStr.index("cell nr per gen") + 1])
         algaeNo = int(saveStr[saveStr.index("algae per gen") + 1])
         secsPerGen = float(saveStr[saveStr.index("secs per gen") + 1])
+        # if there is no algae spread in the save file, it means it is a save file from an older version
+        # in this case, assume the regular algae spread
+        algaeSpread = 0
+        try:
+            algaeSpread = int(saveStr[saveStr.index("algae spread in sim") + 1])
+        except ValueError:
+            algaeSpread = ComboIndexes.RegularSpread.value
         # finally, create the simulation object
-        simulation = Sims.Sim(self._scene, cellNo, algaeNo, secsPerGen, None, self._mlWindow)
+        simulation = Sims.Sim(self._scene, cellNo, algaeNo, secsPerGen, None, self._mlWindow, algaeSpread)
         simulation.setSimData(simData)
         simulation.setGraphVals(*self._createGraphLists(saveStr))
         simulation.setCrGen([0] * len(simulation.simData().gens()))

@@ -6,12 +6,13 @@ from Cells import Cell
 from AlgaeBloom import Bloom
 from Algae import Alga
 from GenDataCls import GenData
+from NewSimDia import ComboIndexes
 import util
 
 class Gen():
     LIFETIME = 0 # this will be the amount of ms for which a generation lives
 
-    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simObj, simDia = None, olderGen = None, genNumber = 1, nextGenBar = None):
+    def __init__(self, scene, cellsNo, algaeNo, genSec, simData, simObj, simDia = None, olderGen = None, genNumber = 1, nextGenBar = None, algaeSpread = -1):
         Gen.LIFETIME = genSec * 1000
 
         # basic generation values
@@ -21,6 +22,10 @@ class Gen():
         self._genSec = genSec
         self._simData = simData
         self._simDia = simDia
+        if algaeSpread == -1:
+            self._algaeSpread = self._simDia.algaeSpreadCombo.currentIndex() if self._simDia is not None else ComboIndexes.RegularSpread.value
+        else:
+            self._algaeSpread = algaeSpread
         self._olderGen = olderGen
         self._genNumber = genNumber
         self._nextGenBar = nextGenBar
@@ -50,8 +55,13 @@ class Gen():
                 self._scene.addItem(Cell(self._genData))
     # adds the specified number of algae to the scene
     def _addAlgae(self):
-        leftBloom = Bloom(100, 200, 300, 300)
-        rightBloom = Bloom(600, 600, 300, 300)
+        if self._algaeSpread == ComboIndexes.RegularSpread.value:
+            leftBloom = Bloom(100, 200, 300, 300)
+            rightBloom = Bloom(600, 600, 300, 300)
+        elif self._algaeSpread == ComboIndexes.FullSpread.value:
+            leftBloom = Bloom(100, 200, 900, 300)
+            rightBloom = Bloom(100, 600, 900, 300)
+
         for i in range(0, self._algaeNo):
             self._scene.addItem(Alga(10, 10, leftBloom, rightBloom))
 
@@ -113,7 +123,7 @@ class Gen():
         tempTimer = QtCore.QTimer()
         tempTimer.singleShot(1000, lambda: self._checkIfAlive())
 
-    def killGen(self):
+    def killGen(self, simDead = False):
         if self.killed == True:
             return
         self.killed = True
@@ -122,7 +132,10 @@ class Gen():
                 item.die() # the die method removes cells\algae from the scene and deletes their instances
         self._genData.setCellsData(sorted(self._genData.cellsData(), key=lambda cellData: cellData.data["survivability"], reverse=True))
         self._simData.addGen(self._genData)
-        self._simObj.startAnotherGen()
+        # this checks if this gen should spawn another gen after its death
+        # for instance, if a new sim is created on top of this one, this gen should not trigger the birth of another gen
+        if not simDead:
+            self._simObj.startAnotherGen()
 
         # set the app to not be pausable
         self._simObj.setPauseability(True)

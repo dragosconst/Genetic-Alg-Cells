@@ -1,19 +1,14 @@
 
-from PySide2 import QtCore
-from matplotlib.figure import Figure # at this point, these are imported only for testing stuff, although they might prove to be useful later on
-from matplotlib.backends.backend_qt5agg import(
-    FigureCanvasQTAgg as FigureCanvas,
-    NavigationToolbar2QT as NavToolbar)
-
 from Generations import Gen
 from Walls import Wall
 from SimDataCls import SimData
+from NewSimDia import ComboIndexes
 import util
 import Main
 
 # this class will be used for containing an entire simulation
 class Sim():
-    def __init__(self, scene, cellsNo, algaeNo, genSec, simDia, mlWindow):
+    def __init__(self, scene, cellsNo, algaeNo, genSec, simDia, mlWindow, algaeSpread = -1):
         self._scene = scene # basic simulation values
         self._cellsNo = cellsNo
         self._algaeNo = algaeNo
@@ -21,6 +16,7 @@ class Sim():
         self._simDia = simDia
         self._simData = SimData()
         self._mlWindow = mlWindow # this is the main window object
+        self._algaeSpread = algaeSpread
         self._pausable = False
 
         self._allGens = [] # a list containing all the generation objects of the simulation
@@ -85,7 +81,7 @@ class Sim():
        
         genNo = len(self._simData.gens()) + 1
         self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
-                                    olderGen, genNo, self._mlWindow.nextGenBar)
+                                    olderGen, genNo, self._mlWindow.nextGenBar, self._algaeSpread)
         self._allGens.append(self._currentGen)
         # finally, start the generation
         self._allGens[len(self._allGens) - 1].startGeneration()
@@ -103,7 +99,7 @@ class Sim():
 
         genNo = len(self._simData.gens()) + 1
         self._currentGen = Gen(self._scene, self._cellsNo, self._algaeNo, self._genSec, self._simData, self, None,
-                                    olderGen, genNo, self._mlWindow.nextGenBar)
+                                    olderGen, genNo, self._mlWindow.nextGenBar, self._algaeSpread)
         self._allGens.append(self._currentGen)
         # finally, start the generation
         self._allGens[len(self._allGens) - 1].startGeneration()
@@ -112,7 +108,7 @@ class Sim():
 
     # call this to kill the current sim
     def killSim(self):
-        self.killCurrGen()
+        self._currentGen.killGen(True)
         del self
 
     # method that handles drawing graphs in between generations

@@ -13,13 +13,8 @@ from matplotlib.backends.backend_qt5agg import(
 import numpy as np
 
 # here we import local modules
-from Cells import Cell
-from Walls import Wall
-import util
 import MainWindow as mw
 from NewSimDia import NewSimDia
-from Algae import Alga
-from AlgaeBloom import Bloom
 import Sims
 import Saves
 import Loads
@@ -136,6 +131,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     # removes all items from the previous scene and clears all lists
     # also clears the graphs
     def _delOldSim(self):
+        print("crafsos")
         # kill the simulation
         self._currentSim.killSim()
         self._currentSim = None

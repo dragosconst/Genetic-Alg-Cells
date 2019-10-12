@@ -1,7 +1,14 @@
+from enum import Enum
+
 from PySide2 import QtCore, QtWidgets, QtGui
 
 from NewSimBase import Ui_NewSimDialogBase
 from CellNoErrDia import CellNoErr
+
+# this enum will be used for encoding the combo box options
+class ComboIndexes(Enum):
+    RegularSpread = 0
+    FullSpread = 1
 
 class NewSimDia(Ui_NewSimDialogBase, QtWidgets.QDialog):
     def __init__(self, MLwindow):

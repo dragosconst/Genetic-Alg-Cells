@@ -1,8 +1,7 @@
 
 from PySide2 import QtCore
 
-import util
-
+from NewSimDia import ComboIndexes
 # this class will handle saving generations
 class SaveSim():
     def __init__(self, simObj, savePath):
@@ -18,6 +17,8 @@ class SaveSim():
         saveStr += "\ncarn cells in sim: " + str(self._simData.carnCells())
         saveStr += "\nherb cells in sim: " + str(self._simData.herbCells())
         saveStr += "\ncells killed in sim: " + str(self._simData.cellsKilled())
+        algaeSpread = self._simObj._simDia.algaeSpreadCombo.currentIndex() if self._simObj._simDia is not None else self._simObj._algaeSpread
+        saveStr += "\nalgae spread in sim: " + str(algaeSpread)
         saveStr += "\nalgae eaten in sim: " + str(self._simData.algaeEaten())
         saveStr += "\ncells dead from hunger in sim: " + str(self._simData.deadFromHunger())
         saveStr += "\ncells that ate sth in sim: " + str(self._simData.cellsAteSomething())

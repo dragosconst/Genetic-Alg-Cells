@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'new_simulation.ui'
+# Form implementation generated from reading ui file 'new_simulation.ui',
+# licensing of 'new_simulation.ui' applies.
 #
-# Created by: PySide2 UI code generator 5.13.0
+# Created: Sat Oct 12 12:48:38 2019
+#      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PySide2 import QtCore, QtGui, QtWidgets
-
 
 class Ui_NewSimDialogBase(object):
     def setupUi(self, NewSimDialogBase):
         NewSimDialogBase.setObjectName("NewSimDialogBase")
-        NewSimDialogBase.resize(327, 238)
+        NewSimDialogBase.resize(360, 289)
         self.gridLayout = QtWidgets.QGridLayout(NewSimDialogBase)
         self.gridLayout.setObjectName("gridLayout")
         self.mainLayout = QtWidgets.QVBoxLayout()
@@ -50,6 +50,15 @@ class Ui_NewSimDialogBase(object):
         self.algaeNoLine = QtWidgets.QLineEdit(NewSimDialogBase)
         self.algaeNoLine.setObjectName("algaeNoLine")
         self.formLay.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.algaeNoLine)
+        self.algaeSpreadText = QtWidgets.QLabel(NewSimDialogBase)
+        self.algaeSpreadText.setAlignment(QtCore.Qt.AlignCenter)
+        self.algaeSpreadText.setObjectName("algaeSpreadText")
+        self.formLay.setWidget(4, QtWidgets.QFormLayout.LabelRole, self.algaeSpreadText)
+        self.algaeSpreadCombo = QtWidgets.QComboBox(NewSimDialogBase)
+        self.algaeSpreadCombo.setObjectName("algaeSpreadCombo")
+        self.algaeSpreadCombo.addItem("")
+        self.algaeSpreadCombo.addItem("")
+        self.formLay.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.algaeSpreadCombo)
         self.mainLayout.addLayout(self.formLay)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.mainLayout.addItem(spacerItem)
@@ -69,20 +78,24 @@ class Ui_NewSimDialogBase(object):
         self.gridLayout.addLayout(self.mainLayout, 0, 0, 1, 1)
 
         self.retranslateUi(NewSimDialogBase)
+        self.algaeSpreadCombo.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(NewSimDialogBase)
 
     def retranslateUi(self, NewSimDialogBase):
-        _translate = QtCore.QCoreApplication.translate
-        NewSimDialogBase.setWindowTitle(_translate("NewSimDialogBase", "New Simulation"))
-        self.welcomeText.setText(_translate("NewSimDialogBase", "Create a new simulation..."))
-        self.cellNoText.setText(_translate("NewSimDialogBase", "Write here how many cells\n"
-" should be in a generation"))
-        self.cellNoLine.setPlaceholderText(_translate("NewSimDialogBase", "No more than 50 cells..."))
-        self.genDurText.setText(_translate("NewSimDialogBase", "Write here how many seconds\n"
-" should a generation last"))
-        self.algaeText.setText(_translate("NewSimDialogBase", "Write here how many algae\n"
+        NewSimDialogBase.setWindowTitle(QtWidgets.QApplication.translate("NewSimDialogBase", "New Simulation", None, -1))
+        self.welcomeText.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Create a new simulation...", None, -1))
+        self.cellNoText.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Write here how many cells\n"
+" should be in a generation", None, -1))
+        self.cellNoLine.setPlaceholderText(QtWidgets.QApplication.translate("NewSimDialogBase", "No more than 50 cells...", None, -1))
+        self.genDurText.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Write here how many seconds\n"
+" should a generation last", None, -1))
+        self.algaeText.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Write here how many algae\n"
 "should a generation have\n"
-"(optional)"))
-        self.algaeNoLine.setPlaceholderText(_translate("NewSimDialogBase", "No more than the cell pop..."))
-        self.okButton.setText(_translate("NewSimDialogBase", "OK"))
-        self.cancelButton.setText(_translate("NewSimDialogBase", "Cancel"))
+"(optional)", None, -1))
+        self.algaeNoLine.setPlaceholderText(QtWidgets.QApplication.translate("NewSimDialogBase", "No more than the cell pop...", None, -1))
+        self.algaeSpreadText.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Choose algae spread", None, -1))
+        self.algaeSpreadCombo.setItemText(0, QtWidgets.QApplication.translate("NewSimDialogBase", "Regular algae spread", None, -1))
+        self.algaeSpreadCombo.setItemText(1, QtWidgets.QApplication.translate("NewSimDialogBase", "Full map algae spread", None, -1))
+        self.okButton.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "OK", None, -1))
+        self.cancelButton.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Cancel", None, -1))
+
