@@ -15,7 +15,11 @@ class Sim():
         self._simDia = simDia
         self._simData = SimData()
         self._mlWindow = mlWindow # this is the main window object
-        self._algaeSpread = algaeSpread
+        self._algaeSpread = 0
+        if algaeSpread == -1:
+            self._algaeSpread = self._simDia.algaeSpreadCombo.currentIndex() if self._simDia is not None else ComboIndexes.RegularSpread.value
+        else:
+            self._algaeSpread = algaeSpread
         self._threshold = threshold
         self._pausable = False
 

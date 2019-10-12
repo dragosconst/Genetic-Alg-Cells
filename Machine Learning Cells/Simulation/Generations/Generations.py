@@ -26,6 +26,7 @@ class Gen():
             self._algaeSpread = self._simDia.algaeSpreadCombo.currentIndex() if self._simDia is not None else ComboIndexes.RegularSpread.value
         else:
             self._algaeSpread = algaeSpread
+        print(self._algaeSpread)
         self._threshold = threshold
         self._olderGen = olderGen
         self._genNumber = genNumber
