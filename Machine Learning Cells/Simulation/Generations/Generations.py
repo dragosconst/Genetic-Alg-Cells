@@ -44,16 +44,16 @@ class Gen():
         # the first generation simply makes some random cells
         if self._genNumber == 1:
             for i in range(0, self._cellsNo):
-                self._scene.addItem(Cell(self._genData))
+                self._scene.addItem(Cell(self._genData, None, None, self._simObj.window()))
         else:
             oneFifth = int(len(self._olderGen.cellsData()) / 5)
             parentsList = self._olderGen.cellsData()[:oneFifth]
             noParentedCells = (self._cellsNo / 2 - self._genNumber + 2) if self._cellsNo / 2 - self._genNumber + 2 >= 3 else 3 
             noParentedCells = int(noParentedCells)
             for i in range(0, self._cellsNo - noParentedCells): # + 2 because the first generation with parents is the second one
-                self._scene.addItem(Cell(self._genData, self._genNumber, [rand.choice(parentsList), rand.choice(parentsList)]))
+                self._scene.addItem(Cell(self._genData, self._genNumber, [rand.choice(parentsList), rand.choice(parentsList)], self._simObj.window()))
             for i in range(0, noParentedCells): # the rest are randomly generated
-                self._scene.addItem(Cell(self._genData))
+                self._scene.addItem(Cell(self._genData, None, None, self._simObj.window()))
 
     # adds the specified number of algae to the scene
     def _addAlgae(self):
@@ -61,8 +61,8 @@ class Gen():
             leftBloom = Bloom(100, 200, 300, 300)
             rightBloom = Bloom(600, 600, 300, 300)
         elif self._algaeSpread == ComboIndexes.FullSpread.value:
-            leftBloom = Bloom(100, 200, 900, 300)
-            rightBloom = Bloom(100, 600, 900, 300)
+            leftBloom = Bloom(100, 200, 750, 300)
+            rightBloom = Bloom(100, 600, 750, 300)
 
         for i in range(0, self._algaeNo):
             self._scene.addItem(Alga(10, 10, leftBloom, rightBloom))

@@ -10,7 +10,6 @@ from matplotlib.figure import Figure # at this point, these are imported only fo
 from matplotlib.backends.backend_qt5agg import(
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavToolbar)
-import numpy as np
 
 # here we import local modules
 import MainWindow as mw
@@ -18,6 +17,7 @@ from NewSimDia import NewSimDia
 import Sims
 import Saves
 import Loads
+import util
 
 # this enum class is used for encoding the tabs
 class Tabs(Enum):
@@ -47,6 +47,9 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
         self.mapScene = QtWidgets.QGraphicsScene() # create a graphics scene for drawing etc
         self.mapScene.setSceneRect(0, 0, 1000, 1000) # the painting area will be fixed to 1000 x 1000, the size of the map
         self.mapGView.setScene(self.mapScene)
+        self.photoScene = QtWidgets.QGraphicsScene() # create a graphics scene for the photo view
+        self.photoScene.setSceneRect(0, 0, 220, 200)
+        self.cellPhoto.setScene(self.photoScene)
 
         self._tabLayouts = [] # this list will contain every layout from every tab
         self._plots = [] # this list will contain every math plot from every tab
@@ -66,6 +69,20 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
 
         self._isPaused = False # stores whether the current simulation is paused or not, in order to know what the pause button should do
 
+        self._passDataCell = None
+
+    #mousePressEvent override
+    def mousePressEvent(self, event:QtGui.QMouseEvent):
+        if self.mapScene.hasFocus():
+            for item in self.mapScene.items():
+                if util.getClassName(item) == "Cell":
+                    if item.isUnderMouse() and (self._passDataCell is None or self._passDataCell != item):
+                        if self._passDataCell is not None:
+                            self._passDataCell.stopPassing = True
+                        item.passData(True)
+                        self._passDataCell = item
+                        self._passDataCell.stopPassing = False
+        super().mousePressEvent(event)
 
     # load a simulation
     def _loadSim(self):
@@ -131,7 +148,6 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
     # removes all items from the previous scene and clears all lists
     # also clears the graphs
     def _delOldSim(self):
-        print("crafsos")
         # kill the simulation
         self._currentSim.killSim()
         self._currentSim = None

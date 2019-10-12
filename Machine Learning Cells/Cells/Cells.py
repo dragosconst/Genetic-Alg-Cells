@@ -27,7 +27,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
     # this function resets the position of every cell, one by one
     @classmethod
     def resetCells(cls, scene, simDia = None, totalEntities = 0, soFar = 0, nextGenBar = None):
-        print(cls.EAT_CELL_THRESHOLD)
         if scene is None: # if the scene object was not yet constructed, wait a bit for its construction(by recalling the function 10 ms later)
             reset = QtCore.QTimer()
             reset.singleShot(10, lambda: cls.resetCells(scene))
@@ -129,7 +128,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # OBJECT\INSTANCE METHODS START
 
-    def __init__(self, genData, genNumber = None, parents = None):
+    def __init__(self, genData, genNumber = None, parents = None, mlWindow = None):
         super().__init__()
         ## VARIABLES TIED TO GENERATION DATA
         self._genData = genData
@@ -217,13 +216,53 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self.dead = False
         ##
 
+        ## VARIABLES TIED TO THE MAIN WINDOW(AND OTHER STUFF RELATED TO IT)
+        self.setAcceptedMouseButtons(QtCore.Qt.LeftButton)
+        self._mlWindow = mlWindow
+        self.stopPassing = False
 
-    #boundinGRect override
+
+    #boundingRect override
     def boundingRect(self):
         bounds = QtCore.QRectF(self.actualPos().x() - self.pos().x(), self.actualPos().y() - self.pos().y(),
-                               self.width(), self.height())
+                               self.width() * self.width(), self.height() * self.height())
         return bounds
 
+    # pass data to the MLWindow
+    def passData(self, newCell = True):
+        # if the cell is dead, automatically remove it from the cell stats stuff
+        # also do this if another cell was clicked
+        if self.dead or self.stopPassing:
+            if not self.stopPassing:
+                self._mlWindow.photoScene.clear()
+            self._mlWindow.initFPLine.setText(str(0))
+            self._mlWindow.actFPLine.setText(str(0))
+            self._mlWindow.killsLine.setText(str(0))
+            self._mlWindow.algaeLine.setText(str(0))
+            self._mlWindow.hungerLine.setText(str(0) + "%")
+            return
+
+        # make a flag var that checks whether this cell needs to be drawn in the photo scene or not
+        # if the cell has already been drawn, for instance, there is no need to keep redrawing it
+        if newCell:
+            self._mlWindow.photoScene.clear()
+            _polyItem = Cell(None)
+            _polyItem.setPolygon(self.polygon())
+            _polyItem.setBrush(self.brush())
+            _polyItem.setScale(6)
+            sceneWidth = self._mlWindow.photoScene.sceneRect().width(); sceneHeight = self._mlWindow.photoScene.sceneRect().height()
+            # center the cell drawing
+            _polyItem.setActualPos(0, 30)
+            self._mlWindow.photoScene.addItem(_polyItem)
+        self._mlWindow.initFPLine.setText(str(self.initFoodPref))
+        self._mlWindow.actFPLine.setText(str(self.kills / (self.algae + self.kills) if self.algae + self.kills > 0 else -1))
+        self._mlWindow.killsLine.setText(str(self.kills))
+        self._mlWindow.algaeLine.setText(str(self.algae))
+        self._mlWindow.hungerLine.setText(str(self.hunger * 100) + "%")
+
+        # call this function every 20 ms
+        _callback = QtCore.QTimer()
+        _callback.singleShot(20, lambda: self.passData(False))
 
     ### INTERNAL LOGIC OF THE CELL STARTS  HERE
         

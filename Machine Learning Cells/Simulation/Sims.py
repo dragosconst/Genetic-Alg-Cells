@@ -153,6 +153,8 @@ class Sim():
     # methods that return stuff
     def scene(self):
         return self._scene
+    def window(self):
+        return self._mlWindow
     def threshold(self):
         return self._threshold
     def simData(self):
