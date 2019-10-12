@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Cell Number Too Large</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../../img/icon.qrc">
+    <normaloff>:/iconPic/cell_app.png</normaloff>:/iconPic/cell_app.png</iconset>
+  </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="1">
     <widget class="QLabel" name="errText">
@@ -66,6 +70,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../img/icon.qrc"/>
+ </resources>
  <connections/>
 </ui>

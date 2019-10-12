@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="backgrIMG">
+    <file>backgr.jpg</file>
+  </qresource>
+</RCC>

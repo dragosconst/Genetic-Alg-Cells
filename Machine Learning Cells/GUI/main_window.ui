@@ -22,6 +22,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../img/icon.qrc">
+    <normaloff>:/iconPic/cell_app.png</normaloff>:/iconPic/cell_app.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
@@ -299,6 +303,9 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../img/icon.qrc"/>
+  <include location="../img/backgr.qrc"/>
+ </resources>
  <connections/>
 </ui>

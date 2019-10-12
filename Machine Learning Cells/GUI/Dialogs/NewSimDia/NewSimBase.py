@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'new_simulation.ui',
 # licensing of 'new_simulation.ui' applies.
 #
-# Created: Sat Oct 12 14:18:56 2019
+# Created: Sat Oct 12 18:02:20 2019
 #      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,7 +13,10 @@ from PySide2 import QtCore, QtGui, QtWidgets
 class Ui_NewSimDialogBase(object):
     def setupUi(self, NewSimDialogBase):
         NewSimDialogBase.setObjectName("NewSimDialogBase")
-        NewSimDialogBase.resize(360, 289)
+        NewSimDialogBase.resize(360, 297)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/iconPic/cell_app.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        NewSimDialogBase.setWindowIcon(icon)
         self.gridLayout = QtWidgets.QGridLayout(NewSimDialogBase)
         self.gridLayout.setObjectName("gridLayout")
         self.mainLayout = QtWidgets.QVBoxLayout()
@@ -109,3 +112,4 @@ class Ui_NewSimDialogBase(object):
         self.okButton.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "OK", None, -1))
         self.cancelButton.setText(QtWidgets.QApplication.translate("NewSimDialogBase", "Cancel", None, -1))
 
+import icon_rc

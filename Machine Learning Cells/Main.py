@@ -19,6 +19,18 @@ import Saves
 import Loads
 import util
 
+"""
+This class exists in two places(namely, here and in the Main Window class) for the following reason: the mapGView
+has to be a child of this class for the background image to be displayed properly. However, every time I change the
+Main Window with Qt Designer, the whole code of that class gets rewritten, meaning the code for this class would be
+lost. This way, the code can always be copy-pasted there, without losing it.
+"""
+class MapView(QtWidgets.QGraphicsView):
+    def drawBackground(self, painter:QtGui.QPainter, rect:QtCore.QRectF):
+        #backgrImg = QtGui.QPixmap(":/backgrIMG/backgr.jpg")
+        #painter.drawPixmap(QtCore.QPointF(0, 0), backgrImg)
+        super().drawBackground(painter, rect)
+
 # this enum class is used for encoding the tabs
 class Tabs(Enum):
     SimSurvTab = 1

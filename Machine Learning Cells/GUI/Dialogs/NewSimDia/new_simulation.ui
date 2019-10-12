@@ -7,11 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>289</height>
+    <height>297</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>New Simulation</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../../img/icon.qrc">
+    <normaloff>:/iconPic/cell_app.png</normaloff>:/iconPic/cell_app.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -177,6 +181,8 @@ value here
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../img/icon.qrc"/>
+ </resources>
  <connections/>
 </ui>

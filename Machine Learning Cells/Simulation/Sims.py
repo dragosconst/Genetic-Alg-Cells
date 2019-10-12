@@ -2,7 +2,6 @@
 from Generations import Gen
 from Walls import Wall
 from SimDataCls import SimData
-from NewSimDia import ComboIndexes
 import util
 import Main
 

@@ -3,12 +3,19 @@
 # Form implementation generated from reading ui file 'main_window.ui',
 # licensing of 'main_window.ui' applies.
 #
-# Created: Sat Oct 12 15:21:05 2019
+# Created: Sat Oct 12 17:49:39 2019
 #      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
 
 from PySide2 import QtCore, QtGui, QtWidgets
+
+class MapView(QtWidgets.QGraphicsView):
+    def drawBackground(self, painter:QtGui.QPainter, rect:QtCore.QRectF):
+        backgrImg = QtGui.QPixmap(":/backgrIMG/backgr.jpg")
+        backgrImg = backgrImg.scaled(QtCore.QSize(1500, 2000), QtGui.Qt.KeepAspectRatio)
+        painter.drawPixmap(QtCore.QPointF(0, 0), backgrImg)
+        super().drawBackground(painter, rect)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -20,13 +27,16 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setCursor(QtCore.Qt.WaitCursor)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/iconPic/cell_app.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
         self.mainLayout = QtWidgets.QHBoxLayout()
         self.mainLayout.setObjectName("mainLayout")
-        self.mapGView = QtWidgets.QGraphicsView(self.centralwidget)
+        self.mapGView = MapView(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -197,3 +207,5 @@ class Ui_MainWindow(object):
         self.actionNew_simulation.setText(QtWidgets.QApplication.translate("MainWindow", "New simulation", None, -1))
         self.actionNew_simulation.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+N", None, -1))
 
+import icon_rc
+import backgr_rc

@@ -8,8 +8,6 @@ import numpy as np
 import util
 from GenDataCls import CellData
 
-
-
 class BaseShape(Enum): # not sure if we will ever use this enum, but this is the standard I use in the class
     Square = 1
     Rect = 2

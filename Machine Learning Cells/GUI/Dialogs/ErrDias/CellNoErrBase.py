@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'cell_no_err.ui'
+# Form implementation generated from reading ui file 'cell_no_err.ui',
+# licensing of 'cell_no_err.ui' applies.
 #
-# Created by: PySide2 UI code generator 5.13.0
+# Created: Sat Oct 12 18:02:49 2019
+#      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
 
-
 from PySide2 import QtCore, QtGui, QtWidgets
-
 
 class Ui_CellNoErr(object):
     def setupUi(self, CellNoErr):
         CellNoErr.setObjectName("CellNoErr")
         CellNoErr.resize(340, 145)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/iconPic/cell_app.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        CellNoErr.setWindowIcon(icon)
         self.gridLayout_2 = QtWidgets.QGridLayout(CellNoErr)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.errText = QtWidgets.QLabel(CellNoErr)
@@ -36,8 +39,9 @@ class Ui_CellNoErr(object):
         QtCore.QMetaObject.connectSlotsByName(CellNoErr)
 
     def retranslateUi(self, CellNoErr):
-        _translate = QtCore.QCoreApplication.translate
-        CellNoErr.setWindowTitle(_translate("CellNoErr", "Cell Number Too Large"))
-        self.errText.setText(_translate("CellNoErr", "Don\'t enter a cell number\n"
-" greater than 50!"))
-        self.okButton.setText(_translate("CellNoErr", "OK"))
+        CellNoErr.setWindowTitle(QtWidgets.QApplication.translate("CellNoErr", "Cell Number Too Large", None, -1))
+        self.errText.setText(QtWidgets.QApplication.translate("CellNoErr", "Don\'t enter a cell number\n"
+" greater than 50!", None, -1))
+        self.okButton.setText(QtWidgets.QApplication.translate("CellNoErr", "OK", None, -1))
+
+import icon_rc
