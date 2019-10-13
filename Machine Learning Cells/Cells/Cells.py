@@ -130,9 +130,51 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         super().__init__()
         ## VARIABLES TIED TO GENERATION DATA
         self._genData = genData
+        ###
+        ### FROM HERE ON START THE A.I.-RELATED VARIABLES
+        ## THESE ARE VARIABLES THAT ARE DIRECTLY TIED TO EVOLUTION
+        # this checks if this cell has parents
+        if parents == None:
+            self.size = rand.randrange(50, 251)
+            self.speedFactor = rand.uniform(-0.1, 0.1)
+            self.hunger = 1.0
+            self.hungerTime = QtCore.QTime()
+            self.lifeSpawn = (20 - self.speedFactor * 20) * 1000
+            self.speed = 1 / (self.size ** 2) * 1000 + self.speedFactor + 1 / (1 + self.hunger)
+            self.kills = 0
+            self.algae = 0
+            self.secondsAlive = 0
+            self.survivability = 0
+            self.initFoodPref = 0.5
+            self.actualFoodPref = 0
+        else:
+            self.buildFromParents(parents)
+
+        # the rgb for skyblue is 135, 206, 235
+        red = 135
+        green = 206
+        blue = 235
+        if self.initFoodPref > 0.5:
+            red += (self.initFoodPref - 0.5) * 240
+            green -= (self.initFoodPref - 0.5) * 412
+            blue -= (self.initFoodPref - 0.5) * 470
+        else:
+            red -= (0.5 - self.initFoodPref) * 270
+            green += (0.5 - self.initFoodPref) * 98
+            blue -= (0.5 - self.initFoodPref) * 470
+
+        self.setBrush(QtGui.QBrush(QtGui.QColor(red, green, blue)))
+        ##
+
+        ## THESE ARE A.I.-RELATED VARS THAT ARE NOT TIED TO EVOLUTION
+        self._prey = None # this is the prey the cell locked on for eating
+        self._alga = None # this is the alga it wants to eat
+        self.dead = False
+        ##
+        ###
 
         ## VARIABLES DIRECTLY RELATED TO THE BASE SHAPE AND THE SEMI-CIRCLES
-        self._area = rand.randrange(50, 251) # selects a random _area for the cell
+        self._area = self.size # selects a random _area for the cell
         self._sides = [0, 0] # the value for the width and height(they are equivalent for squares and rhombuses(? hope this is the plural))
         self._angle = rand.randrange(30, 161) # this is only relevant for the rhombus
         self._baseShapeKey = self._chooseShape() # this is the shape from whitch the cell is drawn
@@ -171,47 +213,6 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._timePaused = 0 # this only affects some stuff in the update loop
         self._timePausedDead = 0 # this is for the die method
         self._turnTimeLeft = 0 # this will store for how much time the cell was supposed to go in a certain direction it has chosen before pausing
-        ##
-
-        ### FROM HERE ON START THE A.I.-RELATED VARIABLES
-        ## THESE ARE VARIABLES THAT ARE DIRECTLY TIED TO EVOLUTION
-        # this checks if this cell has parents
-        if parents == None:
-            self.size = self._area
-            self.speedFactor = rand.uniform(-0.1, 0.1) 
-            self.hunger = 1.0
-            self.hungerTime = QtCore.QTime()
-            self.lifeSpawn = (20 - self.speedFactor * 20) * 1000 
-            self.speed = 1 / (self.size ** 2) * 1000 + self.speedFactor + 1 / (1 + self.hunger)
-            self.kills = 0
-            self.algae = 0
-            self.secondsAlive = 0
-            self.survivability = 0
-            self.initFoodPref = 0.5
-            self.actualFoodPref = 0
-        else:
-            self.buildFromParents(parents)
-        
-        # the rgb for skyblue is 135, 206, 235
-        red = 135
-        green = 206
-        blue = 235
-        if self.initFoodPref > 0.5:
-            red += (self.initFoodPref - 0.5) * 240
-            green -= (self.initFoodPref - 0.5) * 412    
-            blue -= (self.initFoodPref - 0.5) * 470
-        else:
-            red -= (0.5 - self.initFoodPref) * 270
-            green += (0.5 - self.initFoodPref) * 98
-            blue -= (0.5 - self.initFoodPref) * 470
-
-        self.setBrush(QtGui.QBrush(QtGui.QColor(red, green, blue)))
-        ##
-
-        ## THESE ARE A.I.-RELATED VARS THAT ARE NOT TIED TO EVOLUTION
-        self._prey = None # this is the prey the cell locked on for eating
-        self._alga = None # this is the alga it wants to eat
-        self.dead = False
         ##
 
         ## VARIABLES TIED TO THE MAIN WINDOW(AND OTHER STUFF RELATED TO IT)
