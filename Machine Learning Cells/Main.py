@@ -155,6 +155,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
             self._currentSim.pauseSim()
             self.actionPause.setText("Unpause")
             self._isPaused = True
+            self.actionPause.triggered.disconnect()
             self.actionPause.triggered.connect(lambda: self._unpauseApp())
 
     def _unpauseApp(self):
@@ -162,6 +163,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
             self._currentSim.restartSim()
             self.actionPause.setText("Pause")
             self._isPaused = False
+            self.actionPause.triggered.disconnect()
             self.actionPause.triggered.connect(lambda: self._pauseApp())
     # opens a dialog for creating a new generation
     def _newSimDia(self):

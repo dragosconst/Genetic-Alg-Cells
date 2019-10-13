@@ -35,6 +35,7 @@ class Gen():
         self._simObj = simObj
         self._paused = False
         self._pauseTimer = QtCore.QTime()
+        self._pauseTimer.start()
         self._timePaused = 0 # this variable will store for how long a generation has been paused
         self._genLifeClock = QtCore.QTime()
         self._genLifeClock.start()
@@ -71,7 +72,7 @@ class Gen():
     # method for pausing a generation
     def pauseGen(self):
         self._paused = True
-        self._pauseTimer.restart() # restart because there might be multiple pauses in the same generation
+        self._pauseTimer.restart()
         for item in self._scene.items(): # pause all the cells
             if util.getClassName(item) == "Cell":
                 item.pauseCell()
