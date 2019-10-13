@@ -1,6 +1,3 @@
-
-
-
 # this dictionary-class' objects will be used to hold relevant data for every cell in a generation
 class CellData():
     def __init__(self):
@@ -42,6 +39,7 @@ class GenData():
         ##
         ## some average values
         self._averageSurvivability = 0
+        self._averageSpeedFactor = 0
         self._averageSecondsAlive = 0
         self._averageActualFoodPref = 0
         self._averageInitFoodPref = 0
@@ -71,6 +69,7 @@ class GenData():
 
         # update the averages
         self._updateSurvAvg(cellData)
+        self._updateSpeedFactor(cellData)
         self._updateSecAliveAvg(cellData)
         self._updateActFPAvg(cellData)
         self._updateInitFPAvg(cellData)
@@ -88,6 +87,10 @@ class GenData():
         self._averageSecondsAlive *= (len(self._cellsData) - 1)
         self._averageSecondsAlive += cellData["secondsAlive"]
         self._averageSecondsAlive /= len(self._cellsData)
+    def _updateSpeedFactor(self, cellData):
+        self._averageSpeedFactor *= (len(self._cellsData) - 1)
+        self._averageSpeedFactor += cellData["speedFactor"]
+        self._averageSpeedFactor /= len(self._cellsData)
     def _updateActFPAvg(self, cellData):
         if cellData["actualFoodPref"] != -1: # if this cell ate anything at all
             self._averageActualFoodPref *= (self._cellsAteSomething - 1)
@@ -137,6 +140,8 @@ class GenData():
         return self._averageInitFoodPref
     def averageSize(self):
         return self._averageSize
+    def averageSpeedFactor(self):
+        return self._averageSpeedFactor
     def averageCarnSize(self):
         return self._averageCarnSize
     def averageHerbSize(self):
@@ -157,6 +162,8 @@ class GenData():
         self._deadFromHunger = deadFromHunger
     def setCellsAteSomething(self, cellsAteSomething):
         self._cellsAteSomething = cellsAteSomething
+    def setAverageSpeedFact(self, averageSpeedFactor):
+        self._averageSpeedFactor = averageSpeedFactor
     def setAverageSurvivability(self, averageSurvivability):
         self._averageSurvivability = averageSurvivability
     def setAverageSecondsAlive(self, averageSecondsAlive):

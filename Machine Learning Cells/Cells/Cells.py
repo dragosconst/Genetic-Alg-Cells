@@ -238,6 +238,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             self._mlWindow.killsLine.setText(str(0))
             self._mlWindow.algaeLine.setText(str(0))
             self._mlWindow.hungerLine.setText(str(0) + "%")
+            self._mlWindow.sizeLine.setText(str(0))
+            self._mlWindow.speedFactLine.setText(str(0))
             return
 
         # make a flag var that checks whether this cell needs to be drawn in the photo scene or not
@@ -257,6 +259,8 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
         self._mlWindow.killsLine.setText(str(self.kills))
         self._mlWindow.algaeLine.setText(str(self.algae))
         self._mlWindow.hungerLine.setText(str(self.hunger * 100) + "%")
+        self._mlWindow.sizeLine.setText(str(self.size))
+        self._mlWindow.speedFactLine.setText(str(self.speedFactor))
 
         # call this function every 20 ms
         _callback = QtCore.QTimer()
@@ -1220,7 +1224,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             return
         # calculate all the post-mortem variables
         self.secondsAlive = self.hungerTime.elapsed() - self._timePausedDead
-        self.survivability = self.secondsAlive + max(self.kills, self.algae)
+        self.survivability = self.secondsAlive + max(self.kills, self.algae) * 1000
         self.actualFoodPref = self.kills / (self.algae + self.kills) if self.algae + self.kills > 0 else -1 # if it ate nothing, set its FP to -1
 
         # kill self
@@ -1265,7 +1269,7 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
 
     # managing mutations for cells with parents
     def mutate(self):
-        sizeMutate = rand.uniform(-10, 10)
+        sizeMutate = rand.uniform(-20, 20)
         self.size += (self.size * sizeMutate / 100)
         if self.size < 30: # some evolution locks
             self.size = 30
@@ -1273,7 +1277,9 @@ class Cell(QtWidgets.QGraphicsPolygonItem):
             self.size = 400
         speedFMutate = rand.uniform(-10, 10)
         self.speedFactor += (self.speedFactor * speedFMutate / 100)
-        initFPMutate = rand.uniform(-10, 10)
+        # change the mutation in such a way that, the more carnivorous the cell is, the less likely a mutation would be
+        # to increase its carnivorousness
+        initFPMutate = rand.uniform(-20 - (self.initFoodPref - 0.5) * 10, 20 + (self.initFoodPref + 0.5) * 10)
         self.initFoodPref += (self.initFoodPref * initFPMutate / 100)
         if self.initFoodPref > 1: # more evolution locks
             self.initFoodPref = 1

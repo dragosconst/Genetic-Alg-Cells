@@ -24,6 +24,7 @@ class SaveSim():
         saveStr += "\ncells dead from hunger in sim: " + str(self._simData.deadFromHunger())
         saveStr += "\ncells that ate sth in sim: " + str(self._simData.cellsAteSomething())
         saveStr += "\naverage sim cell size: " + str(self._simData.averageSimSize())
+        saveStr += "\naverage sim speed factor: " + str(self._simData.averageSimSpeedFactor())
         saveStr += "\naverage sim carn cells size: " + str(self._simData.averageSimCarnSize())
         saveStr += "\naverage sim herb cells size: " + str(self._simData.averageSimHerbSize())
         saveStr += "\naverage sim secs alive: " + str(self._simData.averageSimSecondsAlive())
@@ -58,7 +59,8 @@ class SaveSim():
             saveStr += "\n\taverage actual FP in this gen: " + str(thisGen.averageActualFoodPref())  
             saveStr += "\n\taverage init FP in this gen: " + str(thisGen.averageInitFoodPref())  
             saveStr += "\n\taverage cells size in this gen: " + str(thisGen.averageSize())  
-            saveStr += "\n\taverage carn cells size in this gen: " + str(thisGen.averageCarnSize())  
+            saveStr += "\n\taverage speed factor in this gen: " + str(thisGen.averageSpeedFactor())
+            saveStr += "\n\taverage carn cells size in this gen: " + str(thisGen.averageCarnSize())
             saveStr += "\n\taverage herb cells size in this gen: " + str(thisGen.averageHerbSize())
 
             # also store data related to graphing
@@ -66,6 +68,7 @@ class SaveSim():
             saveStr += "\n\taverage sim carn cells size in gen: " + str(self._simObj.averageSimCarnSizeOverTime()[i])
             saveStr += "\n\taverage sim herb cells size in gen: " + str(self._simObj.averageSimHerbSizeOverTime()[i])
             saveStr += "\n\taverage sim secs alive in gen: " + str(self._simObj.averageSimSecAliveOverTime()[i])
+            saveStr += "\n\taverage sim speedFactor in gen: " + str(self._simObj.averageSimSpeedFactor()[i])
             saveStr += "\n\taverage sim actual FP in gen: " + str(self._simObj.averageSimActFPOverTime()[i])
             saveStr += "\n\taverage sim init FP in gen: " + str(self._simObj.averageInitFPOverTime()[i])
             saveStr += "\n\taverage survivability in gen: " + str(self._simObj.averageSimSurvOverTime()[i])

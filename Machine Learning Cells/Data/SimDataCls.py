@@ -1,5 +1,3 @@
-
-
 # the objects of this class will be used to store relevant data for an entire simulation
 class SimData():
     def __init__(self):
@@ -26,6 +24,7 @@ class SimData():
         self._averageSimSize = 0 # the average size of cells throughout the simulation
         self._averageSimCarnSize = 0 # the average size of the carnivorous cells throughout the sim
         self._averageSimHerbSize = 0 # the average size of the herbivorous cells throughout the sim
+        self._averageSimSpeedFactor = 0
         self._averageSimSecondsAlive = 0 # the average seconds alive of cells throughout the sim
         self._averageSimActFP = 0 # the average actual food preference of the cells in the sim
         self._averageSimInitFP = 0 # same as before but for initial fp
@@ -57,6 +56,7 @@ class SimData():
         self._updateSimSecAliveAvg(genData)
         self._updateSimActFPAvg(genData)
         self._updateSimInitFPAvg(genData)
+        self._updateSimSpeedFactor(genData)
         self._updateSimSurvAvg(genData)
 
     # some update methods
@@ -64,6 +64,10 @@ class SimData():
         self._averageSimSurv *= (len(self._gens) - 1)
         self._averageSimSurv += genData.averageSurvivability()
         self._averageSimSurv /= len(self._gens)
+    def _updateSimSpeedFactor(self, genData):
+        self._averageSimSpeedFactor *= (len(self._gens) - 1)
+        self._averageSimSpeedFactor += genData.averageSpeedFactor()
+        self._averageSimSpeedFactor /= len(self._gens)
     def _updateSimSecAliveAvg(self, genData):
         self._averageSimSecondsAlive *= (len(self._gens) - 1)
         self._averageSimSecondsAlive += genData.averageSecondsAlive()
@@ -96,6 +100,8 @@ class SimData():
     # some methods that return various instance objects
     def gens(self):
         return self._gens
+    def currentGen(self):
+        return self._gens[len(self._gens) - 1]
     def cells(self):
         return self._cells
     def carnCells(self):
@@ -124,6 +130,8 @@ class SimData():
         return self._averageSimActFP
     def averageSimInitFP(self):
         return self._averageSimInitFP
+    def averageSimSpeedFactor(self):
+        return self._averageSimSpeedFactor
     def averageSimSurv(self):
         return self._averageSimSurv
     def gensWithCarn(self):
@@ -158,6 +166,8 @@ class SimData():
         self._averageSimCarnSize = averageSimCarnSize
     def setAverageSimHerbSize(self, averageSimHerbSize):
         self._averageSimHerbSize = averageSimHerbSize
+    def setAverageSimSpeedFactor(self, averageSpeedFactor):
+        self._averageSimSpeedFactor = averageSpeedFactor
     def setAverageSimSecondsAlive(self, averageSimSecondsAlive):
         self._averageSimSecondsAlive = averageSimSecondsAlive
     def setAverageSimActFP(self, averageSimActFP):

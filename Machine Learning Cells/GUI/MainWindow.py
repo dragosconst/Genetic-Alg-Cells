@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'main_window.ui',
 # licensing of 'main_window.ui' applies.
 #
-# Created: Sat Oct 12 17:49:39 2019
+# Created: Sun Oct 13 15:16:06 2019
 #      by: pyside2-uic  running on PySide2 5.13.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -42,6 +42,9 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.mapGView.sizePolicy().hasHeightForWidth())
         self.mapGView.setSizePolicy(sizePolicy)
+        brush = QtGui.QBrush(QtGui.QColor(0, 0, 0))
+        brush.setStyle(QtCore.Qt.NoBrush)
+        self.mapGView.setBackgroundBrush(brush)
         self.mapGView.setObjectName("mapGView")
         self.mainLayout.addWidget(self.mapGView)
         self.statsLayout = QtWidgets.QVBoxLayout()
@@ -90,6 +93,20 @@ class Ui_MainWindow(object):
         self.hungerLine.setReadOnly(True)
         self.hungerLine.setObjectName("hungerLine")
         self.fStatsLay.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.hungerLine)
+        self.sizeText = QtWidgets.QLabel(self.centralwidget)
+        self.sizeText.setObjectName("sizeText")
+        self.fStatsLay.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.sizeText)
+        self.sizeLine = QtWidgets.QLineEdit(self.centralwidget)
+        self.sizeLine.setReadOnly(True)
+        self.sizeLine.setObjectName("sizeLine")
+        self.fStatsLay.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.sizeLine)
+        self.speedFactText = QtWidgets.QLabel(self.centralwidget)
+        self.speedFactText.setObjectName("speedFactText")
+        self.fStatsLay.setWidget(6, QtWidgets.QFormLayout.LabelRole, self.speedFactText)
+        self.speedFactLine = QtWidgets.QLineEdit(self.centralwidget)
+        self.speedFactLine.setReadOnly(True)
+        self.speedFactLine.setObjectName("speedFactLine")
+        self.fStatsLay.setWidget(6, QtWidgets.QFormLayout.FieldRole, self.speedFactLine)
         self.cellStatsLay.addLayout(self.fStatsLay)
         self.generalStatsLay.addLayout(self.cellStatsLay)
         self.progBarLayout = QtWidgets.QHBoxLayout()
@@ -184,6 +201,8 @@ class Ui_MainWindow(object):
         self.killsText.setText(QtWidgets.QApplication.translate("MainWindow", "Kills", None, -1))
         self.algaeText.setText(QtWidgets.QApplication.translate("MainWindow", "Algae eaten", None, -1))
         self.hungerText.setText(QtWidgets.QApplication.translate("MainWindow", "Hunger percentage", None, -1))
+        self.sizeText.setText(QtWidgets.QApplication.translate("MainWindow", "Size", None, -1))
+        self.speedFactText.setText(QtWidgets.QApplication.translate("MainWindow", "Speed Factor", None, -1))
         self.nextGenText.setText(QtWidgets.QApplication.translate("MainWindow", "New Gen Loading progress", None, -1))
         self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))
         self.menuEdit.setTitle(QtWidgets.QApplication.translate("MainWindow", "Edit", None, -1))

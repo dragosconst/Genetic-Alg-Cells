@@ -2,6 +2,7 @@
 from Generations import Gen
 from Walls import Wall
 from SimDataCls import SimData
+from NewSimDia import ComboIndexes
 import util
 import Main
 
@@ -28,10 +29,20 @@ class Sim():
         self._averageSimSurvOverTime = [] # for drawing the graphs, the list will contain the average sim surv over generations
         self._averageSimSizeOverTime = [] # like the previous list, but for sizes
         self._averageSimCarnSizeOverTime = []
+        self._averageSimSpeedFactOverTime = []
         self._averageSimHerbSizeOverTime = []
         self._averageSimSecAliveOverTime = []
         self._averageSimActFPOverTime = []
         self._averageInitFPOverTime = []
+
+        self._averageGenSurvOverTime = [] # for drawing the graphs, the list will contain the average Gen surv for every gen
+        self._averageGenSizeOverTime = [] # like the previous list, but for sizes
+        self._averageGenCarnSizeOverTime = []
+        self._averageGenSpeedFactOverTime = []
+        self._averageGenHerbSizeOverTime = []
+        self._averageGenSecAliveOverTime = []
+        self._averageGenActFPOverTime = []
+        self._averageGenInitFPOverTime = []
 
     # change pauseability value
     def setPauseability(self, val):
@@ -72,13 +83,22 @@ class Sim():
         # these lists are all related to graph drawing
         self._averageSimSurvOverTime.append(self._simData.averageSimSurv())
         self._averageSimSizeOverTime.append(self._simData.averageSimSize())
+        self._averageSimSpeedFactOverTime.append(self._simData.averageSimSpeedFactor())
         self._averageSimCarnSizeOverTime.append(self._simData.averageSimCarnSize())
         self._averageSimHerbSizeOverTime.append(self._simData.averageSimHerbSize())
         self._averageSimSecAliveOverTime.append(self._simData.averageSimSecondsAlive())
         self._averageSimActFPOverTime.append(self._simData.averageSimActFP())
         self._averageInitFPOverTime.append(self._simData.averageSimInitFP())
+        currGen = self._simData.currentGen()
+        self._averageGenSurvOverTime.append(currGen.averageSurvivability())
+        self._averageGenSizeOverTime.append(currGen.averageSize())
+        self._averageGenSpeedFactOverTime.append(currGen.averageSpeedFactor())
+        self._averageGenCarnSizeOverTime.append(currGen.averageCarnSize())
+        self._averageGenHerbSizeOverTime.append(currGen.averageHerbSize())
+        self._averageGenSecAliveOverTime.append(currGen.averageSecondsAlive())
+        self._averageGenActFPOverTime.append(currGen.averageActualFoodPref())
+        self._averageGenInitFPOverTime.append(currGen.averageInitFoodPref())
         # here end the graph-related lists
-
         # update the graph drawings
         self.updateGraphs()
 
@@ -132,6 +152,9 @@ class Sim():
         figHerbSize, axHerbSize = util.createGraph(allGens, self._averageSimHerbSizeOverTime, "greenyellow")
         self._mlWindow.updateTab(Main.Tabs.SimHerbSizeTab.value, figHerbSize, axHerbSize, allGens, self._averageSimHerbSizeOverTime, Main.Tabs.SimHerbSizeTitle.value, "greenyellow")
 
+        figSP, axSP = util.createGraph(allGens, self._averageSimSpeedFactOverTime, "darkorchid")
+        self._mlWindow.updateTab(Main.Tabs.SimSFTab.value, figSP, axSP, allGens, self._averageSimSpeedFactOverTime, Main.Tabs.SimSFTitle.value, "darkorchid")
+
         figSecs, axSecs = util.createGraph(allGens, self._averageSimSecAliveOverTime, "steelblue")
         self._mlWindow.updateTab(Main.Tabs.SimSecAliveTab.value, figSecs, axSecs, allGens, self._averageSimSecAliveOverTime, Main.Tabs.SimSecAliveTitle.value, "steelblue")
 
@@ -140,6 +163,30 @@ class Sim():
 
         figInitFP, axInitFP = util.createGraph(allGens, self._averageInitFPOverTime, "darkmagenta")
         self._mlWindow.updateTab(Main.Tabs.SimInitFPTab.value, figInitFP, axInitFP, allGens, self._averageInitFPOverTime, Main.Tabs.SimInitFPTitle.value, "darkmagenta")
+
+        figSurv, axSurv = util.createGraph(allGens, self._averageGenSurvOverTime, "cornflowerblue")
+        self._mlWindow.updateTab(Main.Tabs.GenSurvTab.value, figSurv, axSurv, allGens, self._averageGenSurvOverTime, Main.Tabs.GenSurvTitle.value, "cornflowerblue")
+
+        figSize, axSize = util.createGraph(allGens, self._averageGenSizeOverTime, "olivedrab")
+        self._mlWindow.updateTab(Main.Tabs.GenSizeTab.value, figSize, axSize, allGens, self._averageGenSizeOverTime, Main.Tabs.GenSizeTitle.value, "olivedrab")
+
+        figCarnSize, axCarnSize = util.createGraph(allGens, self._averageGenCarnSizeOverTime, "firebrick")
+        self._mlWindow.updateTab(Main.Tabs.GenCarnSizeTab.value, figCarnSize, axCarnSize, allGens, self._averageGenCarnSizeOverTime, Main.Tabs.GenCarnSizeTitle.value, "firebrick")
+
+        figHerbSize, axHerbSize = util.createGraph(allGens, self._averageGenHerbSizeOverTime, "limegreen")
+        self._mlWindow.updateTab(Main.Tabs.GenHerbSizeTab.value, figHerbSize, axHerbSize, allGens, self._averageGenHerbSizeOverTime, Main.Tabs.GenHerbSizeTitle.value, "limegreen")
+
+        figSP, axSP = util.createGraph(allGens, self._averageGenSpeedFactOverTime, "darkviolet")
+        self._mlWindow.updateTab(Main.Tabs.GenSFTab.value, figSP, axSP, allGens, self._averageGenSpeedFactOverTime, Main.Tabs.GenSFTitle.value, "darkviolet")
+
+        figSecs, axSecs = util.createGraph(allGens, self._averageGenSecAliveOverTime, "slategray")
+        self._mlWindow.updateTab(Main.Tabs.GenSecAliveTab.value, figSecs, axSecs, allGens, self._averageGenSecAliveOverTime, Main.Tabs.GenSecAliveTitle.value, "slategray")
+
+        figActFP, axActFP = util.createGraph(allGens, self._averageGenActFPOverTime, "brown")
+        self._mlWindow.updateTab(Main.Tabs.GenActFPTab.value, figActFP, axActFP, allGens, self._averageGenActFPOverTime, Main.Tabs.GenActFPTitle.value, "brown")
+
+        figInitFP, axInitFP = util.createGraph(allGens, self._averageGenInitFPOverTime, "purple")
+        self._mlWindow.updateTab(Main.Tabs.GenInitFPTab.value, figInitFP, axInitFP, allGens, self._averageGenInitFPOverTime, Main.Tabs.GenInitFPTitle.value, "purple")
 
     # pause a simulation
     def pauseSim(self):
@@ -182,11 +229,25 @@ class Sim():
         return self._averageSimActFPOverTime
     def averageInitFPOverTime(self):
         return self._averageInitFPOverTime
+    def averageGenSurvOverTime(self):
+        return self._averageGenSurvOverTime
+    def averageGenSizeOverTime(self):
+        return self._averageGenSizeOverTime
+    def averageGenCarnSizeOverTime(self):
+        return self._averageGenCarnSizeOverTime
+    def averageGenHerbSizeOverTime(self):
+        return self._averageGenHerbSizeOverTime
+    def averageGenSecAliveOverTime(self):
+        return self._averageGenSecAliveOverTime
+    def averageGenActFPOverTime(self):
+        return self._averageGenActFPOverTime
+    def averageGenInitFPOverTime(self):
+        return self._averageGenInitFPOverTime
     def currentGen(self):
         return self._allGens
 
     # for setting the values directly
-    def setGraphVals(self, size, csize, hsize, secs, actfp, inifp, surv):
+    def setGraphVals(self, size, csize, hsize, secs, actfp, inifp, surv, sf, GENsize, GENcsize, GENhsize, GENsecs, GENactfp, GENinifp, GENsurv, GENsf):
         self._averageSimSizeOverTime = size
         self._averageSimCarnSizeOverTime = csize
         self._averageSimHerbSizeOverTime = hsize
@@ -194,6 +255,15 @@ class Sim():
         self._averageSimActFPOverTime = actfp
         self._averageInitFPOverTime = inifp
         self._averageSimSurvOverTime = surv
+        self._averageSimSpeedFactOverTime = sf
+        self._averageGenSizeOverTime = GENsize
+        self._averageGenCarnSizeOverTime = GENcsize
+        self._averageGenHerbSizeOverTime = GENhsize
+        self._averageGenSecAliveOverTime = GENsecs
+        self._averageGenActFPOverTime = GENactfp
+        self._averageGenInitFPOverTime = GENinifp
+        self._averageGenSurvOverTime = GENsurv
+        self._averageGenSpeedFactOverTime = GENsf
     def setCrGen(self, currGen):
         self._allGens = currGen
     def setSimData(self, simData):

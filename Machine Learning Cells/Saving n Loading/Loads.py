@@ -50,14 +50,14 @@ class LoadSim():
         # finally, create the simulation object
         simulation = Sims.Sim(self._scene, cellNo, algaeNo, secsPerGen, None, self._mlWindow, algaeSpread, cellThreshold)
         simulation.setSimData(simData)
-        simulation.setGraphVals(*self._createGraphLists(saveStr))
+        simulation.setGraphVals(*self._createGraphLists(saveStr, simData))
         simulation.setCrGen([0] * len(simulation.simData().gens()))
         simulation.currentGen()[len(simulation.simData().gens()) - 1] = Generations.Gen(self._scene, cellNo, algaeNo, secsPerGen, None, simulation)
         return simulation
 
     
     # returns the graph values from the save string(they are all a bunch of lists that are not yet contained in the SimData obj)
-    def _createGraphLists(self, saveStr):
+    def _createGraphLists(self, saveStr, simData):
         gensNo = int(saveStr[saveStr.index("there are") + 1])
         lastGenIndex = saveStr.index("gen no") + 1
         l_avgSize = []
@@ -65,9 +65,29 @@ class LoadSim():
         l_avgHerbSize = []
         l_avgSecs = []
         l_avgActFP = []
+        l_avgSF = []
         l_avgInitFP = []
         l_avgSurv = []
+        l_avgGenSize = []
+        l_avgGenCarnSize = []
+        l_avgGenHerbSize = []
+        l_avgGenSecs = []
+        l_avgGenActFP = []
+        l_avgGenSF = []
+        l_avgGenInitFP = []
+        l_avgGenSurv = []
         for i in range(gensNo):
+            ## create the gen-related graph data
+            l_avgGenSize.append(simData.gens()[i].averageSize())
+            l_avgGenCarnSize.append(simData.gens()[i].averageCarnSize())
+            l_avgGenHerbSize.append(simData.gens()[i].averageHerbSize())
+            l_avgGenSecs.append(simData.gens()[i].averageSecondsAlive())
+            l_avgGenActFP.append(simData.gens()[i].averageActualFoodPref())
+            l_avgGenInitFP.append(simData.gens()[i].averageInitFoodPref())
+            l_avgGenSF.append(simData.gens()[i].averageSpeedFactor())
+            l_avgGenSurv.append(simData.gens()[i].averageSurvivability())
+            ##
+
             avgSize = float(saveStr[saveStr[lastGenIndex:].index("average sim cell size in gen") + 1 + lastGenIndex])
             l_avgSize.append(avgSize)
             avgCarnSize = float(saveStr[saveStr[lastGenIndex:].index("average sim carn cells size in gen") + 1 + lastGenIndex])
@@ -83,10 +103,20 @@ class LoadSim():
             avgSurv = float(saveStr[saveStr[lastGenIndex:].index("average survivability in gen") + 1 + lastGenIndex])
             l_avgSurv.append(avgSurv)
 
+            # for backwards compatibility
+            try:
+                saveStr[lastGenIndex:].index("average sim speedFactor in gen")
+                avgSF = float(saveStr[lastGenIndex:].index("average sim speedFactor in gen") + 1)
+                l_avgSF.append(avgSF)
+            except ValueError:
+                l_avgSF.append(0)
+
             if i != gensNo - 2:
                 lastGenIndex = saveStr[lastGenIndex:].index("gen no") + 1 + lastGenIndex
 
-        return l_avgSize, l_avgCarnSize, l_avgHerbSize, l_avgSecs, l_avgActFP, l_avgInitFP, l_avgSurv
+        return l_avgSize, l_avgCarnSize, l_avgHerbSize, l_avgSecs, l_avgActFP, l_avgInitFP, l_avgSurv, l_avgSF,\
+        l_avgGenSize, l_avgGenCarnSize, l_avgGenHerbSize, l_avgGenSecs, l_avgGenActFP, l_avgGenInitFP, l_avgGenSurv,\
+        l_avgGenSF
 
     # returns a SimData object created from given string
     def _createSimDataFromStr(self, saveStr):
@@ -108,6 +138,13 @@ class LoadSim():
         simData.setCellsAteSomething(cellsAteSomething)
         averageSimSize = float(saveStr[saveStr.index("average sim cell size") + 1])
         simData.setAverageSimSize(averageSimSize)
+        # backwards compatibility
+        try:
+            saveStr.index("average sim speed factor")
+            avgSF = float(saveStr[saveStr.index("average sim speed factor") + 1])
+            simData.setAverageSimSpeedFactor(avgSF)
+        except ValueError:
+            simData.setAverageSimSpeedFactor(0)
         averageSimCarnSize = float(saveStr[saveStr.index("average sim carn cells size") + 1])
         simData.setAverageSimCarnSize(averageSimCarnSize)
         averageSimHerbSize = float(saveStr[saveStr.index("average sim herb cells size") + 1])
@@ -155,6 +192,13 @@ class LoadSim():
             currGen.setAverageInitFoodPref(averageInitFP)
             averageSize = float(saveStr[saveStr[lastGenIndex:].index("average cells size in this gen") + 1 + lastGenIndex])
             currGen.setAverageSize(averageSize)
+            #backwards compatibility
+            try:
+                saveStr[lastGenIndex:].index("average speed factor in this gen")
+                speedFact = float(saveStr[saveStr[lastGenIndex:].index("average speed factor in this gen") + 1 + lastGenIndex])
+                currGen.setAverageSpeedFact(speedFact)
+            except ValueError:
+                currGen.setAverageSpeedFact(0)
             averageCarnSize = float(saveStr[saveStr[lastGenIndex:].index("average carn cells size in this gen") + 1 + lastGenIndex])
             currGen.setAverageCarnSize(averageCarnSize)
             averageHerbSize = float(saveStr[saveStr[lastGenIndex:].index("average herb cells size in this gen") + 1 + lastGenIndex])

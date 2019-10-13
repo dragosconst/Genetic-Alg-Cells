@@ -41,12 +41,30 @@ class Tabs(Enum):
     SimCarnSizeTitle = "Carn Size"
     SimHerbSizeTab = 4
     SimHerbSizeTitle = "Herb Size"
-    SimSecAliveTab = 5
+    SimSFTab = 5
+    SimSFTitle = "Speed Factor"
+    SimSecAliveTab = 6
     SimSecAliveTitle = "Secs Alive"
-    SimActFPTab = 6
+    SimActFPTab = 7
     SimActFPTitle = "Actual FP"
-    SimInitFPTab = 7
+    SimInitFPTab = 8
     SimInitFPTitle = "Init FP"
+    GenSurvTab = 9
+    GenSurvTitle = "Gen Survivability"
+    GenSizeTab = 10
+    GenSizeTitle= "Gen Size"
+    GenCarnSizeTab = 11
+    GenCarnSizeTitle = "Gen Carn Size"
+    GenHerbSizeTab = 12
+    GenHerbSizeTitle = "Gen Herb Size"
+    GenSFTab = 13
+    GenSFTitle = "Gen Speed Factor"
+    GenSecAliveTab = 14
+    GenSecAliveTitle = "Gen Secs Alive"
+    GenActFPTab = 15
+    GenActFPTitle = "Gen Actual FP"
+    GenInitFPTab = 16
+    GenInitFPTitle = "Gen Init FP"
 
 # this class contains the main window of the application
 # its methods handle stuff directly related to the functionality of the main window AND JUST THAT
@@ -109,7 +127,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
                 self._currentSim = oldSim.loadSim()
                 self._currentSim.startLoadSim()
             if self._currentSim is not None and self._isPaused == True:
-                self._pauseApp() # unpause the sim
+                self._unpauseApp() # unpause the sim
 
     # save a simulation
     def _saveSimulation(self):
@@ -120,7 +138,7 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
                 self._pauseApp() # pause before saving
                 newSave = Saves.SaveSim(self._currentSim, self._savePath)
                 newSave.saveSim()
-                self._pauseApp() # unpause
+                self._unpauseApp() # unpause
 
     # for the save as action
     def _saveAsSimulation(self):
@@ -130,19 +148,19 @@ class MLCellWindow(mw.Ui_MainWindow, QtWidgets.QMainWindow):
             if _extension != "":
                 newSave = Saves.SaveSim(self._currentSim, self._savePath)
                 newSave.saveSim()
-            self._pauseApp() # unpause
+            self._unpauseApp() # unpause
 
     def _pauseApp(self):
         if self._currentSim is not None and self._currentSim.pauseability() == True:
-            if self._isPaused == False:
-                self._currentSim.pauseSim()
-                self.actionPause.setText("Unpause")
-                self._isPaused = True
-            else:
-                self._currentSim.restartSim()
-                self.actionPause.setText("Pause")
-                self._isPaused = False
+            self._currentSim.pauseSim()
+            self.actionPause.setText("Unpause")
+            self._isPaused = True
 
+    def _unpauseApp(self):
+        if self._currentSim is not None and self._currentSim.pauseability() == True:
+            self._currentSim.restartSim()
+            self.actionPause.setText("Pause")
+            self._isPaused = False
     # opens a dialog for creating a new generation
     def _newSimDia(self):
         if self._currentSim is not None:
