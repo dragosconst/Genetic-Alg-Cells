@@ -223,6 +223,8 @@ class Sim():
         return self._averageSimCarnSizeOverTime
     def averageSimHerbSizeOverTime(self):
         return self._averageSimHerbSizeOverTime
+    def averageSimSpeedFactor(self):
+        return self._averageSimSpeedFactOverTime
     def averageSimSecAliveOverTime(self):
         return self._averageSimSecAliveOverTime
     def averageSimActFPOverTime(self):
@@ -236,7 +238,9 @@ class Sim():
     def averageGenCarnSizeOverTime(self):
         return self._averageGenCarnSizeOverTime
     def averageGenHerbSizeOverTime(self):
-        return self._averageGenHerbSizeOverTime
+        return self._averageGenHerbSizeOverTim
+    def averageGenSpeedFactOverTime(self):
+        return self._averageGenSpeedFactOverTime
     def averageGenSecAliveOverTime(self):
         return self._averageGenSecAliveOverTime
     def averageGenActFPOverTime(self):
