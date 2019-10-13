@@ -111,7 +111,7 @@ class LoadSim():
             except ValueError:
                 l_avgSF.append(0)
 
-            if i != gensNo - 2:
+            if i <= gensNo - 2:
                 lastGenIndex = saveStr[lastGenIndex:].index("gen no") + 1 + lastGenIndex
 
         return l_avgSize, l_avgCarnSize, l_avgHerbSize, l_avgSecs, l_avgActFP, l_avgInitFP, l_avgSurv, l_avgSF,\
